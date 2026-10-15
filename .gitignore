@@ -5,3 +5,4 @@ media/originals/
 .env
 .env.*
 !.env.example
+.impeccable/hook.cache.json
