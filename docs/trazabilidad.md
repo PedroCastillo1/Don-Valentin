@@ -3,20 +3,20 @@
 **Corte:** 15/10/2026 · **Fuente de verdad única (Claude y Gemini):** carpeta `D:\don valentin` (subcarpeta `documentacion`). Este archivo no copia los documentos: los cita por número.
 Convención: **Implementado / Probado** = `No` salvo evidencia. No existe repositorio de producto (Informe 09, I-06) y esta sesión no desarrolló nada.
 
-## 1. Estado de la línea base (CR-009)
-- **CR-009 (doc 11, v1.0, 07/10/2026): "Propuesto — decisión en el Comité de Dirección del 09/10/2026".** Bloque de decisión (Aprobado/Rechazado/Postergado, fecha, conformidad) **en blanco**; tabla de aprobaciones (Juan González, Luca Di Gresia, Agustín González) **en blanco**.
-- Acta, Alcance, Plan de Dirección, Plan de Comunicaciones: "Emitido para aprobación — Comité del 09/10". Tablero 05 (hoja Hitos): línea base v4 = **Pendiente**; el .pod (doc 12) la llama "propuesta".
-- **Ningún documento de la carpeta registra el resultado del Comité del 09/10.** Conclusión: aprobación **no comprobada**. Mientras no haya registro escrito, v4 es la línea base *propuesta*; v3 es la última aprobada. Hay que confirmarlo con Agustín/Luca (D-038: la conformidad se registra por escrito).
+## 1. Estado de la línea base (CR-009) — APROBADA por confirmación del responsable
+- **15/10/2026: Martín Cabrera, responsable del proyecto, confirmó que CR-009 fue aprobada** y que la **línea base v4 es el cronograma vigente.** Fuente: confirmación del responsable en el chat (no hay documento firmado todavía).
+- **Constancia documental pendiente:** el PDF de CR-009 (doc 11) sigue diciendo "Propuesto" con decisión y firmas en blanco; Acta, Alcance, Plan, Tablero y .pod también. **No se modificaron ni se inventaron firmas.** Falta incorporar la constancia al PDF (responsable: equipo/Luca). Hasta entonces, citar siempre "aprobada según confirmación del responsable 15/10/2026".
+- Coherencia: el prototipo visto en la grabación de `moldes de web` ya muestra las fechas v4 (reservas 30/10, QR 06/11, integración 13/11).
 
-## 2. Hitos (línea base v4 propuesta · Alcance §2.1/§3.2, Tablero 05)
+## 2. Hitos (línea base v4 vigente · Alcance §2.1/§3.2, Tablero 05)
 | Hito | Fecha v3 | Fecha v4 | Estado al 15/10 | Criterio de aceptación |
 |---|---|---|---|---|
 | H1 Acta, relevamiento y alcance | 28/08 | 28/08 | Cumplido (Director); conformidad del Sponsor no registrada (I-08), se ratifica el 09/10 | Acta aprobada, relevamiento cerrado, alcance definido |
 | N1 Kickoff (cátedra) | 15/09 | 15/09 | Cumplido | — |
-| LB Línea base v4 (CR-009) | — | 09/10 | **Pendiente** | Aprobación en Comité |
-| **H2** Prototipos, modelo de datos, parametrización | 11/09 | **16/10** | Vencido en v3; reprogramado (vence mañana) | Prototipos validados, modelo de datos unificado, planilla de parametrización completa |
+| LB Línea base v4 (CR-009) | — | 09/10 | **Aprobada (confirmación del responsable 15/10); constancia en PDF pendiente** | Aprobación en Comité |
+| **H2** Prototipos, modelo de datos, parametrización | 11/09 | **16/10** | **En curso — vence 16/10 (prioridad inmediata)** | Prototipos validados, modelo de datos unificado, planilla de parametrización completa |
 | N3 Demo prototipo funcional (cátedra) | — | 20/10 | Pendiente | — |
-| **H3** Gestor de reservas y turnos | 02/10 | **30/10** | Vencido en v3; reprogramado | ≥10 reservas de prueba sin errores de asignación ni sobreventa; conformidad del Sponsor (RF-R1–R4, RNF-4) |
+| **H3** Gestor de reservas y turnos | 02/10 | **30/10** | En plan; no iniciado (0 % implementado) | ≥10 reservas de prueba sin errores de asignación ni sobreventa; conformidad del Sponsor (RF-R1–R4, RNF-4) |
 | N4 Presentación final (cátedra) | — | 03/11 (a confirmar: 03/10/17-11) | Pendiente | — |
 | **H4** Pedidos por QR | 23/10 | **06/11** | Pendiente | 30 QR abren la mesa correcta; pedido al sector correcto en ≤5 s; conformidad (RF-Q1–Q4) |
 | **H5** Integración y sitio en ambiente de prueba | 13/11 | 13/11 | Pendiente | Sistema integrado, sitio desplegado en prueba, Lighthouse en meta |
@@ -62,4 +62,7 @@ Cobros/facturación/caja/sueldos; **control de stock** (CR-001); tablero para el
 | 8 | Stack sin decidir (A6) | Propuesto: Node/Express/MySQL (S-03); PostgreSQL del relevamiento queda como contradicción a confirmar |
 
 ## 6. Pendientes de confirmación humana
-1. Resultado del Comité del 09/10 (¿CR-009 aprobada? ¿H1 ratificado?). 2. Fecha de N4 (cátedra). 3. Encargado de Salón designado. 4. S-03 stack. 5. Hosting/dominio del cliente.
+1. Constancia escrita de CR-009 en el PDF; ¿H1 ratificado por el Sponsor (I-08)? 2. Fecha de N4 (cátedra). 3. Encargado de Salón designado. 4. S-03 stack. 5. Hosting/dominio del cliente.
+
+## 7. Regla de presentación de estado
+Nada posterior a H2 se presenta como terminado. Cada requisito RF/RNF figura "No implementado / No probado" hasta que exista evidencia ejecutada (test, medición o conformidad del Sponsor). El prototipo visto en la grabación **no cuenta** como evidencia: no hay código en la carpeta ni se sabe su origen.

@@ -14,14 +14,14 @@ No hacer todavía: web pública, hero, administrador. Ver `docs/estado.md`, `doc
 
 ## Fuente de verdad
 Carpeta conectada `D:\don valentin` (compartida con Gemini; no copiar ni duplicar). Vigentes: documentos v4 del 07/10/2026 (Acta, Alcance+EDT, Fase de Implementación, Plan de Dirección, Tablero, RACI, Riesgos, Informe 09, CR-009, cronograma .pod v5). Lo que dice el usuario en el chat va después. Nada más: no inventar horarios, platos, precios, historia, fechas ni costos.
-**Estado de aprobación:** CR-009 y la línea base v4 están "Propuestos"; el resultado del Comité del 09/10 no está registrado en la carpeta. Confirmar antes de tratar v4 como aprobada.
+**Estado de aprobación:** CR-009 APROBADA y línea base v4 vigente por confirmación del responsable (Martín Cabrera, 15/10/2026); falta incorporar la constancia al PDF de CR-009 (no inventar firmas ni editar el original). Prioridad inmediata: H2 (16/10). Cronograma en `docs/cronograma.md`, prioridades en `docs/prioridades.md`.
 
-## Hitos (línea base v4 propuesta)
+## Hitos (línea base v4 vigente)
 H1 28/08 cumplido · H2 16/10 prototipos+modelo de datos+parametrización · N3 20/10 demo · H3 30/10 reservas y turnos · N4 03/11 (a confirmar) · H4 06/11 pedidos QR · H5 13/11 integración y sitio en ambiente de prueba · H6 20/11 pruebas y Plan de Implantación · H7 27/11 cierre. Detalle y criterios en `docs/trazabilidad.md`.
 Alcance: reservas y turnos + pedidos por QR (30 mesas; paneles recepción/cocina/parrilla/barra/mozo) + sitio institucional. Sin stock, cobros ni extras CR-008. Stack propuesto S-03: Node/Express/MySQL (a confirmar en H2).
 
 ## Puntos abiertos (no resolver por cuenta propia)
-Resultado del Comité 09/10 · fecha de N4 · stack S-03 vs PostgreSQL mencionado en el relevamiento · hosting/dominio del cliente · Encargado de Salón.
+Constancia de CR-009 · fecha de N4 · stack S-03 vs PostgreSQL mencionado en el relevamiento · hosting/dominio del cliente · Encargado de Salón.
 
 ## Protocolo de trabajo
 Analizar → consultar docs → listar supuestos → plan verificable → una unidad de trabajo → probar → revisar → corregir → registrar en `docs/decisiones.md` → seguir.
