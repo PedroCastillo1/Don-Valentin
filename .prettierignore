@@ -1,0 +1,7 @@
+node_modules
+.claude
+docs
+media
+phase0/out
+CLAUDE.md
+phase0/site

@@ -1,0 +1,7 @@
+node_modules/
+phase0/out/
+media/originals/
+*.log
+.env
+.env.*
+!.env.example
