@@ -1,14 +1,22 @@
 {
   "name": "don-valentin-digital",
   "private": true,
-  "version": "0.0.0",
-  "description": "Don Valentín Digital — Fase 0: toolchain de verificación",
+  "version": "0.1.0",
+  "description": "Don Valentín Digital — reservas y turnos, pedidos por QR y sitio institucional",
+  "type": "module",
+  "workspaces": ["packages/*", "apps/*"],
+  "engines": { "node": ">=22" },
   "scripts": {
-    "typecheck": "tsc --noEmit",
+    "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "format:check": "prettier --check .",
-    "test": "vitest run",
-    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test"
+    "test": "npm run test --workspaces --if-present",
+    "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test",
+    "db:migrate": "npm run db:migrate -w @dv/api",
+    "db:seed": "npm run db:seed -w @dv/api",
+    "dev:api": "npm run dev -w @dv/api",
+    "dev:web": "npm run dev -w @dv/web",
+    "build": "npm run build -w @dv/shared && npm run build -w @dv/web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -22,8 +30,5 @@
     "typescript-eslint": "^8.71.2",
     "typescript-language-server": "^5.3.0",
     "vitest": "^5.0.5"
-  },
-  "dependencies": {
-    "gsap": "^3.15.0"
   }
 }

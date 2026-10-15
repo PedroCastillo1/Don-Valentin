@@ -1,0 +1,1642 @@
+{
+ "fuente": "documentacion/Don Valentin  carta.pdf (Canva, creada el 05/08/2026)",
+ "validacion": "Transcripción de la carta entregada por el local. Precios y asignación de sector sin validar por el Encargado (actividad 1.2.3.4).",
+ "parrillaLibre": {
+  "formulas": [
+   {
+    "id": "libre-mediodia-semana",
+    "nombre": "Parrilla libre, lunes a viernes al mediodía",
+    "precioPorPersona": 41000
+   },
+   {
+    "id": "libre-noche-finde",
+    "nombre": "Parrilla libre, lunes a viernes a la noche, sábados, domingos y feriados al mediodía",
+    "precioPorPersona": 48500
+   }
+  ],
+  "incluye": [
+   "Entrada",
+   "Principal (parrilla, pastas con salsa a elección y pizzas)",
+   "Postre"
+  ],
+  "postreIncluido": "1 postre por persona (flan, budín de pan, tarantela o helado)",
+  "menores": "Menores de 4 a 7 años abonan el 50 %.",
+  "reservas": [
+   "11-3303-9516",
+   "4664-1720"
+  ]
+ },
+ "categorias": [
+  {
+   "id": "porciones-individuales",
+   "nombre": "Porciones individuales",
+   "grupo": "Carnes",
+   "orden": 1
+  },
+  {
+   "id": "porciones-con-guarnicion",
+   "nombre": "Porciones con guarnición",
+   "grupo": "Carnes",
+   "orden": 2
+  },
+  {
+   "id": "sandwiches",
+   "nombre": "Sándwiches",
+   "grupo": "Sándwiches",
+   "orden": 3
+  },
+  {
+   "id": "papas-fritas",
+   "nombre": "Papas fritas",
+   "grupo": "Papas y guarniciones",
+   "orden": 4
+  },
+  {
+   "id": "guarniciones",
+   "nombre": "Guarniciones",
+   "grupo": "Papas y guarniciones",
+   "orden": 5
+  },
+  {
+   "id": "pizzas",
+   "nombre": "Pizzas",
+   "grupo": "Pizzas y pastas",
+   "orden": 6
+  },
+  {
+   "id": "pastas",
+   "nombre": "Pastas caseras",
+   "grupo": "Pizzas y pastas",
+   "orden": 7
+  },
+  {
+   "id": "postres",
+   "nombre": "Postres",
+   "grupo": "Postres",
+   "orden": 8
+  },
+  {
+   "id": "vinos-blancos",
+   "nombre": "Vinos blancos",
+   "grupo": "Bebidas",
+   "orden": 9
+  },
+  {
+   "id": "vinos-tintos",
+   "nombre": "Vinos tintos",
+   "grupo": "Bebidas",
+   "orden": 10
+  },
+  {
+   "id": "cervezas",
+   "nombre": "Cervezas",
+   "grupo": "Bebidas",
+   "orden": 11
+  },
+  {
+   "id": "sin-alcohol",
+   "nombre": "Bebidas sin alcohol",
+   "grupo": "Bebidas",
+   "orden": 12
+  },
+  {
+   "id": "aperitivos",
+   "nombre": "Aperitivos",
+   "grupo": "Bebidas",
+   "orden": 13
+  },
+  {
+   "id": "espumantes",
+   "nombre": "Espumantes",
+   "grupo": "Bebidas",
+   "orden": 14
+  }
+ ],
+ "salsas": {
+  "sinCargo": [
+   "Fileto",
+   "Blanca",
+   "Pesto",
+   "Rosa",
+   "Bolognesa"
+  ],
+  "adicionales": {
+   "precio": 5000,
+   "items": [
+    "Parisiene",
+    "Crema",
+    "Scarparo",
+    "Cuatro quesos",
+    "Putanesca",
+    "Fellini JMF"
+   ]
+  },
+  "adicionalEstofado": 8000
+ },
+ "productos": [
+  {
+   "nombre": "Asado",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 14700
+    },
+    {
+     "etiqueta": "1",
+     "precio": 28900
+    }
+   ]
+  },
+  {
+   "nombre": "Vacío",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 15500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 29700
+    }
+   ]
+  },
+  {
+   "nombre": "Matambre",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 15500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 29700
+    }
+   ]
+  },
+  {
+   "nombre": "Bondiola",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 15500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 29700
+    }
+   ]
+  },
+  {
+   "nombre": "Molleja",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 19000
+    },
+    {
+     "etiqueta": "1",
+     "precio": 36000
+    }
+   ]
+  },
+  {
+   "nombre": "Chinchulín",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 6500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 11800
+    }
+   ]
+  },
+  {
+   "nombre": "Riñón",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 8500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 16300
+    }
+   ]
+  },
+  {
+   "nombre": "Carré",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 14700
+    },
+    {
+     "etiqueta": "1",
+     "precio": 28900
+    }
+   ]
+  },
+  {
+   "nombre": "Rabas",
+   "categoria": "porciones-individuales",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 13200
+    },
+    {
+     "etiqueta": "1",
+     "precio": 25300
+    }
+   ]
+  },
+  {
+   "nombre": "¼ de pollo",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "Parrillada para 2 personas",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 75200
+    }
+   ]
+  },
+  {
+   "nombre": "Provoleta",
+   "categoria": "porciones-individuales",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13800
+    }
+   ]
+  },
+  {
+   "nombre": "Tortilla de papa",
+   "categoria": "porciones-individuales",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13800
+    }
+   ]
+  },
+  {
+   "nombre": "Asado",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 31000
+    }
+   ]
+  },
+  {
+   "nombre": "Vacío",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 32600
+    }
+   ]
+  },
+  {
+   "nombre": "Matambre a la pizza",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 32600
+    }
+   ]
+  },
+  {
+   "nombre": "Bondiola",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 32600
+    }
+   ]
+  },
+  {
+   "nombre": "Bife de chorizo",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 38900
+    }
+   ]
+  },
+  {
+   "nombre": "Entraña",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 38900
+    }
+   ]
+  },
+  {
+   "nombre": "¼ de pollo",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "Milanesa",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 20500
+    }
+   ]
+  },
+  {
+   "nombre": "Milanesa a caballo",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 23700
+    }
+   ]
+  },
+  {
+   "nombre": "Milanesa napolitana",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 23700
+    }
+   ]
+  },
+  {
+   "nombre": "Nuggets de pollo",
+   "categoria": "porciones-con-guarnicion",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13800
+    }
+   ]
+  },
+  {
+   "nombre": "Choripán / Morcipán",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 7400
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Choripán pomarola",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 7800
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Hamburguesa L&T",
+   "categoria": "sandwiches",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 9200
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Hamburguesa completa",
+   "categoria": "sandwiches",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10800
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Sándwich de milanesa con lechuga y tomate",
+   "categoria": "sandwiches",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 14700
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Sándwich de milanesa de carne o pollo completo (lechuga, tomate, jamón y queso)",
+   "categoria": "sandwiches",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 14700
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Sándwich de bondiola, matambre o vacío",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 15000
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Bife de chorizo",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18000
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Entraña",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18000
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Lomito completo",
+   "categoria": "sandwiches",
+   "sector": "parrilla",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 17500
+    }
+   ],
+   "nota": "Todos salen con fritas."
+  },
+  {
+   "nombre": "Papas fritas",
+   "categoria": "papas-fritas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "Papas con cheddar",
+   "categoria": "papas-fritas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13300
+    }
+   ]
+  },
+  {
+   "nombre": "Ensalada mixta",
+   "categoria": "guarniciones",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "Ensalada rusa",
+   "categoria": "guarniciones",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "Papas al horno",
+   "categoria": "guarniciones",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11200
+    }
+   ]
+  },
+  {
+   "nombre": "½ morrón",
+   "categoria": "guarniciones",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 2000
+    }
+   ]
+  },
+  {
+   "nombre": "Adicional huevo",
+   "categoria": "guarniciones",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 1500
+    }
+   ]
+  },
+  {
+   "nombre": "Mozzarella",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18900
+    }
+   ]
+  },
+  {
+   "nombre": "Anchoa con muzzarela",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 25200
+    }
+   ]
+  },
+  {
+   "nombre": "Fugazzeta",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 29800
+    }
+   ]
+  },
+  {
+   "nombre": "Jamón",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 29800
+    }
+   ]
+  },
+  {
+   "nombre": "Jamón y morrón",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 34700
+    }
+   ]
+  },
+  {
+   "nombre": "Jamón, tomate, morrón",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 48300
+    }
+   ]
+  },
+  {
+   "nombre": "Roquefort",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 32000
+    }
+   ]
+  },
+  {
+   "nombre": "Choclo",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 29300
+    }
+   ]
+  },
+  {
+   "nombre": "Napolitano",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 30200
+    }
+   ]
+  },
+  {
+   "nombre": "Calabresa",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 30200
+    }
+   ]
+  },
+  {
+   "nombre": "Pollo",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 29800
+    }
+   ]
+  },
+  {
+   "nombre": "Huevo",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 25200
+    }
+   ]
+  },
+  {
+   "nombre": "Verdeo",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 25200
+    }
+   ]
+  },
+  {
+   "nombre": "Papas pay",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 25200
+    }
+   ]
+  },
+  {
+   "nombre": "Salchichas",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 30900
+    }
+   ]
+  },
+  {
+   "nombre": "Panceta",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 32000
+    }
+   ]
+  },
+  {
+   "nombre": "Panceta y huevo",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 35700
+    }
+   ]
+  },
+  {
+   "nombre": "Panceta y rúcula",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 35700
+    }
+   ]
+  },
+  {
+   "nombre": "Rúcula",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 29800
+    }
+   ]
+  },
+  {
+   "nombre": "Salchipapa",
+   "categoria": "pizzas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 30800
+    }
+   ]
+  },
+  {
+   "nombre": "Tallarines",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ]
+  },
+  {
+   "nombre": "Ñoquis",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ],
+   "sinTacc": true
+  },
+  {
+   "nombre": "Ñoquis tricolor",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ]
+  },
+  {
+   "nombre": "Ravioles de verdura",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ],
+   "sinTacc": true
+  },
+  {
+   "nombre": "Ravioles de ricota",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ]
+  },
+  {
+   "nombre": "Malfatti de verdura",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 9500
+    },
+    {
+     "etiqueta": "1",
+     "precio": 17000
+    }
+   ]
+  },
+  {
+   "nombre": "Raviolín de pollo",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Raviolón 4 quesos",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Raviolón de calabaza",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Canelón de verdura",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Canelón de pollo",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Capellettis",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Agñolotis de ricota y jamón",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Sorrentino de jamón y queso",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ],
+   "sinTacc": true
+  },
+  {
+   "nombre": "Sorrentino de verdura",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 10400
+    },
+    {
+     "etiqueta": "1",
+     "precio": 19000
+    }
+   ]
+  },
+  {
+   "nombre": "Lasaña de pollo, jamón y ricota",
+   "categoria": "pastas",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "½",
+     "precio": 11200
+    },
+    {
+     "etiqueta": "1",
+     "precio": 21300
+    }
+   ]
+  },
+  {
+   "nombre": "Vasco Viejo ¾",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10200
+    }
+   ]
+  },
+  {
+   "nombre": "Vasco Viejo ⅜",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 7700
+    }
+   ]
+  },
+  {
+   "nombre": "López",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16600
+    }
+   ]
+  },
+  {
+   "nombre": "López ⅜",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10900
+    }
+   ]
+  },
+  {
+   "nombre": "Cosecha Tardía",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18900
+    }
+   ]
+  },
+  {
+   "nombre": "Estancia Mendoza dulce",
+   "categoria": "vinos-blancos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16400
+    }
+   ]
+  },
+  {
+   "nombre": "Vasco Viejo ¾",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10200
+    }
+   ]
+  },
+  {
+   "nombre": "Vasco Viejo ⅜",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 7700
+    }
+   ]
+  },
+  {
+   "nombre": "Norton dulce",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18900
+    }
+   ]
+  },
+  {
+   "nombre": "López",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16600
+    }
+   ]
+  },
+  {
+   "nombre": "López ⅜",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10900
+    }
+   ]
+  },
+  {
+   "nombre": "Don Valentín",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 14700
+    }
+   ]
+  },
+  {
+   "nombre": "Novecento",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16000
+    }
+   ]
+  },
+  {
+   "nombre": "Estancia Mendoza",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16400
+    }
+   ]
+  },
+  {
+   "nombre": "Alma Mora",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 19600
+    }
+   ]
+  },
+  {
+   "nombre": "Dadá",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 19600
+    }
+   ]
+  },
+  {
+   "nombre": "San Telmo",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16300
+    }
+   ]
+  },
+  {
+   "nombre": "Finca Las Moras",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16300
+    }
+   ]
+  },
+  {
+   "nombre": "Vaso de vino",
+   "categoria": "vinos-tintos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 4600
+    }
+   ]
+  },
+  {
+   "nombre": "Quilmes / Brahma",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 12400
+    }
+   ]
+  },
+  {
+   "nombre": "Quilmes Bock",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 12400
+    }
+   ]
+  },
+  {
+   "nombre": "Brahma lata",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 8000
+    }
+   ]
+  },
+  {
+   "nombre": "Stella Artois",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18000
+    }
+   ]
+  },
+  {
+   "nombre": "Corona 710 cc",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18000
+    }
+   ]
+  },
+  {
+   "nombre": "Patagonia",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18000
+    }
+   ]
+  },
+  {
+   "nombre": "Speed",
+   "categoria": "cervezas",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 5800
+    }
+   ]
+  },
+  {
+   "nombre": "Gaseosa 1 ½",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 9900
+    }
+   ]
+  },
+  {
+   "nombre": "Gaseosa 500 cc",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 4600
+    }
+   ]
+  },
+  {
+   "nombre": "Agua o soda",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 4000
+    }
+   ]
+  },
+  {
+   "nombre": "Agua saborizada 1 ½",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 9900
+    }
+   ]
+  },
+  {
+   "nombre": "Agua saborizada 500 cc",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 4600
+    }
+   ]
+  },
+  {
+   "nombre": "Coca-Cola o Sprite 1,75 L",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 11600
+    }
+   ]
+  },
+  {
+   "nombre": "Coca-Cola 600",
+   "categoria": "sin-alcohol",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 5500
+    }
+   ]
+  },
+  {
+   "nombre": "Gancia",
+   "categoria": "aperitivos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 9000
+    }
+   ]
+  },
+  {
+   "nombre": "Fernet",
+   "categoria": "aperitivos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 9000
+    }
+   ]
+  },
+  {
+   "nombre": "Fernet con Coca",
+   "categoria": "aperitivos",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13000
+    }
+   ]
+  },
+  {
+   "nombre": "Sidra",
+   "categoria": "espumantes",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 10700
+    }
+   ]
+  },
+  {
+   "nombre": "F. de Alvear",
+   "categoria": "espumantes",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 16800
+    }
+   ]
+  },
+  {
+   "nombre": "Chandon",
+   "categoria": "espumantes",
+   "sector": "barra",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": null
+    }
+   ],
+   "nota": "La carta del 05/08/2026 imprime «$48.00»; el importe real debe confirmarlo el local."
+  },
+  {
+   "nombre": "Tiramisú",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 8900
+    }
+   ]
+  },
+  {
+   "nombre": "Flan casero",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 6600
+    }
+   ]
+  },
+  {
+   "nombre": "Budín de pan",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 6600
+    }
+   ]
+  },
+  {
+   "nombre": "2 bochas de helado",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 6600
+    }
+   ]
+  },
+  {
+   "nombre": "Frutilla con crema",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 13300
+    }
+   ]
+  },
+  {
+   "nombre": "Durazno con crema",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 8000
+    }
+   ]
+  },
+  {
+   "nombre": "Don Pedro",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 18900
+    }
+   ]
+  },
+  {
+   "nombre": "Adicional crema",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 3000
+    }
+   ]
+  },
+  {
+   "nombre": "Adicional dulce de leche",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "única",
+     "precio": 3000
+    }
+   ]
+  },
+  {
+   "nombre": "Ensalada de frutas",
+   "categoria": "postres",
+   "sector": "cocina",
+   "variantes": [
+    {
+     "etiqueta": "sola",
+     "precio": 7400
+    },
+    {
+     "etiqueta": "con 1 bocha de helado",
+     "precio": 9500
+    }
+   ]
+  }
+ ]
+}

@@ -1,8 +1,9 @@
-node_modules/
-phase0/out/
-media/originals/
-*.log
+node_modules
+dist
+.credenciales-prueba.json
 .env
-.env.*
-!.env.example
-.impeccable/hook.cache.json
+*.log
+media/originals
+test-results
+playwright-report
+.impeccable-cache

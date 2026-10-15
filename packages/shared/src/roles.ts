@@ -1,0 +1,56 @@
+export const ROLES = ["admin", "encargado", "mozo", "parrillero", "cocinero", "barra"] as const;
+export type Rol = (typeof ROLES)[number];
+
+export const ROL_NOMBRE: Record<Rol, string> = {
+  admin: "Administración",
+  encargado: "Encargado de Salón",
+  mozo: "Mozo",
+  parrillero: "Parrillero",
+  cocinero: "Cocinero",
+  barra: "Barra",
+};
+
+export const PERMISOS = [
+  "reservas:ver",
+  "reservas:crear",
+  "mesas:ver",
+  "mesas:administrar",
+  "qr:generar",
+  "sesion_mesa:abrir",
+  "sesion_mesa:cerrar",
+  "parametros:ver",
+  "parametros:editar",
+  "usuarios:administrar",
+  "auditoria:ver",
+  "panel_sector:ver",
+] as const;
+export type Permiso = (typeof PERMISOS)[number];
+
+/**
+ * RNF-3: cada perfil accede solo a sus funciones. El mozo no administra mesas.
+ * Fuente: Alcance v4 §1.4; Fase de Implementación v4 (criterios de aceptación del Sistema integrado).
+ */
+export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
+  admin: PERMISOS,
+  encargado: [
+    "reservas:ver",
+    "reservas:crear",
+    "mesas:ver",
+    "mesas:administrar",
+    "qr:generar",
+    "sesion_mesa:abrir",
+    "sesion_mesa:cerrar",
+    "parametros:ver",
+    "parametros:editar",
+    "usuarios:administrar",
+    "auditoria:ver",
+  ],
+  mozo: ["reservas:ver", "reservas:crear", "sesion_mesa:abrir", "sesion_mesa:cerrar"],
+  parrillero: ["panel_sector:ver"],
+  cocinero: ["panel_sector:ver"],
+  barra: ["panel_sector:ver"],
+};
+
+export function puede(rol: Rol, permiso: Permiso): boolean {
+  return PERMISOS_POR_ROL[rol].includes(permiso);
+}
