@@ -1,60 +1,65 @@
-# Trazabilidad por hito — Don Valentín Digital
+# Trazabilidad — Don Valentín Digital (corregida con documentos reales v4)
 
-**Fecha de corte:** 15/10/2026
-**Fuentes usadas (únicas):** `docs/fuente/decisiones_equipo.md` (versión 03/09/2026, en adelante **DE**) y `CLAUDE.md` (en adelante **CM**).
-**Fuera de fuente:** Acta v6, Alcance+EDT v3, Cronograma v2, Matriz de Interesados, Enfoque v2 y Kickoff no están en el repo. Solo se los conoce por lo que DE y CM dicen de ellos. No se leyó código ni otros archivos del repo para armar esta matriz.
+**Corte:** 15/10/2026 · **Fuente de verdad única (Claude y Gemini):** carpeta `D:\don valentin` (subcarpeta `documentacion`). Este archivo no copia los documentos: los cita por número.
+Convención: **Implementado / Probado** = `No` salvo evidencia. No existe repositorio de producto (Informe 09, I-06) y esta sesión no desarrolló nada.
 
-Convención: **Implementado / Probado / Evidencia** = `Sin dato` cuando las fuentes no los respaldan. Un documento de planificación no prueba que algo exista.
+## 1. Estado de la línea base (CR-009)
+- **CR-009 (doc 11, v1.0, 07/10/2026): "Propuesto — decisión en el Comité de Dirección del 09/10/2026".** Bloque de decisión (Aprobado/Rechazado/Postergado, fecha, conformidad) **en blanco**; tabla de aprobaciones (Juan González, Luca Di Gresia, Agustín González) **en blanco**.
+- Acta, Alcance, Plan de Dirección, Plan de Comunicaciones: "Emitido para aprobación — Comité del 09/10". Tablero 05 (hoja Hitos): línea base v4 = **Pendiente**; el .pod (doc 12) la llama "propuesta".
+- **Ningún documento de la carpeta registra el resultado del Comité del 09/10.** Conclusión: aprobación **no comprobada**. Mientras no haya registro escrito, v4 es la línea base *propuesta*; v3 es la última aprobada. Hay que confirmarlo con Agustín/Luca (D-038: la conformidad se registra por escrito).
 
-## 1. Matriz de trazabilidad
+## 2. Hitos (línea base v4 propuesta · Alcance §2.1/§3.2, Tablero 05)
+| Hito | Fecha v3 | Fecha v4 | Estado al 15/10 | Criterio de aceptación |
+|---|---|---|---|---|
+| H1 Acta, relevamiento y alcance | 28/08 | 28/08 | Cumplido (Director); conformidad del Sponsor no registrada (I-08), se ratifica el 09/10 | Acta aprobada, relevamiento cerrado, alcance definido |
+| N1 Kickoff (cátedra) | 15/09 | 15/09 | Cumplido | — |
+| LB Línea base v4 (CR-009) | — | 09/10 | **Pendiente** | Aprobación en Comité |
+| **H2** Prototipos, modelo de datos, parametrización | 11/09 | **16/10** | Vencido en v3; reprogramado (vence mañana) | Prototipos validados, modelo de datos unificado, planilla de parametrización completa |
+| N3 Demo prototipo funcional (cátedra) | — | 20/10 | Pendiente | — |
+| **H3** Gestor de reservas y turnos | 02/10 | **30/10** | Vencido en v3; reprogramado | ≥10 reservas de prueba sin errores de asignación ni sobreventa; conformidad del Sponsor (RF-R1–R4, RNF-4) |
+| N4 Presentación final (cátedra) | — | 03/11 (a confirmar: 03/10/17-11) | Pendiente | — |
+| **H4** Pedidos por QR | 23/10 | **06/11** | Pendiente | 30 QR abren la mesa correcta; pedido al sector correcto en ≤5 s; conformidad (RF-Q1–Q4) |
+| **H5** Integración y sitio en ambiente de prueba | 13/11 | 13/11 | Pendiente | Sistema integrado, sitio desplegado en prueba, Lighthouse en meta |
+| **H6** Pruebas integrales y Plan de Implantación | 20/11 | 20/11 | Pendiente | Prueba de aceptación ≥95 %, 0 defectos críticos/altos, manuales y Plan de Implantación listos |
+| **H7** Aceptación final y cierre | 27/11 | 27/11 | Pendiente | Todo aceptado, acta de aceptación final firmada, entrega de código/credenciales/QR |
+Desvío del proyecto al corte 06/10 (Informe 09): SPI 0,67; EV 255 h, PV 378,2 h, AC 255 h (reconstruido). Criterios de éxito del proyecto: CE1–CE6 (Acta §4).
 
-La numeración "Hito N" no figura en las fuentes (el cronograma tiene 8 hitos y solo 5 tienen fecha documentada), por eso los hitos se identifican por nombre.
+## 3. Requisitos → hito → criterio (Alcance v4 §1)
+| ID | Requisito | Hito | Criterio de aceptación | Impl. | Prob. |
+|---|---|---|---|---|---|
+| RF-R1 | Alta de reserva (nombre, teléfono, personas, horario) | H3 | 10 reservas de prueba sin errores | No | No |
+| RF-R2 | Asignación de mesa por capacidad y sector sin superar aforo | H3 | 0 sobreventas | No | No |
+| RF-R3 | Estado de mesas (libre/reservada/ocupada) por franja; walk-in y no-show | H3 | Coincide en 10 escenarios | No | No |
+| RF-R4 | Modificar/cancelar reserva | H3 | Libera o reasigna cupo | No | No |
+| RF-Q1 | QR único por mesa → carta digital sin instalar app | H4 | 30 códigos abren la mesa correcta | No | No |
+| RF-Q2 | Envío y enrutamiento a cocina/parrilla/barra ≤5 s | H4 | Llega al sector correcto ≤5 s | No | No |
+| RF-Q3 | Estados en preparación/listo/entregado; demora destacada | H4 | Estados reflejados; alerta al superar el máximo | No | No |
+| RF-Q4 | Carga manual del mozo | H4 | Sigue el mismo circuito | No | No |
+| RF-W1 | Sitio: carta, ubicación, horarios, contacto, adaptable | H5 | Correcto en celular y PC con datos reales | No | No |
+| RF-W2 | Acceso a reservas; reserva web impacta disponibilidad | H5 | Aparece en el panel de recepción | No | No |
+| RF-W3 | GA4 + Search Console con sitemap | H5 | GA4 registra visitas en prueba; propiedad verificada | No | No |
+| RNF-1 | Lighthouse rendimiento ≥90 (base 54/57) | H5 | Medición ≥90 | No | No |
+| RNF-2 | Accesibilidad ≥95 (base 89); SEO y buenas prácticas ≥95 | H5 | Medición ≥95 | No | No |
+| RNF-3 | Usuarios y roles | H5/H6 | Mozo no accede a administración de mesas; intento registrado | No | No |
+| RNF-4 | Datos mínimos y aviso (Ley 25.326) | H3 | Solo nombre y teléfono; aviso en formulario | No | No |
+| RNF-5 | Web, sin app nativa | H5/H6 | Chrome y Safari celular; Chrome PC | No | No |
+| RNF-6 | Respaldo automático y restauración | H6 | Una restauración documentada | No | No |
+| RNF-7 | Concurrencia | H6 | Turno simulado sin pérdidas; 95 % ≤5 s | No | No |
 
-| Hito | Fecha | Requisito | Fuente | Implementado | Probado | Evidencia | Estado |
-|---|---|---|---|---|---|---|---|
-| Reservas y Turnos | 09/10/2026 | Módulo "Reservas y Turnos" entra en uso real, reemplazando directamente esa parte del proceso manual (sin doble registro, según DE) | DE §Enfoque de Puesta en Marcha; CM §Hitos documentados | Sin dato | Sin dato | Sin dato | **Pendiente — exigible al corte** (fecha ≤ 15/10/2026; sin evidencia en las fuentes) |
-| Reservas y Turnos | 09/10/2026 | Requisitos funcionales del módulo (qué hace, reglas, criterios de aceptación) | — | — | — | — | **Sin fuente** |
-| Pedidos por QR | 23/10/2026 | Módulo "Pedidos por QR" entra en uso real | DE §Enfoque; CM §Hitos documentados | No aplica al corte | No aplica al corte | No aplica al corte | Programado (Pedidos por QR, 23/10/2026) |
-| Pedidos por QR | 23/10/2026 | Requisitos funcionales del módulo | — | — | — | — | **Sin fuente** |
-| Control de Stock | 06/11/2026 | Módulo "Control de Stock" entra en uso real | DE §Enfoque; CM §Hitos documentados | No aplica al corte | No aplica al corte | No aplica al corte | Programado (Control de Stock, 06/11/2026) |
-| Control de Stock | 06/11/2026 | Requisitos funcionales del módulo | — | — | — | — | **Sin fuente** |
-| Integración | 13/11/2026 | Integración de los módulos | DE §Enfoque; CM §Hitos documentados | No aplica al corte | No aplica al corte | No aplica al corte | Programado (Integración, 13/11/2026) |
-| Integración | 13/11/2026 | Alcance concreto de la integración | — | — | — | — | **Sin fuente** |
-| Cierre | 27/11/2026 | Cierre del proyecto | DE §Enfoque; CM §Hitos documentados | No aplica al corte | No aplica al corte | No aplica al corte | Programado (Cierre, 27/11/2026) |
-| Sitio web | Sin fecha en fuente | Sitio web (DE lo menciona como parte de "los 3 módulos + sitio"; CM: "sitio web") | DE §Kickoff; CM §Puntos abiertos | Sin dato | Sin dato | Sin dato | **Sin fuente** (ni hito ni fecha ni requisitos) |
-| Hito 6, 7 y 8 (los 3 restantes del cronograma) | Sin fuente | Desconocidos | CM §Hitos documentados ("los otros 3 no figuran en las fuentes disponibles") | — | — | — | **Sin fuente** |
-| Módulos Cocina, Parrilla, Barra, Salón, Conciliación | Sin fuente | Listados en el "master prompt"; la documentación solo menciona 3 módulos | CM §Puntos abiertos | — | — | — | **Sin fuente** (fuera de alcance hasta confirmar) |
+## 4. Lo que NO es alcance (Alcance §4)
+Cobros/facturación/caja/sueldos; **control de stock** (CR-001); tablero para el Dueño, indicadores por turno, promociones, galería, FAQ estructuradas, delivery (CR-008 rechazado); app nativa, takeaway, marketing, redes, segunda sucursal; puesta en marcha en el local (el cliente ejecuta el Plan de Implantación después del 27/11); hosting y dominio de producción; soporte posterior. Tecnología planificada (S-03, a confirmar en H2): Node.js + Express + MySQL; sitio HTML/CSS/JS.
 
-Notas sobre la matriz:
-- Las fechas de los 5 hitos son "fechas de entrada en uso" y coinciden entre DE y CM.
-- "Pendiente" para Reservas y Turnos significa solo que **las fuentes no aportan evidencia de entrega**. No afirma que no exista nada: no se inspeccionó el código.
-- CM indica que el proyecto está en **Fase 0** y que no se desarrolla producto sin autorización escrita de Martín. Es un indicio (inferido, no comprobado) de que el módulo no está implementado.
+## 5. Discrepancias respecto de la Fase 0 anterior (corregidas)
+| # | Fase 0 decía | Documentos reales dicen |
+|---|---|---|
+| 1 | Fuentes: Acta v6, Alcance/EDT v3, Cronograma v2 | Vigentes: Acta/Alcance/EDT/Plan v4 (07/10); v3 es la base anterior |
+| 2 | "Reservas y Turnos 09/10 es hito exigible" | H3 reservas = 30/10 (v4) o 02/10 vencido (v3); 09/10 es el **Comité**, no un hito de producto |
+| 3 | Hitos: Reservas 09/10, QR 23/10, Stock 06/11, Integración 13/11, Cierre 27/11 | H1–H7 y notas N1/N3/N4 (tabla §2). Control de stock **quitado** (CR-001) |
+| 4 | "3 hitos sin fecha" | Todos tienen fecha |
+| 5 | Módulos Cocina/Parrilla/Barra/Salón/Conciliación en duda | Paneles de recepción, cocina, parrilla, barra y mozo **sí** están (Alcance §1.6); conciliación/caja **excluida** (RP7) |
+| 6 | "Documentos no están en el entorno" | Estaban en `D:\don valentin` (14 docs, 12+1 videos, 7 fotos, 9 referencias) |
+| 7 | Puesta en marcha: etapas vs paralelo (A1) | Fuera de alcance: lo ejecuta el cliente con el Plan de Implantación |
+| 8 | Stack sin decidir (A6) | Propuesto: Node/Express/MySQL (S-03); PostgreSQL del relevamiento queda como contradicción a confirmar |
 
-## 2. Contradicciones abiertas
-
-No se resuelve ninguna; se registran para que el equipo decida.
-
-| # | Contradicción | Fuentes en conflicto | Qué falta |
-|---|---|---|---|
-| C1 | **Enfoque de puesta en marcha:** etapas con reemplazo directo y sin doble registro, frente a operación en paralelo con corte único. | DE (03/09/2026) frente a CM, que cita notas del usuario del 07/09 | Confirmación del equipo de cuál rige. Las notas del 07/09 no están en las fuentes: solo se las conoce por CM. |
-| C2 | **Alcance de módulos:** 3 módulos (reservas y turnos, pedidos por QR, control de stock) + sitio web, frente a 5 módulos del master prompt (Cocina, Parrilla, Barra, Salón, Conciliación). | DE y CM frente al master prompt (citado por CM; no está en el repo) | Confirmar alcance antes de la Fase 6. |
-| C3 | **Roles:** el Acta v6 dice "rol a confirmar" para Martín y Lucía; la Matriz de Interesados, el Enfoque y el Kickoff ya los muestran como Desarrollador y Diseñadora UX/UI. | DE §Pendiente / inconsistencia | Actualizar el Acta o confirmar cuál documento manda. |
-| C4 | **Hito exigible frente a fase del proyecto:** Reservas y Turnos tenía fecha 09/10/2026 (anterior al corte), pero CM declara el proyecto en Fase 0, sin desarrollo de producto autorizado. | CM §Estado actual frente a CM/DE §Hitos | Confirmar si el hito se cumplió por otra vía o si hay un desvío. Si hay desvío, corresponde una solicitud de cambio (`pm-change-request`). |
-
-## 3. Datos faltantes
-
-| # | Dato | A quién pedirlo | Fuente que lo señala |
-|---|---|---|---|
-| F1 | Acta v6, Alcance+EDT v3, Cronograma v2, Matriz de Interesados, Enfoque v2 y Kickoff (no están en el repo). Se necesitan antes de la Fase 1. | Equipo (Lucas Di Gresia, PM) | CM §Fuente de verdad |
-| F2 | Los 3 hitos del Cronograma v2 sin fecha en las fuentes (el cronograma tiene 8). | Lucas Di Gresia (PM) | CM §Hitos |
-| F3 | Requisitos funcionales y criterios de aceptación de cada módulo y del sitio web. | Equipo / Analista Funcional (sin asignar) | Ausentes en DE y CM |
-| F4 | Evidencia de entrega de Reservas y Turnos (implementación, pruebas, acta de aceptación). | Martín Cabrera (Desarrollador) | Ausente en DE y CM |
-| F5 | Nombre real del dueño (Sponsor) y contactos. | Equipo | DE §Pendiente |
-| F6 | 3 integrantes del equipo sin identificar; rol de Pedro Castillo sin confirmar; módulo de Martín sin especificar; Analista Funcional y Responsable de Calidad (QA) sin asignar. | Lucas Di Gresia (PM) | DE §Roles |
-| F7 | Diagrama de Contexto de una entrega anterior (no se encontró ninguno). | Equipo | DE §Pendiente real |
-| F8 | Costo real registrado (solo figura el Escenario A, US$0,01 el año 1), % completado por paquete de la EDT y valor planificado. Sin estos datos no se calcula EVM. | PM | DE §Kickoff |
-| F9 | Texto de las notas del 07/09 sobre operación en paralelo con corte único. | Martín Cabrera | CM §Puntos abiertos |
-
-## 4. Hito exigible al 15/10/2026
-
-**Reservas y Turnos (09/10/2026).** Es el único hito documentado con fecha ≤ corte. Todo lo posterior (Pedidos por QR 23/10, Control de Stock 06/11, Integración 13/11, Cierre 27/11) figura como programado, nunca como operativo.
+## 6. Pendientes de confirmación humana
+1. Resultado del Comité del 09/10 (¿CR-009 aprobada? ¿H1 ratificado?). 2. Fecha de N4 (cátedra). 3. Encargado de Salón designado. 4. S-03 stack. 5. Hosting/dominio del cliente.

@@ -1,4 +1,6 @@
-# Fase 0 — Inventario y puerta de aprobación
+# Fase 0 — Inventario y puerta de aprobación (actualizado 15/10 con documentos reales)
+
+> **Corrección:** donde esta auditoría decía que los documentos no estaban en el entorno, era un error mío: estaban en `D:\don valentin`. Fuente única y compartida con Gemini. Hitos y requisitos vigentes: `docs/trazabilidad.md`.
 
 **Fecha:** 15/10/2026 · **Repo:** `don-valentin-digital` (workspace en la nube) · **Estado:** Fase 0 completada con pendientes. **No se desarrolló producto.**
 
@@ -39,7 +41,7 @@ Ubuntu 24.04 · Claude Code 2.1.301 · Node 22.22 (npm, pnpm, yarn, bun) · Pyth
 - **Playwright + axe**: página real en desktop 1440, móvil 390 y `reduced-motion`. GSAP 3.15 anima (opacidad 0,28→1, línea 0→320 px); con reduced motion queda el estado final; 0 errores de consola; 0 violaciones WCAG 2.2 AA. Las capturas revelaron un botón estirado que axe no detecta; se corrigió y se recapturó.
 - **ffmpeg**: fuente 4K **sintética** → 1080p y 720p H.264 `+faststart`, poster AVIF y WebP; hash del original sin cambios. Los tamaños no sirven como referencia (video sintético).
 - **Lighthouse 13.5** (móvil simulado, página trivial): Performance 100, Accesibilidad 100, Buenas prácticas 96, SEO 90; LCP 1,1 s, CLS 0, TBT 0 ms. **No son métricas del producto.**
-- **PM**: matriz de trazabilidad con la skill `don-valentin-pm` → `docs/trazabilidad.md`. Resultado: Reservas y Turnos (09/10) es el único hito exigible; todo requisito funcional figura "Sin fuente"; 4 contradicciones y 9 datos faltantes.
+- **PM**: matriz de trazabilidad con la skill `don-valentin-pm` → `docs/trazabilidad.md`. **Reemplazada** por la matriz real v4 (ver `docs/trazabilidad.md`): 18 requisitos con criterio, hitos H1–H7, 8 discrepancias corregidas.
 - **Redacción**: texto neutro y publicitario reescrito en voseo sin inventar datos (`phase0/copy/`).
 - **Seguridad**: fixture con inyección SQL, contraseña en claro y secreto hardcodeado → versión corregida (consultas parametrizadas, scrypt, secreto por entorno, JWT con vencimiento). **No tiene tests ni se ejecutó**; sigue sin rate limiting.
 - **Composición + Impeccable**: la composición tiene una idea propia (nombre "grillado") pero el entorno es genérico, el CTA no lleva a ningún lado y la legibilidad en móvil es débil. No se aceptó como dirección creativa.
@@ -47,17 +49,17 @@ Ubuntu 24.04 · Claude Code 2.1.301 · Node 22.22 (npm, pnpm, yarn, bun) · Pyth
 ## 4. Conflictos y riesgos
 1. Master prompt pide `vercel-react-best-practices`: el nombre es correcto. Los comandos `npx impeccable install` y `uipro init` se reemplazaron por sus plugins para no duplicar distribuciones.
 2. Impeccable ejecuta hooks en cada edición y al cerrar la sesión usando un binario descargado de GitHub Releases (verificado con sha256 del mismo origen). Riesgo aceptado por el prompt; revisar si se quiere desactivar.
-3. Alcance: el prompt incluye Cocina, Parrilla, Barra, Salón y Conciliación; la documentación disponible solo menciona 3 módulos y sitio. Ver `docs/decisiones.md` A1–A6.
-4. El hito Reservas y Turnos (09/10) ya venció y no hay evidencia de entrega en lo que tengo.
-5. Todo se probó con material sintético: no se vio ninguna foto ni video real de Don Valentín.
+3. Alcance real (Alcance v4): reservas y turnos, pedidos por QR y sitio, con paneles de recepción/cocina/parrilla/barra/mozo; conciliación y caja excluidas. Ver `docs/trazabilidad.md`.
+4. H2 vence el 16/10 y H3 el 30/10 según v4 **propuesta**; CR-009 sin aprobación registrada.
+5. Las pruebas de Fase 0 usaron material sintético; el material real existe y abre, pero aún no se derivó ni se usó.
 6. Safari/iOS y dispositivos reales: sin probar.
 
 ## 5. Necesita tu autorización o acción
 - **Autorizar Context7** (OAuth).
-- **Pasarme los insumos**: Acta v6, Alcance+EDT v3, Cronograma v2, Matriz de Interesados, Enfoque v2, Kickoff, fotos y videos 4K reales, referencias visuales. No están en este entorno.
+- **Confirmar el resultado del Comité del 09/10** (CR-009 aprobada o no). Los insumos ya no faltan: están en `D:\don valentin`.
 - Decidir A1–A6 de `docs/decisiones.md`.
 - Cuentas del dueño (Google Business Profile, Search Console, dominio).
 - Antes de producción: licencia de PMSkills, hosting y despliegue.
 
 ## 6. Estado de preparación
-**Listo para la Fase 1 en cuanto lleguen los documentos y des la autorización.** Listo = toolchain, skills propias de PM y redacción, diseño (Impeccable/frontend-design/UI-UX) y registros. **No verificado todavía** = los flujos de Superpowers, feature-dev, code-review, security-guidance, LSP y Context7: se ejercitan en la primera funcionalidad real.
+**Listo para la Fase 1 con la autorización de Martín y la confirmación de CR-009.** Listo = toolchain, skills propias de PM y redacción, diseño (Impeccable/frontend-design/UI-UX) y registros. **No verificado todavía** = los flujos de Superpowers, feature-dev, code-review, security-guidance, LSP y Context7: se ejercitan en la primera funcionalidad real.

@@ -1,16 +1,12 @@
 # Estado del proyecto
 
-**Fecha:** 2026-10-15 · **Fase:** 0 (preparación) · **Autorización para desarrollar:** NO
+**Fecha:** 2026-10-15 · **Fase:** 0 (preparación, auditoría actualizada) · **Autorización para desarrollar:** NO
 
-## Comprobado (con evidencia ejecutada)
-- Toolchain local: TypeScript 6 strict, ESLint, Prettier, Vitest, Playwright + Chromium, axe-core, Lighthouse, ffmpeg/ffprobe. `npm run verify` en verde.
-- 16 skills de terceros + 5 propias cargan en una sesión limpia de Claude Code.
-- Pruebas ejecutadas: ver `docs/fase0-inventario.md` §Pruebas.
-
+## Comprobado
+- Carpeta `D:\don valentin` accesible: 14 documentos (9 PDF, 3 xlsx, 1 .pod, 1 txt) abiertos y leídos; 12 videos + 1 grabación con ffprobe OK (h264; 6 en 4K); 7 fotos oficiales y 8 referencias abren; sin archivos ilegibles.
+- Toolchain local y skills: ver `docs/fase0-inventario.md`.
 ## Inferido
-- Reservas y Turnos aparece como no implementado solo porque CLAUDE.md declara Fase 0; no se inspeccionó código previo (el repo es nuevo).
-
+- No existe código de producto (Informe 09, I-06). El repo local es nuevo.
 ## Pendiente
-- Autorización de Martín para pasar a Fase 1.
-- Documentos oficiales (Acta v6, Alcance+EDT v3, Cronograma v2, Matriz de Interesados, Enfoque v2, Kickoff), fotos y videos 4K reales y referencias visuales: **no están en este entorno**.
-- Autorizar Context7 (OAuth). Resolver decisiones abiertas A1–A6.
+- Confirmar resultado del Comité 09/10 / aprobación de CR-009 (`docs/decisiones.md` A1–A6).
+- Autorización de Martín para Fase 1. Autorizar Context7.
