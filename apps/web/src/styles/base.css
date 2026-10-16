@@ -136,3 +136,22 @@ p {
   opacity: 0.92;
   pointer-events: none;
 }
+
+/* Telón de transición entre páginas */
+.telon {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: none;
+  place-items: center;
+  background: var(--brasa);
+  color: var(--carbon);
+  pointer-events: none;
+}
+.telon p {
+  font-family: var(--f-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(3rem, 12vw, 10rem);
+  line-height: 0.85;
+}

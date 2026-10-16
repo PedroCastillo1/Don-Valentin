@@ -1,5 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
+import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
 import { precio } from "../lib/formato.ts";
@@ -195,6 +197,23 @@ export function Carta() {
     };
   }, [carta, filtro]);
 
+  // Los platos aparecen en cascada al entrar (solo opacidad y un corrimiento lateral: no mueve los títulos).
+  useEffect(() => {
+    if (!carta) return;
+    const mm = gsap.matchMedia();
+    mm.add("(prefers-reduced-motion: no-preference)", () => {
+      const items = gsap.utils.toArray<HTMLElement>(".carta__cat li");
+      gsap.set(items, { opacity: 0, x: -18 });
+      ScrollTrigger.batch(items, {
+        start: "top 96%",
+        once: true,
+        onEnter: (lote) =>
+          gsap.to(lote, { opacity: 1, x: 0, duration: 0.55, stagger: 0.035, ease: "power2.out", overwrite: true }),
+      });
+    });
+    return () => mm.revert();
+  }, [carta, filtro]);
+
   // En celulares el índice es una tira horizontal: la categoría activa se mantiene a la vista.
   useEffect(() => {
     const nav = document.querySelector<HTMLElement>(".cartapag__nav");
@@ -218,7 +237,12 @@ export function Carta() {
   }
 
   return (
-    <PaginaPublica titulo="La carta" ojo="Precios por porción, en pesos" ancha>
+    <PaginaPublica
+      titulo="La carta"
+      ojo="Precios por porción, en pesos"
+      ancha
+      medio={{ tipo: "video", src: "/media/video/reel-1.mp4", poster: "/media/video/reel-1.webp" }}
+    >
       {error && (
         <p className="mensaje mensaje--error" role="alert">
           {error}

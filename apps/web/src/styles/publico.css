@@ -51,6 +51,58 @@
   font-weight: 600;
   margin-top: 0.9rem;
 }
+.pag__w {
+  display: inline-block;
+  overflow: hidden;
+  vertical-align: top;
+  padding-bottom: 0.05em;
+  margin-bottom: -0.05em;
+}
+.pag__w > span {
+  display: inline-block;
+}
+/* Portada con medio: foto o video a sangre, el título encima */
+.pag__cab--medio {
+  min-height: min(82svh, 52rem);
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--carbon);
+  color: var(--ceniza);
+  border-bottom-color: var(--carbon);
+}
+.pag__fondo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+  will-change: transform;
+}
+.pag__cab--medio::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(to top, rgb(23 16 12 / 0.9), rgb(23 16 12 / 0.25) 60%, rgb(23 16 12 / 0.55)),
+    linear-gradient(90deg, rgb(23 16 12 / 0.55), transparent 60%);
+}
+.pag__cab--medio::after {
+  background: repeating-linear-gradient(90deg, var(--brasa) 0 0.5rem, transparent 0.5rem 1.4rem);
+}
+.pag__cab--medio h1 {
+  font-size: clamp(3.6rem, 11vw, 9.5rem);
+  line-height: 0.84;
+  text-shadow: 0 4px 40px rgb(0 0 0 / 0.45);
+}
+.pag__cab--medio .pag__sub {
+  color: var(--brasa-clara);
+}
+.pag__cab--medio .pag__estado .punto,
+.pag__cab--medio .pag__estado .punto--on {
+  background: var(--brasa);
+}
 .pag h1 {
   font-family: var(--f-display);
   font-weight: 800;

@@ -6,7 +6,16 @@ import "../styles/parrilla.css";
 
 export function ParrillaLibre() {
   return (
-    <PaginaPublica titulo="Parrilla libre" ojo="Entrada, principal y postre">
+    <PaginaPublica
+      titulo="Parrilla libre"
+      ojo="Entrada, principal y postre"
+      medio={{
+        tipo: "foto",
+        n: 1,
+        alt: "Clientes sirviéndose en el buffet de entradas del salón",
+        posicion: "50% 40%",
+      }}
+    >
       <p className="lead">
         Pagás un precio por persona y comés a gusto: parrilla, pastas con la salsa que elijas y pizzas. Entra una
         entrada y un postre.

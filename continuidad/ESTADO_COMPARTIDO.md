@@ -15,3 +15,7 @@ Hecha y probada (43 tests, 31 E2E, axe 0, Impeccable limpio). Ver HANDOFF.md. C�
 
 ## 16/10/2026 — hero limpio (Claude)
 Hero sin pin ni controles; scroll nativo; pausa discreta. Ver HANDOFF.md. Rendimiento móvil 70/100 (pendiente ≥90).
+
+
+## 16/10/2026 ~01:00 — sitio animado completo (Claude)
+Hero con paradas sin controles; home y páginas internas con escenas animadas; carta corregida; vista local con VER-SITIO.cmd. Ver HANDOFF.md.

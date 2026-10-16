@@ -1,5 +1,6 @@
 import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router";
+import { Telon } from "./components/Telon.tsx";
 
 const Inicio = lazy(() => import("./pages/Inicio.tsx"));
 const AdminRoutes = lazy(() => import("./pages/AdminRoutes.tsx"));
@@ -11,23 +12,26 @@ const MesaQr = lazy(() => import("./pages/MesaQr.tsx").then((m) => ({ default: m
 
 export function App() {
   return (
-    <Suspense
-      fallback={
-        <p className="cargando" role="status">
-          Cargando…
-        </p>
-      }
-    >
-      <Routes>
-        <Route path="/" element={<Inicio />} />
-        <Route path="/carta" element={<Carta />} />
-        <Route path="/parrilla-libre" element={<ParrillaLibre />} />
-        <Route path="/como-llegar" element={<ComoLlegar />} />
-        <Route path="/reservar" element={<Reservar />} />
-        <Route path="/m/:token" element={<MesaQr />} />
-        <Route path="/admin/*" element={<AdminRoutes />} />
-        <Route path="*" element={<p className="cargando">Página no encontrada.</p>} />
-      </Routes>
-    </Suspense>
+    <>
+      <Telon />
+      <Suspense
+        fallback={
+          <p className="cargando" role="status">
+            Cargando…
+          </p>
+        }
+      >
+        <Routes>
+          <Route path="/" element={<Inicio />} />
+          <Route path="/carta" element={<Carta />} />
+          <Route path="/parrilla-libre" element={<ParrillaLibre />} />
+          <Route path="/como-llegar" element={<ComoLlegar />} />
+          <Route path="/reservar" element={<Reservar />} />
+          <Route path="/m/:token" element={<MesaQr />} />
+          <Route path="/admin/*" element={<AdminRoutes />} />
+          <Route path="*" element={<p className="cargando">Página no encontrada.</p>} />
+        </Routes>
+      </Suspense>
+    </>
   );
 }

@@ -96,7 +96,11 @@ export function Reservar() {
 
   if (ok)
     return (
-      <PaginaPublica titulo="¡Listo, tu mesa está reservada!" ojo="Reserva confirmada">
+      <PaginaPublica
+        titulo="¡Listo, tu mesa está reservada!"
+        ojo="Reserva confirmada"
+        medio={{ tipo: "foto", n: 7, alt: "Una parrillada servida en brasero sobre la mesa", posicion: "50% 55%" }}
+      >
         <div className="ticket ticket--ok" role="status">
           <p className="ticket__linea">
             A nombre de <strong>{ok.nombre}</strong>
@@ -123,7 +127,17 @@ export function Reservar() {
     );
 
   return (
-    <PaginaPublica titulo="Reservá tu mesa" ojo="Elegí el día y el horario" ancha>
+    <PaginaPublica
+      titulo="Reservá tu mesa"
+      ojo="Elegí el día y el horario"
+      ancha
+      medio={{
+        tipo: "foto",
+        n: 4,
+        alt: "Una pareja almorzando en el salón, con la parrillada en brasero sobre la mesa",
+        posicion: "35% 45%",
+      }}
+    >
       <div className="reservar">
         <form className="form-pub" onSubmit={enviar} noValidate>
           <p className="paso__t">Primero, tus datos</p>

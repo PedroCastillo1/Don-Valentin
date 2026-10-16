@@ -75,7 +75,12 @@ export function ComoLlegar() {
   }
 
   return (
-    <PaginaPublica titulo="Cómo llegar" ojo={`${LOCAL.direccion}, ${LOCAL.localidad}`} ancha>
+    <PaginaPublica
+      titulo="Cómo llegar"
+      ojo={`${LOCAL.direccion}, ${LOCAL.localidad}`}
+      ancha
+      medio={{ tipo: "video", src: "/media/video/brasas.mp4", poster: "/media/video/brasas.webp" }}
+    >
       <section className="llegar" aria-labelledby="t-mapa">
         <h2 id="t-mapa" className="sr-only">
           Mapa y dirección
