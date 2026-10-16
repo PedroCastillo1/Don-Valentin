@@ -90,10 +90,7 @@ for (const p of plan) {
     console.warn("omitida:", (e as Error).message);
   }
 }
-const admin = await one<{ id: number } & import("mysql2/promise").RowDataPacket>(
-  db,
-  "SELECT id FROM usuarios WHERE usuario='encargado'",
-);
+const admin = await one<{ id: number }>(db, "SELECT id FROM usuarios WHERE usuario='encargado'");
 const mesas = await listarMesas(db);
 for (const m of mesas.filter((x) => [2, 5, 9, 12, 17, 22].includes(x.numero)))
   if (admin) await abrirSesion(db, m.id, admin.id);

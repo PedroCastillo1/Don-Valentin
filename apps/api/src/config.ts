@@ -3,12 +3,20 @@ import { z } from "zod";
 const envSchema = z.object({
   NODE_ENV: z.enum(["development", "test", "production"]).default("development"),
   PORT: z.coerce.number().int().default(3000),
+  /** Cadena de conexión de PostgreSQL (Supabase: "Transaction pooler"). Si está, manda sobre DB_HOST/DB_*. */
+  DATABASE_URL: z.string().optional(),
   DB_HOST: z.string().default("127.0.0.1"),
-  DB_PORT: z.coerce.number().int().default(3306),
-  DB_USER: z.string().default("root"),
+  DB_PORT: z.coerce.number().int().default(5432),
+  DB_USER: z.string().default("postgres"),
   DB_PASSWORD: z.string().default(""),
   DB_NAME: z.string().default("don_valentin"),
-  DB_SOCKET: z.string().optional(),
+  /** TLS hacia la base (obligatorio con Supabase). */
+  DB_SSL: z
+    .enum(["true", "false"])
+    .default("false")
+    .transform((v) => v === "true"),
+  /** Conexiones por instancia: en funciones de Vercel conviene 1–3. */
+  DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
   SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(72).default(10),
   COOKIE_SECURE: z.enum(["true", "false"]).optional(),
   /** Orígenes permitidos para peticiones con cookie (CSRF por Origin). Vacío = mismo host. */
@@ -30,6 +38,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     allowedOrigins: e.ALLOWED_ORIGINS.split(",")
       .map((s) => s.trim())
       .filter(Boolean),
-    trustProxy: e.TRUST_PROXY === "true",
+    // Detrás de un solo proxy (Vercel): se confía en un salto, no en toda la cadena.
+    trustProxy: e.TRUST_PROXY === "true" ? 1 : false,
   };
 }

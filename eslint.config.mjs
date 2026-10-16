@@ -8,6 +8,7 @@ export default tseslint.config(
       "**/dist",
       "**/dist-preview",
       "**/dist-archivo",
+      "**/.vercel",
       "media",
       "docs",
       ".claude",

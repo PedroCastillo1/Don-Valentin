@@ -18,7 +18,7 @@
     "express": "^5.3.0",
     "express-rate-limit": "^8.7.1",
     "helmet": "^8.3.0",
-    "mysql2": "^3.24.6",
+    "pg": "^8.23.1",
     "pino": "^10.4.0",
     "qrcode": "^1.5.4",
     "zod": "^4.6.7"
@@ -26,9 +26,10 @@
   "devDependencies": {
     "@types/compression": "^1.8.1",
     "@types/express": "^5.0.0",
+    "@types/pg": "^8.23.1",
     "@types/qrcode": "^1.5.5",
     "@types/supertest": "^6.0.3",
-    "mysql-memory-server": "^1.17.0",
+    "embedded-postgres": "^17.10.0-beta.17",
     "supertest": "^7.3.1"
   }
 }

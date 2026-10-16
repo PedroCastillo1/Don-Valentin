@@ -1,7 +1,7 @@
 import { randomInt } from "node:crypto";
 import type { OrigenReserva } from "@dv/shared";
 import { DIA_NOMBRE, diaDeSemana, localAbre, parsearFechas } from "@dv/shared";
-import type { Db, Row } from "../db/pool.ts";
+import type { Db, Row, Tx } from "../db/pool.ts";
 import { exec, one, rows, withTx } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
 import { elegirMesa, estadoDeFranja } from "../domain/disponibilidad.ts";
@@ -115,13 +115,7 @@ export async function disponibilidad(
   return salida;
 }
 
-async function mesasLibres(
-  db: Db | import("mysql2/promise").PoolConnection,
-  sectorId: number,
-  fecha: string,
-  franjaId: number,
-  personas: number,
-) {
+async function mesasLibres(db: Db | Tx, sectorId: number, fecha: string, franjaId: number, personas: number) {
   const r = await rows(
     db,
     `SELECT m.id, m.numero, m.capacidad FROM mesas m
@@ -177,7 +171,7 @@ export async function crearReserva(db: Db, n: NuevaReserva, ahora = new Date()):
   for (const s of sectores) {
     await exec(
       db,
-      "INSERT IGNORE INTO ocupacion_franja (fecha_servicio, franja_id, sector_salon_id, personas_confirmadas) VALUES (?,?,?,0)",
+      "INSERT INTO ocupacion_franja (fecha_servicio, franja_id, sector_salon_id, personas_confirmadas) VALUES (?,?,?,0) ON CONFLICT DO NOTHING",
       [n.fecha, n.franjaId, s.id],
     );
   }
@@ -199,7 +193,7 @@ export async function crearReserva(db: Db, n: NuevaReserva, ahora = new Date()):
       if (!mesa) continue;
       const cli = await exec(
         tx,
-        "INSERT INTO clientes (nombre, telefono) VALUES (?,?) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)",
+        "INSERT INTO clientes (nombre, telefono) VALUES (?,?) ON CONFLICT (telefono) DO UPDATE SET telefono = EXCLUDED.telefono RETURNING id",
         [n.nombre, n.telefono],
       );
       let codigo = nuevoCodigo();

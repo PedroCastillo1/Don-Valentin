@@ -1,6 +1,6 @@
 /**
  * Sistema completo en una compu sin MySQL instalado (vista local para revisar el panel).
- * Levanta un MySQL temporal (mysql-memory-server; la primera vez lo descarga del CDN oficial de MySQL),
+ * Levanta un PostgreSQL 17 temporal (embedded-postgres, la misma versión que Supabase),
  * aplica las migraciones, carga la carta real, crea usuarios de prueba con contraseñas al azar y datos de PRUEBA
  * para el panel, y sirve el sitio y la API en http://localhost:3001. Al cerrar la ventana se borra todo.
  * No es para producción.
@@ -9,21 +9,22 @@ import path from "node:path";
 import { writeFile } from "node:fs/promises";
 import { exec } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { createDB } from "mysql-memory-server";
+import { levantarPostgres } from "./db/pg-local.ts";
 
 const base = process.env.DV_BASE ?? path.dirname(fileURLToPath(import.meta.url));
 const puerto = process.env.PORT ?? "3001";
-console.log("Preparando la base de datos de prueba (la primera vez descarga MySQL: puede tardar unos minutos)...");
-const mysqlDb = await createDB({ version: "8.4.x", dbName: "don_valentin", logLevel: "ERROR", xEnabled: "OFF" });
+console.log("Preparando la base de datos de prueba...");
+const pgLocal = await levantarPostgres({ puerto: Number(process.env.DV_PG_PUERTO ?? 54331) });
+await pgLocal.baseNueva("don_valentin");
 
 Object.assign(process.env, {
   NODE_ENV: "development",
   PORT: puerto,
   DB_HOST: "127.0.0.1",
-  DB_PORT: String(mysqlDb.port),
-  DB_USER: mysqlDb.username,
-  DB_PASSWORD: "",
-  DB_NAME: mysqlDb.dbName,
+  DB_PORT: String(pgLocal.puerto),
+  DB_USER: pgLocal.usuario,
+  DB_PASSWORD: pgLocal.clave,
+  DB_NAME: "don_valentin",
   WEB_DIST: path.join(base, "web"),
   COOKIE_SECURE: "false",
   PUBLIC_BASE_URL: `http://localhost:${puerto}`,
@@ -74,7 +75,7 @@ const cerrar = () =>
     () =>
       void db
         .end()
-        .then(() => mysqlDb.stop())
+        .then(() => pgLocal.detener())
         .then(() => process.exit(0)),
   );
 process.on("SIGINT", cerrar);

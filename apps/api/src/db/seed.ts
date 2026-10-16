@@ -166,31 +166,28 @@ export async function seedBase(db: Db): Promise<void> {
   for (const [i, r] of ROLES.entries()) {
     await exec(
       db,
-      "INSERT INTO roles (id, codigo, nombre, descripcion) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), descripcion=VALUES(descripcion)",
+      "INSERT INTO roles (id, codigo, nombre, descripcion) VALUES (?,?,?,?) ON CONFLICT (id) DO UPDATE SET nombre=EXCLUDED.nombre, descripcion=EXCLUDED.descripcion",
       [i + 1, r, ROL_NOMBRE[r], ROLES_DESC[r]],
     );
   }
   for (const [i, s] of SECTORES_PREPARACION.entries()) {
     await exec(
       db,
-      "INSERT INTO sectores_preparacion (id, codigo, nombre) VALUES (?,?,?) ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)",
+      "INSERT INTO sectores_preparacion (id, codigo, nombre) VALUES (?,?,?) ON CONFLICT (id) DO UPDATE SET nombre=EXCLUDED.nombre",
       [i + 1, s, s[0]?.toUpperCase() + s.slice(1)],
     );
   }
   await exec(
     db,
-    "INSERT INTO sectores_salon (codigo, nombre, estado_validacion) VALUES ('salon','Salón','provisorio') ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)",
+    "INSERT INTO sectores_salon (codigo, nombre, estado_validacion) VALUES ('salon','Salón','provisorio') ON CONFLICT (codigo) DO UPDATE SET nombre=EXCLUDED.nombre",
   );
-  const salon = await one<{ id: number } & import("mysql2/promise").RowDataPacket>(
-    db,
-    "SELECT id FROM sectores_salon WHERE codigo='salon'",
-  );
+  const salon = await one<{ id: number }>(db, "SELECT id FROM sectores_salon WHERE codigo='salon'");
   if (!salon) throw new Error("Falta el sector de salón");
 
   for (const [clave, valor, tipo, unidad, descripcion, fuente, estado] of PARAMETROS) {
     await exec(
       db,
-      "INSERT INTO parametros (clave, valor, tipo, unidad, descripcion, fuente, estado_validacion) VALUES (?,?,?,?,?,?,?) ON DUPLICATE KEY UPDATE descripcion=VALUES(descripcion), fuente=VALUES(fuente)",
+      "INSERT INTO parametros (clave, valor, tipo, unidad, descripcion, fuente, estado_validacion) VALUES (?,?,?,?,?,?,?) ON CONFLICT (clave) DO UPDATE SET descripcion=EXCLUDED.descripcion, fuente=EXCLUDED.fuente",
       [clave, valor, tipo, unidad, descripcion, fuente, estado],
     );
   }
@@ -198,7 +195,7 @@ export async function seedBase(db: Db): Promise<void> {
   for (let n = 1; n <= 30; n++) {
     await exec(
       db,
-      "INSERT IGNORE INTO mesas (numero, sector_salon_id, capacidad, qr_token, estado_validacion) VALUES (?,?,?,?, 'provisorio')",
+      "INSERT INTO mesas (numero, sector_salon_id, capacidad, qr_token, estado_validacion) VALUES (?,?,?,?, 'provisorio') ON CONFLICT DO NOTHING",
       [n, salon.id, capacidadProvisoria(n), nuevoTokenQr()],
     );
   }
@@ -210,25 +207,22 @@ export async function seedBase(db: Db): Promise<void> {
     const nombre = `${hh}:${mm} a ${String(Math.floor(fin / 60)).padStart(2, "0")}:${String(fin % 60).padStart(2, "0")}`;
     await exec(
       db,
-      "INSERT IGNORE INTO franjas (codigo, nombre, hora_inicio, duracion_min, orden, estado_validacion) VALUES (?,?,?,?,?, 'provisorio')",
+      "INSERT INTO franjas (codigo, nombre, hora_inicio, duracion_min, orden, estado_validacion) VALUES (?,?,?,?,?, 'provisorio') ON CONFLICT DO NOTHING",
       [`F${hh}${mm}`, nombre, `${hh}:${mm}:00`, FRANJA_DURACION_MIN, i + 1],
     );
   }
   await exec(
     db,
-    "INSERT IGNORE INTO aforos (franja_id, sector_salon_id, aforo_personas, estado_validacion) SELECT f.id, ?, ?, 'provisorio' FROM franjas f",
+    "INSERT INTO aforos (franja_id, sector_salon_id, aforo_personas, estado_validacion) SELECT f.id, ?, ?, 'provisorio' FROM franjas f ON CONFLICT DO NOTHING",
     [salon.id, AFORO_PROVISORIO],
   );
 
-  const sectores = await rows<{ id: number; codigo: string } & import("mysql2/promise").RowDataPacket>(
-    db,
-    "SELECT id, codigo FROM sectores_preparacion",
-  );
+  const sectores = await rows<{ id: number; codigo: string }>(db, "SELECT id, codigo FROM sectores_preparacion");
   const sectorId = new Map(sectores.map((s) => [s.codigo, s.id]));
   for (const t of TIPOS) {
     await exec(
       db,
-      "INSERT INTO tipos_solicitud (sector_preparacion_id, codigo, nombre, tiempo_maximo_min, estado_validacion) VALUES (?,?,?,?, 'provisorio') ON DUPLICATE KEY UPDATE nombre=VALUES(nombre)",
+      "INSERT INTO tipos_solicitud (sector_preparacion_id, codigo, nombre, tiempo_maximo_min, estado_validacion) VALUES (?,?,?,?, 'provisorio') ON CONFLICT (codigo) DO UPDATE SET nombre=EXCLUDED.nombre",
       [sectorId.get(t.sector), t.codigo, t.nombre, t.min],
     );
   }
@@ -237,24 +231,15 @@ export async function seedBase(db: Db): Promise<void> {
   for (const c of carta.categorias) {
     await exec(
       db,
-      "INSERT INTO categorias_carta (codigo, nombre, grupo, orden) VALUES (?,?,?,?) ON DUPLICATE KEY UPDATE nombre=VALUES(nombre), grupo=VALUES(grupo), orden=VALUES(orden)",
+      "INSERT INTO categorias_carta (codigo, nombre, grupo, orden) VALUES (?,?,?,?) ON CONFLICT (codigo) DO UPDATE SET nombre=EXCLUDED.nombre, grupo=EXCLUDED.grupo, orden=EXCLUDED.orden",
       [c.id, c.nombre, c.grupo, c.orden],
     );
   }
-  const yaHayProductos = await one<{ n: number } & import("mysql2/promise").RowDataPacket>(
-    db,
-    "SELECT COUNT(*) AS n FROM productos",
-  );
+  const yaHayProductos = await one<{ n: number }>(db, "SELECT COUNT(*) AS n FROM productos");
   if ((yaHayProductos?.n ?? 0) > 0) return;
-  const cats = await rows<{ id: number; codigo: string } & import("mysql2/promise").RowDataPacket>(
-    db,
-    "SELECT id, codigo FROM categorias_carta",
-  );
+  const cats = await rows<{ id: number; codigo: string }>(db, "SELECT id, codigo FROM categorias_carta");
   const catId = new Map(cats.map((c) => [c.codigo, c.id]));
-  const tipos = await rows<{ id: number; codigo: string } & import("mysql2/promise").RowDataPacket>(
-    db,
-    "SELECT id, codigo FROM tipos_solicitud",
-  );
+  const tipos = await rows<{ id: number; codigo: string }>(db, "SELECT id, codigo FROM tipos_solicitud");
   const tipoId = new Map(tipos.map((t) => [t.codigo, t.id]));
   let orden = 0;
   for (const p of carta.productos) {
@@ -297,11 +282,7 @@ export async function seedUsuarios(db: Db, lista: UsuarioSeed[]): Promise<Record
     const existe = await one(db, "SELECT id FROM usuarios WHERE usuario=?", [u.usuario]);
     if (existe) continue;
     const password = u.password ?? randomBytes(9).toString("base64url");
-    const rol = await one<{ id: number } & import("mysql2/promise").RowDataPacket>(
-      db,
-      "SELECT id FROM roles WHERE codigo=?",
-      [u.rol],
-    );
+    const rol = await one<{ id: number }>(db, "SELECT id FROM roles WHERE codigo=?", [u.rol]);
     await exec(db, "INSERT INTO usuarios (usuario, nombre, rol_id, password_hash) VALUES (?,?,?,?)", [
       u.usuario,
       u.nombre,

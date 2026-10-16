@@ -1,5 +1,6 @@
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
-import mysql from "mysql2/promise";
+import { PUERTO_PG_TEST } from "../../../vitest.global-setup.ts";
+import pg from "pg";
 import request from "supertest";
 import type { Express } from "express";
 import { loadConfig } from "../src/config.ts";
@@ -14,8 +15,9 @@ import { rows } from "../src/db/pool.ts";
 const env = {
   NODE_ENV: "test",
   DB_NAME: "dv_test",
-  DB_SOCKET: process.env.DB_SOCKET ?? "/run/dvmysql/mysql.sock",
-  DB_USER: "root",
+  DB_PORT: String(PUERTO_PG_TEST),
+  DB_USER: "postgres",
+  DB_PASSWORD: "postgres",
 } as NodeJS.ProcessEnv;
 const AHORA = new Date("2026-10-20T15:00:00Z"); // 12:00 en Argentina
 const FECHA = "2026-10-24";
@@ -37,9 +39,16 @@ async function login(usuario: string): Promise<Cliente> {
 
 beforeAll(async () => {
   cfg = loadConfig(env);
-  const admin = await mysql.createConnection({ socketPath: cfg.DB_SOCKET, user: "root" });
-  await admin.query("DROP DATABASE IF EXISTS dv_test");
-  await admin.query("CREATE DATABASE dv_test CHARACTER SET utf8mb4");
+  const admin = new pg.Client({
+    host: "127.0.0.1",
+    port: PUERTO_PG_TEST,
+    user: "postgres",
+    password: "postgres",
+    database: "postgres",
+  });
+  await admin.connect();
+  await admin.query("DROP DATABASE IF EXISTS dv_test WITH (FORCE)");
+  await admin.query("CREATE DATABASE dv_test ENCODING 'UTF8'");
   await admin.end();
   db = createPool(cfg);
   const mdb = createPool(cfg, { multipleStatements: true });

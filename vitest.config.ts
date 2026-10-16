@@ -1,5 +1,9 @@
 import { defineConfig } from "vitest/config";
 
 export default defineConfig({
-  test: { include: ["packages/**/*.test.ts", "apps/**/*.test.ts"], exclude: ["**/node_modules/**", "e2e/**"] },
+  test: {
+    include: ["packages/**/*.test.ts", "apps/**/*.test.ts"],
+    exclude: ["**/node_modules/**", "e2e/**"],
+    globalSetup: ["./vitest.global-setup.ts"],
+  },
 });

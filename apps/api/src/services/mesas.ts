@@ -78,7 +78,7 @@ export async function editarMesa(
   if (i.activa === false) {
     const reservas = await one(
       db,
-      "SELECT COUNT(*) AS n FROM reservas WHERE mesa_id = ? AND estado = 'confirmada' AND fecha_servicio >= CURDATE() - INTERVAL 1 DAY",
+      "SELECT COUNT(*) AS n FROM reservas WHERE mesa_id = ? AND estado = 'confirmada' AND fecha_servicio >= CURRENT_DATE - 1",
       [id],
     );
     if (Number(reservas?.n) > 0)
