@@ -1,4 +1,5 @@
 import type { NextFunction, Request, RequestHandler, Response } from "express";
+import { z } from "zod";
 import type { ZodType } from "zod";
 import { puede } from "@dv/shared";
 import type { Permiso } from "@dv/shared";
@@ -25,6 +26,9 @@ export function leerCookie(req: Request, nombre: string): string | undefined {
   }
   return undefined;
 }
+
+// Los mensajes que Zod arma solo (tipo, largo, formato) salen en español, igual que los propios del proyecto.
+z.config(z.locales.es());
 
 export function parsear<T>(schema: ZodType<T>, datos: unknown): T {
   const r = schema.safeParse(datos);

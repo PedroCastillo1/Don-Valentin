@@ -22,12 +22,16 @@ export const telefonoSchema = z
 
 /** RNF-4: solo nombre y teléfono; el aviso de uso es obligatorio. */
 export const reservaPublicaSchema = z.object({
-  nombre: z.string().trim().min(2, "Ingresá tu nombre").max(80),
+  nombre: z.string().trim().min(2, "Ingresá tu nombre").max(80, "El nombre admite hasta 80 caracteres"),
   telefono: telefonoSchema,
-  personas: z.number().int().min(1, "Mínimo 1 persona").max(40),
+  personas: z
+    .number({ error: "Indicá cuántas personas son" })
+    .int("Indicá un número entero de personas")
+    .min(1, "Mínimo 1 persona")
+    .max(40, "Podemos reservar hasta 40 personas por reserva"),
   fecha: fechaIso,
-  franjaId: z.number().int().positive(),
-  comentarios: z.string().trim().max(300).optional(),
+  franjaId: z.number({ error: "Elegí un horario" }).int("Elegí un horario").positive("Elegí un horario"),
+  comentarios: z.string().trim().max(300, "Los comentarios admiten hasta 300 caracteres").optional(),
   aceptaAviso: z.literal(true, { error: "Aceptá el aviso de uso de datos para reservar" }),
 });
 export type ReservaPublicaInput = z.infer<typeof reservaPublicaSchema>;
@@ -39,7 +43,11 @@ export type ReservaInternaInput = z.infer<typeof reservaInternaSchema>;
 
 export const disponibilidadQuerySchema = z.object({
   fecha: fechaIso,
-  personas: z.coerce.number().int().min(1).max(40),
+  personas: z.coerce
+    .number({ error: "Indicá cuántas personas son" })
+    .int("Indicá un número entero de personas")
+    .min(1, "Mínimo 1 persona")
+    .max(40, "Podemos reservar hasta 40 personas por reserva"),
 });
 
 export const loginSchema = z.object({

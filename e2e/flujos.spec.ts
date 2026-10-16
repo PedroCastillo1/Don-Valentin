@@ -189,6 +189,22 @@ test.describe("sitio público", () => {
     await expect(page.getByText(codigo)).toBeVisible();
   });
 
+  test("reservar: la cantidad de personas se puede borrar y escribir de nuevo; más de 40 avisa en español", async ({
+    page,
+  }) => {
+    await page.goto("/reservar");
+    const personas = page.getByLabel("Personas");
+    await personas.fill("");
+    await expect(personas).toHaveValue("");
+    await personas.fill("50");
+    await expect(page.getByText("Indicá entre 1 y 40 personas.")).toBeVisible();
+    await personas.fill("6");
+    await expect(page.getByText("Indicá entre 1 y 40 personas.")).toHaveCount(0);
+    // La API también responde en español si alguien se pasa de 40.
+    const r = await page.request.get("/api/public/disponibilidad?fecha=2099-01-01&personas=50");
+    expect((await r.json()).error.mensaje).toBe("Podemos reservar hasta 40 personas por reserva");
+  });
+
   test("un QR inventado no abre ninguna mesa", async ({ page }) => {
     await page.goto("/m/00000000000000000000000000000000");
     await expect(page.getByText(/no corresponde a ninguna mesa/)).toBeVisible();

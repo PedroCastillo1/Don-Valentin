@@ -27,7 +27,10 @@ export function Reservar() {
   const [diasMax, setDiasMax] = useState(30);
   const [nombre, setNombre] = useState("");
   const [telefono, setTelefono] = useState("");
-  const [personas, setPersonas] = useState(2);
+  // El campo se guarda como texto para poder borrarlo y escribir de nuevo; la cantidad válida se deriva de ahí.
+  const [personasTxt, setPersonasTxt] = useState("2");
+  const personas = Number(personasTxt);
+  const personasOk = personasTxt !== "" && Number.isInteger(personas) && personas >= 1 && personas <= 40;
   const [fecha, setFecha] = useState(sumarDias(hoy, 1));
   const [franjaId, setFranjaId] = useState<number | "">("");
   const [comentarios, setComentarios] = useState("");
@@ -65,6 +68,11 @@ export function Reservar() {
           .join(", ")
           .replace(/, ([^,]*)$/, " y $1")}.`;
   useEffect(() => {
+    if (!personasOk) {
+      setFranjas([]);
+      setFranjaId("");
+      return;
+    }
     let vivo = true;
     api<{ franjas: Franja[] }>(`/public/disponibilidad?fecha=${fecha}&personas=${personas}`)
       .then((r) => {
@@ -81,7 +89,7 @@ export function Reservar() {
     return () => {
       vivo = false;
     };
-  }, [fecha, personas]);
+  }, [fecha, personas, personasOk]);
 
   // Al confirmar, la página cambia de contenido: llevamos al comensal arriba para que vea el ticket y su código.
   useEffect(() => {
@@ -192,10 +200,12 @@ export function Reservar() {
                 type="number"
                 min={1}
                 max={40}
-                value={personas}
-                onChange={(e) => setPersonas(Math.max(1, Number(e.target.value)))}
+                value={personasTxt}
+                onChange={(e) => setPersonasTxt(e.target.value)}
+                aria-invalid={personasTxt !== "" && !personasOk}
                 required
               />
+              {personasTxt !== "" && !personasOk && <span className="campo-error">Indicá entre 1 y 40 personas.</span>}
             </label>
             <label>
               Día

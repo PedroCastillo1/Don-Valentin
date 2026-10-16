@@ -13,7 +13,6 @@ gsap.registerPlugin(ScrollTrigger);
 
 /** Con movimiento (lo normal). Sin movimiento todo queda visible y quieto: nada se anima. */
 const MOV = "(prefers-reduced-motion: no-preference)";
-const ANCHO = "(min-width: 900px)";
 
 /**
  * Engancha una escena animada a un elemento. Las animaciones viven en un gsap.matchMedia con el elemento como
@@ -103,80 +102,14 @@ export function Cinta() {
 /* ───────────────────────── Del fuego a la mesa ───────────────────────── */
 
 /**
- * Recorrido horizontal: en pantallas anchas la sección se fija y el scroll vertical desplaza una tira de cuatro
- * paneles (portada, fuego, parrilla, mesa). Cada panel destapa su imagen y su texto al entrar. En celulares
- * la tira se apila y cada panel aparece con su propia máscara.
+ * Recorrido vertical: cuatro paneles apilados (portada, fuego, parrilla, mesa). Cada panel destapa su imagen de
+ * abajo hacia arriba y sube su texto al entrar en pantalla. Sin fijar la pantalla ni mover nada de costado.
  */
 export function Recorrido() {
   const ref = useEscena<HTMLElement>((el, mm) => {
     const paneles = Array.from(el.querySelectorAll<HTMLElement>(".rec__panel"));
-    mm.add(`${MOV} and ${ANCHO}`, () => {
-      const pista = el.querySelector<HTMLElement>(".rec__pista")!;
-      const dist = () => pista.scrollWidth - window.innerWidth;
-      const mover = gsap.to(pista, {
-        x: () => -dist(),
-        ease: "none",
-        scrollTrigger: {
-          trigger: el,
-          start: "top top",
-          end: () => `+=${dist()}`,
-          pin: true,
-          scrub: 0.9,
-          anticipatePin: 1,
-          invalidateOnRefresh: true,
-        },
-      });
-      gsap.to(el.querySelector(".rec__palabra"), {
-        xPercent: -38,
-        ease: "none",
-        scrollTrigger: { trigger: el, start: "top top", end: () => `+=${dist()}`, scrub: 1.2 },
-      });
-      gsap.from(paneles[0]!.querySelectorAll(".rec__t > *"), {
-        y: 70,
-        opacity: 0,
-        duration: 1,
-        stagger: 0.1,
-        ease: "power3.out",
-        scrollTrigger: { trigger: el, start: "top 65%" },
-      });
-      paneles.slice(1).forEach((p) => {
-        const medios = p.querySelectorAll(".rec__m");
-        gsap.fromTo(
-          medios,
-          { clipPath: "inset(0% 0% 0% 100%)" },
-          {
-            clipPath: "inset(0% 0% 0% 0%)",
-            ease: "power2.out",
-            stagger: 0.15,
-            scrollTrigger: { trigger: p, containerAnimation: mover, start: "left 92%", end: "left 30%", scrub: true },
-          },
-        );
-        gsap.fromTo(
-          p.querySelectorAll(".rec__m > img, .rec__m > video"),
-          { scale: 1.3 },
-          {
-            scale: 1,
-            ease: "none",
-            scrollTrigger: {
-              trigger: p,
-              containerAnimation: mover,
-              start: "left right",
-              end: "right left",
-              scrub: true,
-            },
-          },
-        );
-        gsap.from(p.querySelectorAll(".rec__t > *"), {
-          y: 80,
-          opacity: 0,
-          ease: "power3.out",
-          stagger: 0.12,
-          scrollTrigger: { trigger: p, containerAnimation: mover, start: "left 70%", end: "left 25%", scrub: true },
-        });
-      });
-    });
-    mm.add(`${MOV} and (max-width: 899px)`, () => {
-      paneles.forEach((p) => {
+    mm.add(MOV, () => {
+      paneles.forEach((p, i) => {
         gsap.fromTo(
           p.querySelectorAll(".rec__m"),
           { clipPath: "inset(100% 0% 0% 0%)" },
@@ -185,7 +118,7 @@ export function Recorrido() {
             duration: 1.2,
             ease: "power3.inOut",
             stagger: 0.15,
-            scrollTrigger: { trigger: p, start: "top 78%" },
+            scrollTrigger: { trigger: p, start: "top 75%" },
           },
         );
         gsap.from(p.querySelectorAll(".rec__t > *"), {
@@ -194,7 +127,7 @@ export function Recorrido() {
           duration: 0.9,
           stagger: 0.1,
           ease: "power3.out",
-          scrollTrigger: { trigger: p, start: "top 72%" },
+          scrollTrigger: { trigger: p, start: i === 0 ? "top 85%" : "top 70%" },
         });
       });
     });
@@ -202,9 +135,6 @@ export function Recorrido() {
 
   return (
     <section ref={ref} className="rec" aria-labelledby="t-rec">
-      <p className="rec__palabra" aria-hidden="true">
-        Fuego · Parrilla · Mesa · Fuego · Parrilla · Mesa
-      </p>
       <div className="rec__pista">
         <div className="rec__panel rec__panel--portada">
           <div className="rec__t">
@@ -279,30 +209,33 @@ export function Recorrido() {
 
 /* ─────────────────────────────── El salón ─────────────────────────────── */
 
-/** Una ventana que se abre: la foto del salón crece hasta ocupar la pantalla mientras las palabras se separan. */
+/** La foto del salón se destapa de abajo hacia arriba y el texto sube detrás. Sin fijar la pantalla. */
 export function Salon() {
   const ref = useEscena<HTMLElement>((el, mm) => {
     mm.add(MOV, () => {
-      const tl = gsap.timeline({
-        defaults: { ease: "none" },
-        scrollTrigger: { trigger: el, start: "top top", end: "+=130%", pin: true, scrub: 0.9, anticipatePin: 1 },
-      });
-      tl.fromTo(
+      gsap.fromTo(
         ".salon__ventana",
-        { clipPath: "inset(24% 32% 24% 32% round 6px)" },
-        { clipPath: "inset(0% 0% 0% 0% round 0px)", ease: "power2.inOut", duration: 1 },
-        0,
-      )
-        .fromTo(".salon__ventana img", { scale: 1.4 }, { scale: 1, ease: "power2.inOut", duration: 1 }, 0)
-        .fromTo(".salon__izq", { xPercent: 0 }, { xPercent: -70, opacity: 0, duration: 0.8 }, 0)
-        .fromTo(".salon__der", { xPercent: 0 }, { xPercent: 70, opacity: 0, duration: 0.8 }, 0)
-        .fromTo(".salon__velo", { opacity: 0 }, { opacity: 1, duration: 0.4 }, 0.6)
-        .fromTo(
-          ".salon__texto > *",
-          { y: 50, opacity: 0 },
-          { y: 0, opacity: 1, stagger: 0.08, duration: 0.35, ease: "power3.out" },
-          0.72,
-        );
+        { clipPath: "inset(100% 0% 0% 0%)" },
+        {
+          clipPath: "inset(0% 0% 0% 0%)",
+          duration: 1.3,
+          ease: "power3.inOut",
+          scrollTrigger: { trigger: el, start: "top 70%" },
+        },
+      );
+      gsap.fromTo(
+        ".salon__ventana img",
+        { scale: 1.12 },
+        { scale: 1, duration: 1.8, ease: "power2.out", scrollTrigger: { trigger: el, start: "top 70%" } },
+      );
+      gsap.from(".salon__texto > *", {
+        y: 40,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: el, start: "top 55%" },
+      });
     });
   });
   return (
@@ -314,12 +247,6 @@ export function Salon() {
           sizes="100vw"
         />
       </figure>
-      <p className="salon__izq" aria-hidden="true">
-        Una mesa
-      </p>
-      <p className="salon__der" aria-hidden="true">
-        larga
-      </p>
       <div className="salon__velo" aria-hidden="true" />
       <div className="salon__texto">
         <p className="rec__mono">El salón</p>

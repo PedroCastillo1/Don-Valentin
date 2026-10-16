@@ -64,7 +64,6 @@
   width: min(34rem, calc(100% - 2.5rem));
   color: var(--carbon);
   filter: drop-shadow(0 22px 28px rgb(0 0 0 / 0.45));
-  rotate: -1deg;
 }
 .hero__ticket-cuerpo,
 .hero__ticket-pie {

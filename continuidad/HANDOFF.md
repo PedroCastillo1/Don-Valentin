@@ -50,3 +50,5 @@ No reutilizar el diseño del prototipo anterior ni la v0 beige/Caprasimo. No inv
 Base en Supabase cargada y usuarios del ambiente con contraseña igual al usuario (hash argon2). Vercel lo configura Pedro con `vercel.json` (instalación `npm ci --include=dev`). Pendiente: URL final, `PUBLIC_BASE_URL` y probar carta, login, reserva y QR en vivo. Panel: telón de marca una sola vez; Mesas y QR en tarjetas en celular. Presentación y guion corregidos (el QR se queda en el alcance; Supabase y Vercel figuran como ya montados: confirmar que el sitio esté arriba antes de presentar).
 
 Mesas y QR: el botón "Cerrar sesión" pasó a "Liberar mesa" (el QR queda fijo y la próxima sesión empieza con cuenta en cero). Diseño del permiso atado a la sesión para H4 en `docs/decisiones.md`.
+
+Sitio en vivo: https://don-valentin.vercel.app (Pedro lo desplegó). Ajustes del 16/10 a la tarde: ticket del hero derecho, Recorrido vertical, Salón sin pin y con foto apaisada en celular, Reservar con personas borrable y errores en español (z.config es). E2E 35/37: fallan solo los 2 del hero por falta de H.264 en este Chromium.
