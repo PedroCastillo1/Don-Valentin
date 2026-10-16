@@ -38,39 +38,73 @@ export async function listarMesas(db: Db): Promise<MesaDto[]> {
   return (await rows(db, `${SELECT_MESA} ORDER BY m.numero`)).map(dto);
 }
 
-export async function crearMesa(db: Db, i: { numero: number; sectorSalonId: number; capacidad: number }): Promise<MesaDto> {
+export async function crearMesa(
+  db: Db,
+  i: { numero: number; sectorSalonId: number; capacidad: number },
+): Promise<MesaDto> {
   const sector = await one(db, "SELECT id FROM sectores_salon WHERE id = ? AND activo = 1", [i.sectorSalonId]);
   if (!sector) throw new ErrorDeDominio(400, "SECTOR_INVALIDO", "El sector no existe.");
   try {
-    const r = await exec(db, "INSERT INTO mesas (numero, sector_salon_id, capacidad, qr_token, estado_validacion) VALUES (?,?,?,?, 'provisorio')", [i.numero, i.sectorSalonId, i.capacidad, nuevoTokenQr()]);
+    const r = await exec(
+      db,
+      "INSERT INTO mesas (numero, sector_salon_id, capacidad, qr_token, estado_validacion) VALUES (?,?,?,?, 'provisorio')",
+      [i.numero, i.sectorSalonId, i.capacidad, nuevoTokenQr()],
+    );
     return dto((await one(db, `${SELECT_MESA} WHERE m.id = ?`, [r.insertId]))!);
   } catch (e) {
-    if ((e as { errno?: number }).errno === 1062) throw new ErrorDeDominio(409, "MESA_DUPLICADA", `Ya existe la mesa ${i.numero}.`);
+    if ((e as { errno?: number }).errno === 1062)
+      throw new ErrorDeDominio(409, "MESA_DUPLICADA", `Ya existe la mesa ${i.numero}.`);
     throw e;
   }
 }
 
-export async function editarMesa(db: Db, id: number, i: { sectorSalonId?: number | undefined; capacidad?: number | undefined; activa?: boolean | undefined }): Promise<MesaDto> {
+export async function editarMesa(
+  db: Db,
+  id: number,
+  i: { sectorSalonId?: number | undefined; capacidad?: number | undefined; activa?: boolean | undefined },
+): Promise<MesaDto> {
   const m = await one(db, "SELECT id FROM mesas WHERE id = ?", [id]);
   if (!m) throw new ErrorDeDominio(404, "MESA_NO_ENCONTRADA", "La mesa no existe.");
   if (i.activa === false) {
-    const reservas = await one(db, "SELECT COUNT(*) AS n FROM reservas WHERE mesa_id = ? AND estado = 'confirmada' AND fecha_servicio >= CURDATE() - INTERVAL 1 DAY", [id]);
-    if (Number(reservas?.n) > 0) throw new ErrorDeDominio(409, "MESA_CON_RESERVAS", "No podés desactivar esta mesa: tiene reservas confirmadas.");
+    const reservas = await one(
+      db,
+      "SELECT COUNT(*) AS n FROM reservas WHERE mesa_id = ? AND estado = 'confirmada' AND fecha_servicio >= CURDATE() - INTERVAL 1 DAY",
+      [id],
+    );
+    if (Number(reservas?.n) > 0)
+      throw new ErrorDeDominio(409, "MESA_CON_RESERVAS", "No podés desactivar esta mesa: tiene reservas confirmadas.");
     const sesion = await one(db, "SELECT 1 FROM sesiones_mesa WHERE mesa_id = ? AND estado = 'abierta'", [id]);
-    if (sesion) throw new ErrorDeDominio(409, "MESA_CON_SESION", "No podés desactivar esta mesa: tiene una sesión abierta.");
+    if (sesion)
+      throw new ErrorDeDominio(409, "MESA_CON_SESION", "No podés desactivar esta mesa: tiene una sesión abierta.");
   }
   const sets: string[] = [];
   const params: unknown[] = [];
-  if (i.sectorSalonId !== undefined) (sets.push("sector_salon_id = ?"), params.push(i.sectorSalonId));
-  if (i.capacidad !== undefined) (sets.push("capacidad = ?"), params.push(i.capacidad));
-  if (i.activa !== undefined) (sets.push("activa = ?"), params.push(i.activa ? 1 : 0));
-  if (sets.length) await exec(db, `UPDATE mesas SET ${sets.join(", ")}, estado_validacion = 'provisorio' WHERE id = ?`, [...params, id]);
+  if (i.sectorSalonId !== undefined) {
+    sets.push("sector_salon_id = ?");
+    params.push(i.sectorSalonId);
+  }
+  if (i.capacidad !== undefined) {
+    sets.push("capacidad = ?");
+    params.push(i.capacidad);
+  }
+  if (i.activa !== undefined) {
+    sets.push("activa = ?");
+    params.push(i.activa ? 1 : 0);
+  }
+  if (sets.length)
+    await exec(db, `UPDATE mesas SET ${sets.join(", ")}, estado_validacion = 'provisorio' WHERE id = ?`, [
+      ...params,
+      id,
+    ]);
   return dto((await one(db, `${SELECT_MESA} WHERE m.id = ?`, [id]))!);
 }
 
 /** Genera un QR nuevo: el anterior deja de resolver la mesa. */
 export async function regenerarQr(db: Db, id: number): Promise<MesaDto> {
-  const r = await exec(db, "UPDATE mesas SET qr_token = ?, qr_generado_en = CURRENT_TIMESTAMP(3) WHERE id = ?", [nuevoTokenQr(), id]);
+  const r = await exec(db, "UPDATE mesas SET qr_token = ?, qr_generado_en = CURRENT_TIMESTAMP(3) WHERE id = ?", [
+    nuevoTokenQr(),
+    id,
+  ]);
   if (r.affectedRows === 0) throw new ErrorDeDominio(404, "MESA_NO_ENCONTRADA", "La mesa no existe.");
   return dto((await one(db, `${SELECT_MESA} WHERE m.id = ?`, [id]))!);
 }
@@ -79,7 +113,11 @@ export function urlQr(baseUrl: string, token: string): string {
   return `${baseUrl.replace(/\/$/, "")}/m/${token}`;
 }
 
-export async function qrSvgDeMesa(db: Db, id: number, baseUrl: string): Promise<{ svg: string; url: string; numero: number }> {
+export async function qrSvgDeMesa(
+  db: Db,
+  id: number,
+  baseUrl: string,
+): Promise<{ svg: string; url: string; numero: number }> {
   const m = await one(db, "SELECT numero, qr_token FROM mesas WHERE id = ?", [id]);
   if (!m) throw new ErrorDeDominio(404, "MESA_NO_ENCONTRADA", "La mesa no existe.");
   const url = urlQr(baseUrl, m.qr_token);
@@ -92,7 +130,11 @@ export async function qrDeTodas(db: Db, baseUrl: string): Promise<{ numero: numb
   return Promise.all(
     ms.map(async (m) => {
       const url = urlQr(baseUrl, m.qr_token);
-      return { numero: m.numero as number, url, svg: await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 }) };
+      return {
+        numero: m.numero as number,
+        url,
+        svg: await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 }),
+      };
     }),
   );
 }
@@ -105,7 +147,11 @@ export interface MesaPublica {
 /** Lo que el comensal ve al escanear: la mesa y si tiene sesión abierta. Nada más. */
 export async function mesaPorToken(db: Db, token: string): Promise<MesaPublica | null> {
   if (!/^[0-9a-f]{32}$/.test(token)) return null;
-  const m = await one(db, "SELECT m.numero, EXISTS (SELECT 1 FROM sesiones_mesa x WHERE x.mesa_id = m.id AND x.estado = 'abierta') AS abierta FROM mesas m WHERE m.qr_token = ? AND m.activa = 1", [token]);
+  const m = await one(
+    db,
+    "SELECT m.numero, EXISTS (SELECT 1 FROM sesiones_mesa x WHERE x.mesa_id = m.id AND x.estado = 'abierta') AS abierta FROM mesas m WHERE m.qr_token = ? AND m.activa = 1",
+    [token],
+  );
   return m ? { numero: m.numero, sesionAbierta: Number(m.abierta) === 1 } : null;
 }
 
@@ -124,15 +170,33 @@ export async function abrirSesion(db: Db, mesaId: number, usuarioId: number): Pr
   try {
     const r = await exec(db, "INSERT INTO sesiones_mesa (mesa_id, abierta_por) VALUES (?, ?)", [mesaId, usuarioId]);
     const s = (await one(db, "SELECT id, abierta_en FROM sesiones_mesa WHERE id = ?", [r.insertId]))!;
-    return { id: Number(s.id), mesaId, numero: mesa.numero, abiertaEn: `${String(s.abierta_en).replace(" ", "T")}Z`, yaExistia: false };
+    return {
+      id: Number(s.id),
+      mesaId,
+      numero: mesa.numero,
+      abiertaEn: `${String(s.abierta_en).replace(" ", "T")}Z`,
+      yaExistia: false,
+    };
   } catch (e) {
     if ((e as { errno?: number }).errno !== 1062) throw e;
-    const s = (await one(db, "SELECT id, abierta_en FROM sesiones_mesa WHERE mesa_id = ? AND estado = 'abierta'", [mesaId]))!;
-    return { id: Number(s.id), mesaId, numero: mesa.numero, abiertaEn: `${String(s.abierta_en).replace(" ", "T")}Z`, yaExistia: true };
+    const s = (await one(db, "SELECT id, abierta_en FROM sesiones_mesa WHERE mesa_id = ? AND estado = 'abierta'", [
+      mesaId,
+    ]))!;
+    return {
+      id: Number(s.id),
+      mesaId,
+      numero: mesa.numero,
+      abiertaEn: `${String(s.abierta_en).replace(" ", "T")}Z`,
+      yaExistia: true,
+    };
   }
 }
 
 export async function cerrarSesion(db: Db, mesaId: number): Promise<void> {
-  const r = await exec(db, "UPDATE sesiones_mesa SET estado = 'cerrada', cerrada_en = CURRENT_TIMESTAMP(3) WHERE mesa_id = ? AND estado = 'abierta'", [mesaId]);
+  const r = await exec(
+    db,
+    "UPDATE sesiones_mesa SET estado = 'cerrada', cerrada_en = CURRENT_TIMESTAMP(3) WHERE mesa_id = ? AND estado = 'abierta'",
+    [mesaId],
+  );
   if (r.affectedRows === 0) throw new ErrorDeDominio(409, "SIN_SESION", "Esa mesa no tiene una sesión abierta.");
 }

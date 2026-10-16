@@ -1,0 +1,212 @@
+.hero {
+  --cx: 74%;
+  --cy: 52%;
+  position: relative;
+  min-height: 100svh;
+  overflow: hidden;
+  isolation: isolate;
+}
+.hero__fondo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    radial-gradient(60% 70% at 74% 52%, rgba(196, 66, 26, 0.16), transparent 70%),
+    repeating-linear-gradient(90deg, transparent 0 46px, rgba(35, 26, 20, 0.035) 46px 47px), var(--papel);
+}
+.hero__escena {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr);
+  align-items: center;
+  gap: 2rem;
+  padding: 7rem clamp(1.25rem, 5vw, 4.5rem) 6rem;
+}
+.hero__texto {
+  max-width: 34rem;
+}
+.hero__ojo {
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--brasa-oscura);
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+.hero__ojo::before {
+  content: "";
+  width: 2.2rem;
+  height: 2px;
+  background: currentColor;
+}
+.hero__ojo--claro {
+  color: var(--brasa-clara);
+}
+.hero__titulo {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(2.35rem, 4.6vw, 4.1rem);
+  line-height: 1.04;
+  margin: 1.1rem 0 1.25rem;
+  letter-spacing: -0.01em;
+  text-wrap: balance;
+}
+.hero__titulo span {
+  color: var(--brasa);
+}
+.hero__bajada {
+  font-size: clamp(1.02rem, 1.3vw, 1.2rem);
+  color: var(--tinta-2);
+  max-width: 31rem;
+}
+.hero__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.8rem;
+  margin-top: 1.9rem;
+}
+
+.hero__brasero {
+  position: relative;
+  justify-self: center;
+  width: min(76vh, 46vw);
+  aspect-ratio: 1;
+}
+.hero__disco {
+  position: absolute;
+  inset: 9%;
+  border-radius: 50%;
+  overflow: hidden;
+  box-shadow:
+    0 0 0 8px var(--papel),
+    0 0 0 10px var(--tinta),
+    0 40px 70px -30px rgba(35, 26, 20, 0.6);
+  background: var(--tinta);
+}
+.hero__disco-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 50% 50%;
+  transform: scale(1.08);
+}
+.hero__anillo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  fill: var(--tinta-2);
+}
+.hero__anillo text {
+  font-family: var(--f-texto);
+  font-weight: 700;
+  font-size: 15px;
+  letter-spacing: 0.3em;
+}
+
+.hero__ticket {
+  position: absolute;
+  left: clamp(1.25rem, 5vw, 4.5rem);
+  bottom: 2rem;
+  background: #fffaf0;
+  border: 1.5px dashed var(--tinta-3);
+  border-radius: 6px;
+  padding: 0.8rem 1.1rem;
+  font-size: 0.9rem;
+  color: var(--tinta-2);
+  box-shadow: 0 10px 24px -16px rgba(35, 26, 20, 0.5);
+  transform: rotate(-1.2deg);
+}
+.hero__ticket-estado {
+  font-weight: 700;
+  color: var(--tinta);
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+.punto {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  background: var(--tinta-3);
+}
+.punto--on {
+  background: var(--brasa);
+  box-shadow: 0 0 0 0 rgba(196, 66, 26, 0.6);
+  animation: latido 2.2s infinite;
+}
+@keyframes latido {
+  70% {
+    box-shadow: 0 0 0 9px rgba(196, 66, 26, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(196, 66, 26, 0);
+  }
+}
+
+.hero__asador {
+  position: absolute;
+  inset: 0;
+  clip-path: circle(0% at var(--cx) var(--cy));
+  background: var(--tinta);
+}
+.hero__asador-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: 30% 42%;
+}
+.hero__asador-velo {
+  position: absolute;
+  inset: 0;
+  background:
+    linear-gradient(180deg, rgba(25, 14, 8, 0.62) 0%, rgba(25, 14, 8, 0) 18%),
+    linear-gradient(0deg, rgba(25, 14, 8, 0.88) 0%, rgba(25, 14, 8, 0.3) 45%, rgba(25, 14, 8, 0) 70%);
+}
+.hero__asador-texto {
+  position: absolute;
+  left: clamp(1.25rem, 5vw, 4.5rem);
+  right: clamp(1.25rem, 5vw, 4.5rem);
+  bottom: 3.2rem;
+  max-width: 40rem;
+  color: #fff7ee;
+  display: grid;
+  gap: 1.1rem;
+  justify-items: start;
+}
+.hero__asador-texto h2 {
+  font-family: var(--f-display);
+  font-weight: 400;
+  font-size: clamp(1.9rem, 3.6vw, 3.1rem);
+  line-height: 1.08;
+  text-wrap: balance;
+}
+
+@media (max-width: 899px) {
+  .hero {
+    --cx: 50%;
+    --cy: 62%;
+  }
+  .hero__escena {
+    grid-template-columns: 1fr;
+    align-content: start;
+    padding-top: 6rem;
+    padding-bottom: 5.5rem;
+    gap: 1.25rem;
+  }
+  .hero__brasero {
+    width: min(78vw, 46vh);
+    justify-self: center;
+  }
+  .hero__ticket {
+    bottom: 1rem;
+  }
+}
+@media (max-width: 899px) and (max-height: 720px) {
+  .hero__bajada {
+    display: none;
+  }
+}

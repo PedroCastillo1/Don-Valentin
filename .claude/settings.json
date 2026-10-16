@@ -13,5 +13,8 @@
     "playwright@claude-plugins-official": true,
     "impeccable@impeccable": true,
     "ui-ux-pro-max@ui-ux-pro-max-skill": true
+  },
+  "env": {
+    "SECURITY_GUIDANCE_DISABLE": "0"
   }
 }

@@ -1,8 +1,8 @@
 node_modules
-.claude
-docs
+dist
 media
-phase0/out
-CLAUDE.md
-phase0/site
-.impeccable
+docs
+.claude
+continuidad
+db/data
+package-lock.json

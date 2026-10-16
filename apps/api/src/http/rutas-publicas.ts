@@ -28,9 +28,27 @@ export function rutasPublicas(db: Db, ahora: () => Date, limitarReservas: Reques
 
   r.post("/reservas", limitarReservas, async (req, res) => {
     const d = parsear(reservaPublicaSchema, req.body);
-    const reserva = await crearReserva(db, { nombre: d.nombre, telefono: d.telefono, personas: d.personas, fecha: d.fecha, franjaId: d.franjaId, comentarios: d.comentarios, origen: "web" }, ahora());
+    const reserva = await crearReserva(
+      db,
+      {
+        nombre: d.nombre,
+        telefono: d.telefono,
+        personas: d.personas,
+        fecha: d.fecha,
+        franjaId: d.franjaId,
+        comentarios: d.comentarios,
+        origen: "web",
+      },
+      ahora(),
+    );
     // El comensal ve su código y el horario; el número de mesa es interno.
-    res.status(201).json({ codigo: reserva.codigo, fecha: reserva.fecha, franja: reserva.franja, personas: reserva.personas, nombre: reserva.aNombreDe });
+    res.status(201).json({
+      codigo: reserva.codigo,
+      fecha: reserva.fecha,
+      franja: reserva.franja,
+      personas: reserva.personas,
+      nombre: reserva.aNombreDe,
+    });
   });
 
   r.get("/mesa/:token", async (req, res) => {

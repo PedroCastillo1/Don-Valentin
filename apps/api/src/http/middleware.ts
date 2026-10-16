@@ -56,9 +56,11 @@ export function exigirCsrf(origenesPermitidos: string[]): RequestHandler {
     const origin = req.headers.origin;
     if (origin) {
       const propio = `${req.protocol}://${req.get("host")}`;
-      if (origin !== propio && !origenesPermitidos.includes(origin)) throw new ErrorDeDominio(403, "ORIGEN_NO_PERMITIDO", "Origen no permitido.");
+      if (origin !== propio && !origenesPermitidos.includes(origin))
+        throw new ErrorDeDominio(403, "ORIGEN_NO_PERMITIDO", "Origen no permitido.");
     }
-    if (!req.sesion || !csrfValido(req.sesion.csrfToken, req.header("x-csrf-token"))) throw new ErrorDeDominio(403, "CSRF", "La sesión venció o la petición no es válida. Recargá la página.");
+    if (!req.sesion || !csrfValido(req.sesion.csrfToken, req.header("x-csrf-token")))
+      throw new ErrorDeDominio(403, "CSRF", "La sesión venció o la petición no es válida. Recargá la página.");
     next();
   };
 }
@@ -69,7 +71,14 @@ export function exigirPermiso(db: Db, permiso: Permiso): RequestHandler {
     const s = req.sesion;
     if (!s) throw new ErrorDeDominio(401, "SIN_SESION", "Iniciá sesión para continuar.");
     if (puede(s.usuario.rol, permiso)) return next();
-    await registrarAuditoria(db, { usuarioId: s.usuario.id, accion: `acceso:${permiso}`, recurso: `${req.method} ${req.originalUrl.split("?")[0]}`, resultado: "denegado", detalle: { rol: s.usuario.rol }, ip: req.ip });
+    await registrarAuditoria(db, {
+      usuarioId: s.usuario.id,
+      accion: `acceso:${permiso}`,
+      recurso: `${req.method} ${req.originalUrl.split("?")[0]}`,
+      resultado: "denegado",
+      detalle: { rol: s.usuario.rol },
+      ip: req.ip,
+    });
     throw new ErrorDeDominio(403, "SIN_PERMISO", "No tenés permiso para esta sección.");
   };
 }

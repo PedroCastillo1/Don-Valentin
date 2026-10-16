@@ -27,7 +27,9 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
     ...e,
     isProd: e.NODE_ENV === "production",
     cookieSecure: e.COOKIE_SECURE ? e.COOKIE_SECURE === "true" : e.NODE_ENV === "production",
-    allowedOrigins: e.ALLOWED_ORIGINS.split(",").map((s) => s.trim()).filter(Boolean),
+    allowedOrigins: e.ALLOWED_ORIGINS.split(",")
+      .map((s) => s.trim())
+      .filter(Boolean),
     trustProxy: e.TRUST_PROXY === "true",
   };
 }

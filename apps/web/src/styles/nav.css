@@ -1,0 +1,47 @@
+.nav {
+  position: fixed;
+  z-index: 20;
+  inset: 0 0 auto 0;
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+  padding: 1rem clamp(1.25rem, 5vw, 4.5rem);
+  color: var(--tinta);
+  transition: color 0.3s;
+}
+.nav__marca {
+  font-family: var(--f-display);
+  font-size: 1.5rem;
+  text-decoration: none;
+  margin-right: auto;
+}
+.nav__links {
+  display: flex;
+  gap: 1.6rem;
+  font-weight: 600;
+  font-size: 0.95rem;
+}
+.nav__links a {
+  text-decoration: none;
+  padding: 0.4rem 0;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 0 2px no-repeat;
+  transition: background-size 0.3s var(--ease);
+}
+.nav__links a:hover {
+  background-size: 100% 2px;
+}
+.nav__cta {
+  min-height: 42px;
+}
+@media (max-width: 720px) {
+  .nav__links {
+    display: none;
+  }
+}
+
+.nav-claro .nav {
+  color: #fff7ee;
+}
+.nav-claro .nav__cta {
+  box-shadow: none;
+}

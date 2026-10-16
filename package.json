@@ -4,19 +4,24 @@
   "version": "0.1.0",
   "description": "Don Valentín Digital — reservas y turnos, pedidos por QR y sitio institucional",
   "type": "module",
-  "workspaces": ["packages/*", "apps/*"],
-  "engines": { "node": ">=22" },
+  "workspaces": [
+    "packages/*",
+    "apps/*"
+  ],
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "typecheck": "npm run typecheck --workspaces --if-present",
     "lint": "eslint .",
     "format:check": "prettier --check .",
-    "test": "npm run test --workspaces --if-present",
+    "test": "vitest run",
     "verify": "npm run typecheck && npm run lint && npm run format:check && npm run test",
     "db:migrate": "npm run db:migrate -w @dv/api",
     "db:seed": "npm run db:seed -w @dv/api",
     "dev:api": "npm run dev -w @dv/api",
     "dev:web": "npm run dev -w @dv/web",
-    "build": "npm run build -w @dv/shared && npm run build -w @dv/web"
+    "build": "npm run build -w @dv/web"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
@@ -24,6 +29,7 @@
     "@types/node": "^26.6.5",
     "axe-core": "^4.14.0",
     "eslint": "^10.12.0",
+    "globals": "^16.5.0",
     "lighthouse": "^13.5.0",
     "prettier": "^3.9.10",
     "typescript": "^6.0.3",

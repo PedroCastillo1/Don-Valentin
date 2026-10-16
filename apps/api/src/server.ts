@@ -3,7 +3,8 @@ import { createPool } from "./db/pool.ts";
 import { createApp } from "./http/app.ts";
 
 const cfg = loadConfig();
-if (cfg.isProd && !cfg.PUBLIC_BASE_URL) throw new Error("PUBLIC_BASE_URL es obligatoria en producción: es la base de los códigos QR.");
+if (cfg.isProd && !cfg.PUBLIC_BASE_URL)
+  throw new Error("PUBLIC_BASE_URL es obligatoria en producción: es la base de los códigos QR.");
 const db = createPool(cfg);
 const app = createApp({ db, cfg });
 const server = app.listen(cfg.PORT, () => console.log(`API de Don Valentín escuchando en el puerto ${cfg.PORT}`));

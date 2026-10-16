@@ -15,7 +15,10 @@ export interface ConfigLocal {
 }
 
 export async function leerConfigLocal(db: Db): Promise<ConfigLocal> {
-  const r = await rows(db, "SELECT clave, valor FROM parametros WHERE clave IN ('local_apertura','local_cierre','reserva_dias_max','tolerancia_no_show_min')");
+  const r = await rows(
+    db,
+    "SELECT clave, valor FROM parametros WHERE clave IN ('local_apertura','local_cierre','reserva_dias_max','tolerancia_no_show_min')",
+  );
   const m = new Map(r.map((x) => [x.clave as string, x.valor as string]));
   return {
     apertura: m.get("local_apertura") ?? "12:00",
@@ -41,14 +44,24 @@ function franjaDto(f: { id: number; hora_inicio: string; duracion_min: number } 
 function validarFecha(fecha: string, cfg: ConfigLocal, ahora: Date): void {
   const hoy = fechaServicioActual(ahora, cfg.apertura, cfg.cierre);
   if (fecha < hoy) throw new ErrorDeDominio(400, "FECHA_FUERA_DE_RANGO", "Esa fecha ya pasó. Elegí otro día.");
-  if (fecha > sumarDias(hoy, cfg.diasMax)) throw new ErrorDeDominio(400, "FECHA_FUERA_DE_RANGO", `Se puede reservar con hasta ${cfg.diasMax} días de anticipación.`);
+  if (fecha > sumarDias(hoy, cfg.diasMax))
+    throw new ErrorDeDominio(
+      400,
+      "FECHA_FUERA_DE_RANGO",
+      `Se puede reservar con hasta ${cfg.diasMax} días de anticipación.`,
+    );
 }
 
 export interface FranjaDisponible extends FranjaDto {
   estado: EstadoFranja;
 }
 
-export async function disponibilidad(db: Db, fecha: string, personas: number, ahora = new Date()): Promise<FranjaDisponible[]> {
+export async function disponibilidad(
+  db: Db,
+  fecha: string,
+  personas: number,
+  ahora = new Date(),
+): Promise<FranjaDisponible[]> {
   const cfg = await leerConfigLocal(db);
   validarFecha(fecha, cfg, ahora);
   const franjas = await rows(db, "SELECT id, hora_inicio, duracion_min FROM franjas WHERE activa = 1 ORDER BY orden");
@@ -58,8 +71,15 @@ export async function disponibilidad(db: Db, fecha: string, personas: number, ah
     const yaEmpezo = ahora >= inicioFranjaUtc(fecha, f.hora_inicio, cfg.apertura);
     const estados: EstadoFranja[] = [];
     for (const s of sectores) {
-      const aforo = await one(db, "SELECT aforo_personas FROM aforos WHERE franja_id = ? AND sector_salon_id = ?", [f.id, s.id]);
-      const ocup = await one(db, "SELECT personas_confirmadas FROM ocupacion_franja WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ?", [fecha, f.id, s.id]);
+      const aforo = await one(db, "SELECT aforo_personas FROM aforos WHERE franja_id = ? AND sector_salon_id = ?", [
+        f.id,
+        s.id,
+      ]);
+      const ocup = await one(
+        db,
+        "SELECT personas_confirmadas FROM ocupacion_franja WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ?",
+        [fecha, f.id, s.id],
+      );
       const libres = await mesasLibres(db, s.id, fecha, f.id, personas);
       estados.push(
         estadoDeFranja({
@@ -70,13 +90,25 @@ export async function disponibilidad(db: Db, fecha: string, personas: number, ah
         }),
       );
     }
-    const estado: EstadoFranja = estados.includes("disponible") ? "disponible" : yaEmpezo ? "cerrada" : estados.includes("sin_mesa") ? "sin_mesa" : "completa";
+    const estado: EstadoFranja = estados.includes("disponible")
+      ? "disponible"
+      : yaEmpezo
+        ? "cerrada"
+        : estados.includes("sin_mesa")
+          ? "sin_mesa"
+          : "completa";
     salida.push({ ...franjaDto(f), estado });
   }
   return salida;
 }
 
-async function mesasLibres(db: Db | import("mysql2/promise").PoolConnection, sectorId: number, fecha: string, franjaId: number, personas: number) {
+async function mesasLibres(
+  db: Db | import("mysql2/promise").PoolConnection,
+  sectorId: number,
+  fecha: string,
+  franjaId: number,
+  personas: number,
+) {
   const r = await rows(
     db,
     `SELECT m.id, m.numero, m.capacidad FROM mesas m
@@ -120,7 +152,9 @@ export interface ReservaDto {
 export async function crearReserva(db: Db, n: NuevaReserva, ahora = new Date()): Promise<ReservaDto> {
   const cfg = await leerConfigLocal(db);
   validarFecha(n.fecha, cfg, ahora);
-  const franja = await one(db, "SELECT id, hora_inicio, duracion_min FROM franjas WHERE id = ? AND activa = 1", [n.franjaId]);
+  const franja = await one(db, "SELECT id, hora_inicio, duracion_min FROM franjas WHERE id = ? AND activa = 1", [
+    n.franjaId,
+  ]);
   if (!franja) throw new ErrorDeDominio(400, "FRANJA_INVALIDA", "Ese horario no existe. Elegí uno de la lista.");
   if (ahora >= inicioFranjaUtc(n.fecha, franja.hora_inicio, cfg.apertura)) {
     throw new ErrorDeDominio(409, "FRANJA_PASADA", "Ese horario ya empezó. Elegí uno posterior.");
@@ -128,22 +162,58 @@ export async function crearReserva(db: Db, n: NuevaReserva, ahora = new Date()):
   const sectores = await rows(db, "SELECT id FROM sectores_salon WHERE activo = 1 ORDER BY id");
   // Las filas contador se crean antes de la transacción para que el bloqueo posterior sea de registro y no de rango.
   for (const s of sectores) {
-    await exec(db, "INSERT IGNORE INTO ocupacion_franja (fecha_servicio, franja_id, sector_salon_id, personas_confirmadas) VALUES (?,?,?,0)", [n.fecha, n.franjaId, s.id]);
+    await exec(
+      db,
+      "INSERT IGNORE INTO ocupacion_franja (fecha_servicio, franja_id, sector_salon_id, personas_confirmadas) VALUES (?,?,?,0)",
+      [n.fecha, n.franjaId, s.id],
+    );
   }
   return withTx(db, async (tx) => {
     let huboAforo = false;
     for (const s of sectores) {
-      const ocup = await one(tx, "SELECT personas_confirmadas FROM ocupacion_franja WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ? FOR UPDATE", [n.fecha, n.franjaId, s.id]);
-      const aforo = await one(tx, "SELECT aforo_personas FROM aforos WHERE franja_id = ? AND sector_salon_id = ?", [n.franjaId, s.id]);
+      const ocup = await one(
+        tx,
+        "SELECT personas_confirmadas FROM ocupacion_franja WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ? FOR UPDATE",
+        [n.fecha, n.franjaId, s.id],
+      );
+      const aforo = await one(tx, "SELECT aforo_personas FROM aforos WHERE franja_id = ? AND sector_salon_id = ?", [
+        n.franjaId,
+        s.id,
+      ]);
       if ((aforo?.aforo_personas ?? 0) - (ocup?.personas_confirmadas ?? 0) < n.personas) continue;
       huboAforo = true;
       const mesa = elegirMesa(await mesasLibres(tx, s.id, n.fecha, n.franjaId, n.personas), n.personas);
       if (!mesa) continue;
-      const cli = await exec(tx, "INSERT INTO clientes (nombre, telefono) VALUES (?,?) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)", [n.nombre, n.telefono]);
+      const cli = await exec(
+        tx,
+        "INSERT INTO clientes (nombre, telefono) VALUES (?,?) ON DUPLICATE KEY UPDATE id = LAST_INSERT_ID(id)",
+        [n.nombre, n.telefono],
+      );
       let codigo = nuevoCodigo();
-      for (let i = 0; i < 5 && (await one(tx, "SELECT 1 FROM reservas WHERE codigo = ?", [codigo])); i++) codigo = nuevoCodigo();
-      const res = await exec(tx, "INSERT INTO reservas (codigo, fecha_servicio, franja_id, sector_salon_id, mesa_id, cliente_id, a_nombre_de, personas, origen, comentarios, creada_por) VALUES (?,?,?,?,?,?,?,?,?,?,?)", [codigo, n.fecha, n.franjaId, s.id, mesa.id, cli.insertId, n.nombre, n.personas, n.origen, n.comentarios ?? null, n.creadaPor ?? null]);
-      await exec(tx, "UPDATE ocupacion_franja SET personas_confirmadas = personas_confirmadas + ? WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ?", [n.personas, n.fecha, n.franjaId, s.id]);
+      for (let i = 0; i < 5 && (await one(tx, "SELECT 1 FROM reservas WHERE codigo = ?", [codigo])); i++)
+        codigo = nuevoCodigo();
+      const res = await exec(
+        tx,
+        "INSERT INTO reservas (codigo, fecha_servicio, franja_id, sector_salon_id, mesa_id, cliente_id, a_nombre_de, personas, origen, comentarios, creada_por) VALUES (?,?,?,?,?,?,?,?,?,?,?)",
+        [
+          codigo,
+          n.fecha,
+          n.franjaId,
+          s.id,
+          mesa.id,
+          cli.insertId,
+          n.nombre,
+          n.personas,
+          n.origen,
+          n.comentarios ?? null,
+          n.creadaPor ?? null,
+        ],
+      );
+      await exec(
+        tx,
+        "UPDATE ocupacion_franja SET personas_confirmadas = personas_confirmadas + ? WHERE fecha_servicio = ? AND franja_id = ? AND sector_salon_id = ?",
+        [n.personas, n.fecha, n.franjaId, s.id],
+      );
       return {
         id: res.insertId,
         codigo,
@@ -159,8 +229,16 @@ export async function crearReserva(db: Db, n: NuevaReserva, ahora = new Date()):
       };
     }
     throw huboAforo
-      ? new ErrorDeDominio(409, "SIN_MESA_PARA_GRUPO", `No tenemos una mesa libre para ${n.personas} ${n.personas === 1 ? "persona" : "personas"} en ese horario. Probá con otro horario o llamanos.`)
-      : new ErrorDeDominio(409, "SIN_AFORO", "Para ese horario ya no tenemos lugar. Probá con otro horario o con otro día.");
+      ? new ErrorDeDominio(
+          409,
+          "SIN_MESA_PARA_GRUPO",
+          `No tenemos una mesa libre para ${n.personas} ${n.personas === 1 ? "persona" : "personas"} en ese horario. Probá con otro horario o llamanos.`,
+        )
+      : new ErrorDeDominio(
+          409,
+          "SIN_AFORO",
+          "Para ese horario ya no tenemos lugar. Probá con otro horario o con otro día.",
+        );
   });
 }
 
@@ -195,7 +273,10 @@ export interface ResumenFranja extends FranjaDto {
 }
 
 /** Inicio del panel: cuánto del aforo de cada franja está comprometido (control de aforo; no es el estado de mesas del Hito 3). */
-export async function resumenDia(db: Db, fecha: string): Promise<{ fecha: string; reservas: number; personas: number; franjas: ResumenFranja[] }> {
+export async function resumenDia(
+  db: Db,
+  fecha: string,
+): Promise<{ fecha: string; reservas: number; personas: number; franjas: ResumenFranja[] }> {
   const franjas = await rows(
     db,
     `SELECT f.id, f.hora_inicio, f.duracion_min,
@@ -205,6 +286,16 @@ export async function resumenDia(db: Db, fecha: string): Promise<{ fecha: string
        FROM franjas f WHERE f.activa = 1 ORDER BY f.orden`,
     [fecha, fecha],
   );
-  const out = franjas.map((f) => ({ ...franjaDto({ id: f.id, hora_inicio: f.hora_inicio, duracion_min: f.duracion_min }), reservas: Number(f.reservas), personas: Number(f.personas), aforo: Number(f.aforo) }));
-  return { fecha, reservas: out.reduce((a, b) => a + b.reservas, 0), personas: out.reduce((a, b) => a + b.personas, 0), franjas: out };
+  const out = franjas.map((f) => ({
+    ...franjaDto({ id: f.id, hora_inicio: f.hora_inicio, duracion_min: f.duracion_min }),
+    reservas: Number(f.reservas),
+    personas: Number(f.personas),
+    aforo: Number(f.aforo),
+  }));
+  return {
+    fecha,
+    reservas: out.reduce((a, b) => a + b.reservas, 0),
+    personas: out.reduce((a, b) => a + b.personas, 0),
+    franjas: out,
+  };
 }

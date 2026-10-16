@@ -54,21 +54,53 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
   const pasar: express.RequestHandler = (_req, _res, next) => next();
   const limite = (windowMs: number, max: number, mensaje: string): express.RequestHandler =>
     limitarTasa
-      ? rateLimit({ windowMs, limit: max, standardHeaders: "draft-8", legacyHeaders: false, handler: (_req, _res) => { throw new ErrorDeDominio(429, "DEMASIADAS_PETICIONES", mensaje); } })
+      ? rateLimit({
+          windowMs,
+          limit: max,
+          standardHeaders: "draft-8",
+          legacyHeaders: false,
+          handler: (_req, _res) => {
+            throw new ErrorDeDominio(429, "DEMASIADAS_PETICIONES", mensaje);
+          },
+        })
       : pasar;
 
   const api = express.Router();
   api.use(limite(60_000, 300, "Demasiadas peticiones. Esperá un momento."));
   api.use(cargarSesion(db));
 
-  api.use("/public", rutasPublicas(db, ahora, limite(10 * 60_000, 8, "Hiciste muchos intentos de reserva. Probá en unos minutos o llamanos.")));
+  api.use(
+    "/public",
+    rutasPublicas(
+      db,
+      ahora,
+      limite(10 * 60_000, 8, "Hiciste muchos intentos de reserva. Probá en unos minutos o llamanos."),
+    ),
+  );
 
-  api.post("/auth/login", limite(15 * 60_000, 20, "Demasiados intentos de ingreso. Probá en unos minutos."), async (req, res) => {
-    const d = parsear(loginSchema, req.body);
-    const s = await iniciarSesion(db, { usuario: d.usuario, password: d.password, ip: req.ip, userAgent: req.get("user-agent"), ttlHoras: cfg.SESSION_TTL_HOURS, ahora: ahora() });
-    res.cookie(COOKIE_SESION, s.token, { httpOnly: true, sameSite: "strict", secure: cfg.cookieSecure, path: "/", expires: s.expiraEn });
-    res.json({ usuario: s.usuario, csrfToken: s.csrfToken, permisos: PERMISOS_POR_ROL[s.usuario.rol] });
-  });
+  api.post(
+    "/auth/login",
+    limite(15 * 60_000, 20, "Demasiados intentos de ingreso. Probá en unos minutos."),
+    async (req, res) => {
+      const d = parsear(loginSchema, req.body);
+      const s = await iniciarSesion(db, {
+        usuario: d.usuario,
+        password: d.password,
+        ip: req.ip,
+        userAgent: req.get("user-agent"),
+        ttlHoras: cfg.SESSION_TTL_HOURS,
+        ahora: ahora(),
+      });
+      res.cookie(COOKIE_SESION, s.token, {
+        httpOnly: true,
+        sameSite: "strict",
+        secure: cfg.cookieSecure,
+        path: "/",
+        expires: s.expiraEn,
+      });
+      res.json({ usuario: s.usuario, csrfToken: s.csrfToken, permisos: PERMISOS_POR_ROL[s.usuario.rol] });
+    },
+  );
   api.get("/auth/me", exigirSesion, (req, res) => {
     const s = req.sesion!;
     res.json({ usuario: s.usuario, csrfToken: s.csrfToken, permisos: PERMISOS_POR_ROL[s.usuario.rol] });
@@ -88,21 +120,35 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
 
   const dist = cfg.WEB_DIST ? path.resolve(cfg.WEB_DIST) : undefined;
   if (dist && existsSync(dist)) {
-    app.use(express.static(dist, { index: false, maxAge: cfg.isProd ? "1h" : 0, setHeaders: (res, file) => { if (/\/assets\//.test(file)) res.setHeader("Cache-Control", "public, max-age=31536000, immutable"); } }));
+    app.use(
+      express.static(dist, {
+        index: false,
+        maxAge: cfg.isProd ? "1h" : 0,
+        setHeaders: (res, file) => {
+          if (/\/assets\//.test(file)) res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+        },
+      }),
+    );
     app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(dist, "index.html")));
   }
 
   const manejarError: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof ErrorDeDominio) {
-      res.status(err.status).json({ error: { codigo: err.codigo, mensaje: err.message, ...(err.campos ? { campos: err.campos } : {}) } });
+      res
+        .status(err.status)
+        .json({ error: { codigo: err.codigo, mensaje: err.message, ...(err.campos ? { campos: err.campos } : {}) } });
       return;
     }
     if (err instanceof SyntaxError && "body" in err) {
-      res.status(400).json({ error: { codigo: "JSON_INVALIDO", mensaje: "El cuerpo de la petición no es JSON válido." } });
+      res
+        .status(400)
+        .json({ error: { codigo: "JSON_INVALIDO", mensaje: "El cuerpo de la petición no es JSON válido." } });
       return;
     }
     if (cfg.NODE_ENV !== "test") console.error(err);
-    res.status(500).json({ error: { codigo: "ERROR_INTERNO", mensaje: "Algo salió mal de nuestro lado. Probá de nuevo." } });
+    res
+      .status(500)
+      .json({ error: { codigo: "ERROR_INTERNO", mensaje: "Algo salió mal de nuestro lado. Probá de nuevo." } });
   };
   app.use(manejarError);
   return app;

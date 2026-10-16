@@ -28,7 +28,8 @@ export async function migrate(db: Db, dir = MIGRATIONS_DIR): Promise<MigracionAp
     const checksum = createHash("sha256").update(sql).digest("hex");
     const previo = aplicadas.get(nombre);
     if (previo) {
-      if (previo !== checksum) throw new Error(`La migración ${nombre} ya fue aplicada y cambió. Creá una migración nueva.`);
+      if (previo !== checksum)
+        throw new Error(`La migración ${nombre} ya fue aplicada y cambió. Creá una migración nueva.`);
       continue;
     }
     const conn = await db.getConnection();

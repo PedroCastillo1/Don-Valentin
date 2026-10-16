@@ -6,7 +6,10 @@ export type Db = Pool;
 export type Tx = PoolConnection;
 export type Row = RowDataPacket;
 
-export function createPool(cfg: Pick<Config, "DB_HOST" | "DB_PORT" | "DB_USER" | "DB_PASSWORD" | "DB_NAME" | "DB_SOCKET">, opts: { multipleStatements?: boolean } = {}): Db {
+export function createPool(
+  cfg: Pick<Config, "DB_HOST" | "DB_PORT" | "DB_USER" | "DB_PASSWORD" | "DB_NAME" | "DB_SOCKET">,
+  opts: { multipleStatements?: boolean } = {},
+): Db {
   return mysql.createPool({
     host: cfg.DB_SOCKET ? undefined : cfg.DB_HOST,
     port: cfg.DB_SOCKET ? undefined : cfg.DB_PORT,
@@ -29,7 +32,11 @@ export async function rows<T extends Row = Row>(db: Db | Tx, sql: string, params
   return r;
 }
 
-export async function one<T extends Row = Row>(db: Db | Tx, sql: string, params: unknown[] = []): Promise<T | undefined> {
+export async function one<T extends Row = Row>(
+  db: Db | Tx,
+  sql: string,
+  params: unknown[] = [],
+): Promise<T | undefined> {
   return (await rows<T>(db, sql, params))[0];
 }
 

@@ -1,17 +1,22 @@
 import js from "@eslint/js";
+import globals from "globals";
 import tseslint from "typescript-eslint";
 export default tseslint.config(
   {
     ignores: [
-      "node_modules",
+      "**/node_modules",
+      "**/dist",
       "media",
       "docs",
       ".claude",
-      "phase0/out",
-      "phase0/site/vendor",
-      "phase0/**/*.html",
+      "continuidad",
+      "coverage",
+      "test-results",
+      "playwright-report",
     ],
   },
   js.configs.recommended,
   ...tseslint.configs.recommended,
+  { rules: { "@typescript-eslint/no-unused-vars": ["error", { argsIgnorePattern: "^_", varsIgnorePattern: "^_" }] } },
+  { languageOptions: { globals: { ...globals.node, ...globals.browser } } },
 );

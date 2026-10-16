@@ -40,5 +40,13 @@ export async function listarAuditoria(db: Db, limite = 100, soloDenegados = fals
       ORDER BY a.id DESC LIMIT ?`,
     [Math.min(limite, 500)],
   );
-  return r.map((x) => ({ id: Number(x.id), usuario: x.usuario ?? null, accion: x.accion, recurso: x.recurso, resultado: x.resultado, detalle: x.detalle, creadaEn: `${String(x.creada_en).replace(" ", "T")}Z` }));
+  return r.map((x) => ({
+    id: Number(x.id),
+    usuario: x.usuario ?? null,
+    accion: x.accion,
+    recurso: x.recurso,
+    resultado: x.resultado,
+    detalle: x.detalle,
+    creadaEn: `${String(x.creada_en).replace(" ", "T")}Z`,
+  }));
 }

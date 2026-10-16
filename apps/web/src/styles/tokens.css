@@ -1,0 +1,25 @@
+/* Sistema visual Don Valentín. Colores tomados de lo que se ve en las fotos oficiales:
+   brasa y hierro de la parrilla, ladrillo del asador, mármol verde de las mesas, papel de carta. */
+:root {
+  --papel: #f2eadb;
+  --papel-2: #e8dcc4;
+  --papel-3: #d9c9a8;
+  --tinta: #231a14;
+  --tinta-2: #4a3d33;
+  --tinta-3: #7a6a5b;
+  --brasa: #c4421a;
+  --brasa-oscura: #8e2b0e;
+  --brasa-clara: #f0a27b;
+  --malbec: #4a1b24;
+  --marmol: #3d5a47;
+  --marmol-claro: #c9d6c3;
+  --ok: #2f6b3f;
+  --alerta: #a56a00;
+
+  --f-display: "Caprasimo", "Georgia", serif;
+  --f-texto: "Instrument Sans Variable", system-ui, sans-serif;
+
+  --radio: 14px;
+  --sombra: 0 1px 0 rgba(35, 26, 20, 0.06), 0 12px 32px -16px rgba(35, 26, 20, 0.28);
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
