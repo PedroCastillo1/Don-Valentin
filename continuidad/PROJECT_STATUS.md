@@ -37,3 +37,7 @@ Ver `HANDOFF.md` → "Próxima acción exacta".
 
 ## Actualización 15/10/2026 noche — 3ª iteración de diseño
 Hero con paradas controladas, Del fuego a la mesa, Cómo llegar con mapa OSM propio, precio $41.000 contextualizado (confirmado por Martín), resto del sitio al mismo nivel. Verificado: 43 tests, 31 E2E, axe 0, Impeccable limpio. Abiertos: licencia de videos de banco, derechos de imagen de fotos, Lighthouse móvil, N4, constancia CR-009.
+
+
+## Actualización 16/10/2026 — hero limpio
+Hero en 3 escenas con scroll nativo, sin controles visuales (solo pausa accesible). 32 E2E + 43 unit verdes, Impeccable limpio. Rendimiento móvil: Lighthouse 70, objetivo 90 abierto (ver decisiones.md). Imagen ilustrativa retirada (derechos confirmados).

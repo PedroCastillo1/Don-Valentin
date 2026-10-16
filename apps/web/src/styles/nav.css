@@ -69,7 +69,7 @@
 /* Sobre el hero (fondo oscuro): sin fondo y en claro */
 .nav-claro .nav {
   color: var(--ceniza);
-  background: transparent;
+  background: linear-gradient(to bottom, rgb(23 16 12 / 0.92) 0%, rgb(23 16 12 / 0.75) 60%, rgb(23 16 12 / 0));
   backdrop-filter: none;
   border-color: transparent;
 }

@@ -115,12 +115,7 @@ export function Fuego() {
         clase="cap--1"
         momento="Primero"
         titulo="El fuego"
-        medio={
-          <>
-            <VideoLoop src="/media/video/reel-1.mp4" poster="/media/video/reel-1.webp" />
-            <figcaption>Imagen ilustrativa</figcaption>
-          </>
-        }
+        medio={<VideoLoop src="/media/video/reel-1.mp4" poster="/media/video/reel-1.webp" />}
       >
         <p>
           La parrilla está encendida todos los días, de {LOCAL.horario.apertura} a {LOCAL.horario.cierre}.

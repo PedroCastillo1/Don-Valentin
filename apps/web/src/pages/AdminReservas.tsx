@@ -51,13 +51,23 @@ export function AdminReservas() {
     <>
       <Cabecera titulo="Reservas" bajada={fecha ? diaLargo(fecha) : ""}>
         <div className="dia" role="group" aria-label="Día">
-          <button type="button" aria-label="Día anterior" onClick={() => void cargar(sumarDias(fecha, -1))}>
+          <button
+            type="button"
+            disabled={!fecha}
+            aria-label="Día anterior"
+            onClick={() => void cargar(sumarDias(fecha, -1))}
+          >
             ‹
           </button>
           <button type="button" onClick={() => void cargar("")}>
             Hoy
           </button>
-          <button type="button" aria-label="Día siguiente" onClick={() => void cargar(sumarDias(fecha, 1))}>
+          <button
+            type="button"
+            disabled={!fecha}
+            aria-label="Día siguiente"
+            onClick={() => void cargar(sumarDias(fecha, 1))}
+          >
             ›
           </button>
         </div>

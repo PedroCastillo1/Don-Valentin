@@ -11,3 +11,7 @@ Cada tipo de información tiene una sola fuente: reglas = `AGENTS.md`; contexto/
 
 ## 15/10/2026 noche — 3ª iteración de diseño (Claude)
 Hecha y probada (43 tests, 31 E2E, axe 0, Impeccable limpio). Ver HANDOFF.md. Código en app/ (commit 22f2fe2). Precio $41.000 confirmado por Martín. Pendiente: licencia de videos, Lighthouse móvil, N4.
+
+
+## 16/10/2026 — hero limpio (Claude)
+Hero sin pin ni controles; scroll nativo; pausa discreta. Ver HANDOFF.md. Rendimiento móvil 70/100 (pendiente ≥90).

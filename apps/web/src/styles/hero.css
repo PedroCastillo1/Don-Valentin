@@ -10,10 +10,12 @@
   color: var(--ceniza);
 }
 .hero__film,
-.hero__barras,
-.hero__persiana {
+.hero__barras {
   position: absolute;
   inset: 0;
+}
+.portada {
+  background: var(--carbon);
 }
 .hero__v {
   position: absolute;
@@ -145,26 +147,8 @@
   color: var(--humo);
 }
 
-/* Rótulos que aparecen con el fuego a pantalla completa */
-.hero__rotulo {
-  position: absolute;
-  z-index: 2;
-  left: clamp(1.25rem, 5vw, 4.5rem);
-  right: clamp(1.25rem, 5vw, 4.5rem);
-  bottom: clamp(2rem, 12vh, 6rem);
-  display: grid;
-  gap: 0.6rem;
-  pointer-events: none;
-}
-.hero__rotulo--1,
-.hero__rotulo--2 {
-  opacity: 1;
-}
 .rotulo__mono {
   color: var(--brasa-clara);
-}
-.hero__rotulo {
-  text-shadow: 0 2px 28px rgb(0 0 0 / 0.65);
 }
 .rotulo__t {
   font-family: var(--f-display);
@@ -176,10 +160,49 @@
   text-wrap: balance;
 }
 
-/* Persiana: tiras con la foto del asador que suben una tras otra */
-.hero__persiana {
-  z-index: 4;
+/* Escena 2: el fuego a pantalla completa con la mesa */
+.portada__fuego,
+.asador {
+  position: relative;
+  height: 100svh;
+  min-height: 34rem;
+  overflow: hidden;
+  isolation: isolate;
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.portada__fuego-v {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  will-change: transform;
+}
+.portada__fuego-tono,
+.asador__velo {
+  position: absolute;
+  inset: 0;
   pointer-events: none;
+  background:
+    linear-gradient(to top, rgb(23 16 12 / 0.85), transparent 58%),
+    linear-gradient(to bottom, rgb(23 16 12 / 0.55), transparent 20%);
+}
+.portada__fuego-texto {
+  position: absolute;
+  z-index: 2;
+  left: clamp(1.25rem, 5vw, 4.5rem);
+  right: clamp(1.25rem, 5vw, 4.5rem);
+  bottom: clamp(2rem, 12vh, 6rem);
+  display: grid;
+  gap: 0.6rem;
+  text-shadow: 0 2px 28px rgb(0 0 0 / 0.65);
+}
+
+/* Escena 3: persiana con la foto del asador; sube con el scroll normal */
+.asador__persiana {
+  position: absolute;
+  inset: 0;
 }
 .tira {
   position: absolute;
@@ -188,7 +211,6 @@
   left: calc(var(--i) * 100% / var(--n));
   width: calc(100% / var(--n) + 1px);
   overflow: hidden;
-  clip-path: inset(100% 0 0 0);
 }
 .tira img {
   position: absolute;
@@ -200,24 +222,21 @@
   object-fit: cover;
   object-position: 68% 40%;
 }
-.hero__asador-velo {
+.asador__texto {
   position: absolute;
-  inset: 0;
-  background:
-    linear-gradient(to top, rgb(23 16 12 / 0.78), transparent 55%),
-    linear-gradient(to bottom, rgb(23 16 12 / 0.6), transparent 18%);
-}
-.hero__asador-texto {
-  position: absolute;
+  z-index: 2;
   left: clamp(1.25rem, 5vw, 4.5rem);
   right: clamp(1.25rem, 5vw, 4.5rem);
   bottom: clamp(2rem, 10vh, 5rem);
   display: grid;
   justify-items: start;
   gap: 0.9rem;
-  pointer-events: auto;
+  text-shadow: 0 2px 24px rgb(0 0 0 / 0.6);
 }
-.hero__asador-texto h2 {
+.asador__texto .btn {
+  text-shadow: none;
+}
+.asador__texto h2 {
   font-family: var(--f-display);
   font-weight: 800;
   text-transform: uppercase;
@@ -225,6 +244,32 @@
   line-height: 0.95;
   max-width: 18ch;
   text-wrap: balance;
+}
+
+/* Pausa de videos: discreta, accesible, no protagonista */
+.hero__pausa {
+  position: absolute;
+  z-index: 6;
+  right: clamp(0.75rem, 2vw, 1.5rem);
+  bottom: clamp(0.75rem, 2vw, 1.5rem);
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid rgb(233 234 236 / 0.35);
+  border-radius: 50%;
+  background: rgb(23 16 12 / 0.45);
+  color: var(--ceniza);
+  cursor: pointer;
+  opacity: 0.7;
+  transition:
+    opacity 0.2s,
+    background 0.2s;
+}
+.hero__pausa:hover,
+.hero__pausa:focus-visible {
+  opacity: 1;
+  background: rgb(23 16 12 / 0.8);
 }
 
 /* Vertical (celular): barras más anchas y ticket a lo ancho */
@@ -248,151 +293,24 @@
   .hero__bajada {
     font-size: 0.95rem;
   }
-  .hero__rotulo {
+  .portada__fuego-texto {
     bottom: 8svh;
   }
-}
-
-/* Pasos de la portada: riel a la derecha, controlable con mouse, teclado y toque */
-.hero__pasos {
-  position: absolute;
-  z-index: 6;
-  right: clamp(0.6rem, 2.2vw, 2rem);
-  top: 50%;
-  translate: 0 -50%;
-  display: grid;
-  justify-items: end;
-}
-.hero__pasos button {
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 0.7rem;
-  min-height: 44px;
-  min-width: 44px;
-  padding: 0 0.4rem;
-  border: 0;
-  background: transparent;
-  color: var(--ceniza);
-  cursor: pointer;
-  font: 500 0.72rem/1 var(--f-mono);
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-}
-.hero__pasos button span {
-  opacity: 0;
-  translate: 6px 0;
-  transition:
-    opacity 0.25s,
-    translate 0.25s var(--ease);
-  text-shadow: 0 1px 8px rgb(0 0 0 / 0.7);
-  white-space: nowrap;
-}
-.hero__pasos button::after {
-  content: "";
-  flex: none;
-  width: 1.3rem;
-  height: 3px;
-  background: rgb(233 234 236 / 0.55);
-  transition:
-    width 0.3s var(--ease),
-    background 0.3s;
-}
-.hero__pasos button:hover span,
-.hero__pasos button:focus-visible span,
-.hero__pasos button[aria-current="step"] span {
-  opacity: 1;
-  translate: 0 0;
-}
-.hero__pasos button[aria-current="step"]::after {
-  width: 2.4rem;
-  background: var(--brasa);
-}
-.hero__pasos button:hover::after {
-  background: var(--brasa-clara);
-}
-.hero__pasos .hero__saltar {
-  margin-top: 0.8rem;
-  color: var(--ceniza-3);
-  text-decoration: underline;
-  text-underline-offset: 4px;
-}
-.hero__pasos .hero__saltar::after {
-  display: none;
-}
-.hero__pasos .hero__saltar:hover {
-  color: var(--ceniza);
-}
-@media (max-aspect-ratio: 1/1) {
-  .hero__pasos {
-    top: 5.5rem;
-    translate: 0 0;
-    grid-auto-flow: column;
-    justify-items: center;
-    align-items: center;
-    right: 0.4rem;
-  }
-  .hero__pasos button span {
-    position: absolute;
-    width: 1px;
-    height: 1px;
-    overflow: hidden;
-    clip: rect(0 0 0 0);
-    white-space: nowrap;
-  }
-  .hero__pasos button {
-    min-width: 36px;
-    padding: 0 0.15rem;
-  }
-  .hero__pasos .hero__saltar {
-    margin: 0 0 0 0.3rem;
-    min-width: 0;
-  }
-  .hero__pasos .hero__saltar span {
-    position: static;
-    width: auto;
-    height: auto;
-    overflow: visible;
-    clip: auto;
-    opacity: 1;
-    translate: 0 0;
+  .hero__pausa {
+    top: 5rem;
+    bottom: auto;
+    width: 40px;
+    height: 40px;
   }
 }
 
-/* Sin movimiento: se ve la composición inicial y la foto del asador queda debajo, sin tiras ni pin */
+/* Sin movimiento: composición estática, sin barras ni persiana; los videos no se reproducen */
 @media (prefers-reduced-motion: reduce) {
-  .hero {
-    height: auto;
-    min-height: 0;
-    overflow: visible;
-  }
-  .hero__film,
-  .hero__barras {
-    position: relative;
-    height: 100svh;
-    inset: auto;
-    display: block;
-  }
-  .hero__film {
-    position: absolute;
-    inset: 0 0 auto 0;
-  }
-  .hero__ticket {
-    top: auto;
-  }
-  .hero__rotulo {
+  .barra {
     display: none;
-  }
-  .hero__persiana {
-    position: relative;
-    inset: auto;
-    height: 70svh;
   }
   .tira {
     clip-path: none;
-  }
-  .barra {
-    box-shadow: none;
   }
   .punto--on {
     animation: none;

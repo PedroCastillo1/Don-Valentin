@@ -1,7 +1,9 @@
+import { lazy, Suspense } from "react";
 import { SiteNav } from "../components/SiteNav.tsx";
 import { Hero } from "../components/Hero.tsx";
-import { Cinta, Fuego, Precios, Ubicacion, CierreReserva } from "../components/HomeSecciones.tsx";
 import { Pie } from "../components/Pie.tsx";
+
+const HomeResto = lazy(() => import("../components/HomeResto.tsx"));
 
 export default function Inicio() {
   return (
@@ -9,11 +11,9 @@ export default function Inicio() {
       <SiteNav />
       <main id="contenido">
         <Hero />
-        <Cinta />
-        <Fuego />
-        <Precios />
-        <Ubicacion />
-        <CierreReserva />
+        <Suspense fallback={<div aria-hidden="true" style={{ minHeight: "100svh" }} />}>
+          <HomeResto />
+        </Suspense>
       </main>
       <Pie />
     </>

@@ -41,3 +41,6 @@ Todo dato operativo viene de la API o de `@dv/shared`/carta real (precio desde $
 - Precio: "desde $41.000 por persona" contextualizado junto a la otra fórmula, confirmado por Martín.
 - Cómo llegar: mapa propio (SVG desde OSM), referencias con distancias aproximadas, Google Maps como acceso secundario.
 - Impeccable 4.6.0 sobre las 5 páginas públicas en escritorio y móvil: limpio tras corregir crédito del mapa (<11 px) y dirección en mayúsculas. Evidencia: `docs/evidencias/impeccable-iteracion3-inicial.txt` (hallazgos previos a la corrección).
+
+## v3.1 (16/10/2026) — hero limpio
+Tres escenas apiladas con scroll nativo: (1) fuego + comanda, (2) fuego a pantalla completa con «Una mesa larga, el fuego a la vista.», (3) persiana con la foto del asador. El movimiento (entrada por tiempo, parallax suave, tiras de la persiana) acompaña el scroll pero nunca lo retiene. Sin botones, pasos, rieles ni números de escena; solo identidad, navegación, titulares, CTA «Reservar mesa», datos comerciales y una pausa discreta de videos. El menú lleva un degradé oscuro mientras la portada está detrás. Evidencia: `docs/evidencias/iteracion3-hero-*.jpg`.

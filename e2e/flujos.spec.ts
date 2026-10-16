@@ -15,69 +15,72 @@ test.describe("sitio público", () => {
     expect(errores.filter((e) => !e.includes("401"))).toEqual([]);
   });
 
-  test("la secuencia del hero avanza por paradas: fuego, mesa y asador, y al salir el menú cambia", async ({
-    page,
-  }) => {
+  test("el hero está limpio: sin botón de saltar, sin pasos ni rieles, solo una pausa discreta", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("load");
-    await expect(page.locator("html")).toHaveClass(/nav-claro/);
+    await expect(page.getByRole("button", { name: /Saltar/i })).toHaveCount(0);
+    await expect(page.locator("[data-parada], .hero__pasos, .hero__saltar")).toHaveCount(0);
+    await expect(page.getByRole("navigation", { name: /Pasos/i })).toHaveCount(0);
     await expect(page.locator(".hero__v--a")).toHaveAttribute("src", /hero-a/);
     await expect
       .poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.currentTime))
       .toBeGreaterThan(0);
-    const parada = (id: string) => page.locator(`[data-parada=${id}]`);
-    await expect(parada("inicio")).toHaveAttribute("aria-current", "step");
+    // pausa accesible (WCAG 2.2.2): detiene los videos y se puede reanudar
+    const pausa = page.getByRole("button", { name: "Pausar los videos de la portada" });
+    await expect(pausa).toBeVisible();
+    await pausa.click();
+    await expect(page.getByRole("button", { name: "Reanudar los videos de la portada" })).toHaveAttribute(
+      "aria-pressed",
+      "true",
+    );
+    expect(await page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
+    await page.getByRole("button", { name: "Reanudar los videos de la portada" }).click();
+    await expect.poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+  });
 
-    await parada("fuego").click();
-    await expect(parada("fuego")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
+  test("el scroll del hero es nativo: sin pin, un solo gesto avanza y vuelve, y el menú cambia al salir", async ({
+    page,
+    isMobile,
+  }) => {
+    await page.goto("/");
+    await page.waitForLoadState("load");
     await page.waitForTimeout(1500);
-    const barra = await page
-      .locator(".barra")
-      .first()
-      .evaluate((el) => getComputedStyle(el).transform);
-    expect(barra === "none" || /matrix\(0(\.0+)?, /.test(barra) || barra.startsWith("matrix(0,")).toBe(true);
-    await expect(page.locator(".hero__ticket")).toHaveCSS("visibility", "hidden");
-
-    await parada("mesa").click();
-    await expect(parada("mesa")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
-    await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
-
-    await parada("asador").click();
-    await expect(parada("asador")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
-    await page.waitForTimeout(1800);
+    await expect(page.locator("html")).toHaveClass(/nav-claro/);
+    // nada retiene el scroll: no hay pin-spacer ni elementos fijados por GSAP
+    expect(await page.locator(".pin-spacer").count()).toBe(0);
+    const alto = await page.evaluate(() => window.innerHeight);
+    if (isMobile) {
+      await page.keyboard.press("PageDown");
+    } else {
+      await page.mouse.move(600, 400);
+      await page.mouse.wheel(0, 900);
+    }
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 2500 }).toBeGreaterThan(alto * 0.6);
+    // un gesto fuerte hacia abajo supera la portada (3 escenas): no hay que repetirlo
+    if (!isMobile) {
+      await page.mouse.wheel(0, 2400);
+      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 2500 }).toBeGreaterThan(alto * 2.5);
+    }
+    await page.evaluate(() => window.scrollTo(0, 3.1 * window.innerHeight));
+    await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 3000 });
+    // la persiana de la tercera escena queda completa y se lee el texto
+    await page.evaluate(() => document.querySelector(".asador")!.scrollIntoView());
+    await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
+    await page.waitForTimeout(1200);
     const clip = await page
       .locator(".tira")
       .last()
       .evaluate((el) => getComputedStyle(el).clipPath);
     expect(clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}\)|none/);
-    await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
-
-    await page.getByRole("button", { name: "Saltar portada" }).click();
-    await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 6000 });
-    await page.waitForTimeout(1800);
-    await page.evaluate(() => window.scrollTo(0, 0));
-    await expect(page.locator("html")).toHaveClass(/nav-claro/, { timeout: 6000 });
-  });
-
-  test("un gesto fuerte de rueda mueve una sola parada del hero, no la pasa volando", async ({ page, isMobile }) => {
-    test.skip(isMobile, "la rueda es de escritorio; en móvil se prueba con las paradas");
-    await page.goto("/");
-    await page.waitForLoadState("load");
-    await page.waitForTimeout(1500);
-    const activa = () => page.locator("[data-parada][aria-current=step]").getAttribute("data-parada");
-    await page.mouse.move(600, 400);
-    for (let i = 0; i < 50; i++) {
-      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
-      await page.waitForTimeout(30);
+    // segunda escena: el video se carga y reproduce cuando entra
+    await page.evaluate(() => document.querySelector(".portada__fuego")!.scrollIntoView());
+    await expect(page.locator(".portada__fuego-v")).toHaveAttribute("src", /hero-b/);
+    // de vuelta arriba con un solo gesto
+    if (!isMobile) {
+      await page.mouse.wheel(0, -9000);
+      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3000 }).toBe(0);
+      await expect(page.locator("html")).toHaveClass(/nav-claro/);
     }
-    await page.waitForTimeout(1800);
-    expect(await activa()).toBe("fuego");
-    for (let i = 0; i < 50; i++) {
-      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
-      await page.waitForTimeout(30);
-    }
-    await page.waitForTimeout(1800);
-    expect(await activa()).toBe("mesa");
   });
 
   test("el inicio cuenta del fuego a la mesa, muestra el precio con su contexto y el mapa", async ({ page }) => {
@@ -115,9 +118,9 @@ test.describe("sitio público", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.waitForTimeout(1200);
     await expect(page.locator(".hero__v--a")).not.toHaveAttribute("src", /.+/);
-    await expect(page.locator(".hero__v--b")).not.toHaveAttribute("src", /.+/);
-    const pin = await page.locator(".hero").evaluate((el) => !!el.parentElement?.classList.contains("pin-spacer"));
-    expect(pin).toBe(false);
+    await expect(page.locator(".portada__fuego-v")).not.toHaveAttribute("src", /.+/);
+    expect(await page.locator(".pin-spacer").count()).toBe(0);
+    await expect(page.getByRole("button", { name: /Pausar|Reanudar/ })).toHaveCount(0);
     await expect(page.getByRole("img", { name: /asador del local/ })).toBeVisible();
     await ctx.close();
   });
@@ -154,7 +157,11 @@ test.describe("sitio público", () => {
 
     await ingresar(page, "encargado");
     await page.getByRole("link", { name: "Reservas", exact: true }).click();
-    await page.getByRole("button", { name: "Día siguiente" }).click();
+    // entre las 00:00 y las 02:00 el día de servicio todavía es el anterior: avanzamos hasta la fecha reservada
+    for (let i = 0; i < 3 && !(await page.getByText(codigo).isVisible()); i++) {
+      await page.getByRole("button", { name: "Día siguiente" }).click();
+      await page.waitForTimeout(400);
+    }
     await expect(page.getByText(codigo)).toBeVisible();
   });
 
