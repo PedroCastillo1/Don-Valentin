@@ -19,3 +19,7 @@ Hero sin pin ni controles; scroll nativo; pausa discreta. Ver HANDOFF.md. Rendim
 
 ## 16/10/2026 ~01:00 — sitio animado completo (Claude)
 Hero con paradas sin controles; home y páginas internas con escenas animadas; carta corregida; vista local con VER-SITIO.cmd. Ver HANDOFF.md.
+
+
+## 16/10/2026 ~02:30 (Claude)
+Listo para GitHub. Mañana: migración a Supabase (Postgres) y Vercel. Ver HANDOFF.md y docs/decisiones.md.

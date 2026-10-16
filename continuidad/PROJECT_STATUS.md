@@ -41,3 +41,7 @@ Hero con paradas controladas, Del fuego a la mesa, Cómo llegar con mapa OSM pro
 
 ## Actualización 16/10/2026 — hero limpio
 Hero en 3 escenas con scroll nativo, sin controles visuales (solo pausa accesible). 32 E2E + 43 unit verdes, Impeccable limpio. Rendimiento móvil: Lighthouse 70, objetivo 90 abierto (ver decisiones.md). Imagen ilustrativa retirada (derechos confirmados).
+
+
+## 16/10/2026 ~02:30
+Sitio y panel aprobados en lo visual por Martín (hero, carta, secciones). Verde: 43 unit, 34 E2E, Lighthouse celular 93–98 en inicio. Siguiente: GitHub (desde la compu de Martín), Supabase + Vercel.
