@@ -155,3 +155,15 @@ p {
   font-size: clamp(3rem, 12vw, 10rem);
   line-height: 0.85;
 }
+
+/* Lenis (scroll suave) */
+html.lenis,
+html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}

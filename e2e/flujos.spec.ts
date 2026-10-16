@@ -50,18 +50,22 @@ test.describe("sitio público", () => {
         await page.mouse.wheel(0, 30);
         await page.waitForTimeout(16);
       }
-      await expect.poll(y, { timeout: 2000 }).toBeGreaterThan(1000);
+      await expect.poll(y, { timeout: 2000 }).toBeGreaterThan(800); // 1200 px de touchpad × 0,8 del scroll suave
+      await page.waitForTimeout(1500); // que termine la inercia del scroll suave
     }
     const alto = await page.evaluate(() => window.innerHeight);
     // escenas: fuego, mesa y asador aparecen en su tramo del recorrido
     await page.evaluate((h) => window.scrollTo(0, h * 0.75), alto);
     await expect.poll(() => opacidad(".hero__rotulo--1 .rotulo__t"), { timeout: 3000 }).toBeGreaterThan(0.9);
-    await page.evaluate((h) => window.scrollTo(0, h * 1.45), alto);
+    await page.evaluate((h) => window.scrollTo(0, h * 1.65), alto);
     await expect.poll(() => opacidad(".hero__rotulo--2 .rotulo__t"), { timeout: 3000 }).toBeGreaterThan(0.9);
     await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
-    await page.evaluate((h) => window.scrollTo(0, h * 2.2), alto);
+    await page.evaluate((h) => window.scrollTo(0, h * 2.6), alto);
     await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
     // teclado: End lleva al pie y Home vuelve arriba
+    // la primera tecla monta las secciones de abajo (carga diferida): End otra vez llega al pie real
+    await page.keyboard.press("End");
+    await page.waitForTimeout(1500);
     await page.keyboard.press("End");
     await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 4000 });
     await expect(page.locator("footer")).toBeInViewport({ timeout: 6000 });

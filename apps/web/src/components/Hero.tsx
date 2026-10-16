@@ -1,13 +1,12 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { LOCAL, PARRILLA_LIBRE } from "@dv/shared";
 import { estadoDelLocal } from "../lib/horario.ts";
 import { precio } from "../lib/formato.ts";
 import "../styles/hero.css";
 
-gsap.registerPlugin(ScrollTrigger);
+type Gsap = (typeof import("gsap"))["default"];
+type ST = (typeof import("gsap/ScrollTrigger"))["ScrollTrigger"];
 
 const BARRAS_ESCRITORIO = 9;
 const BARRAS_MOVIL = 5;
@@ -48,6 +47,31 @@ export function Hero() {
   useLayoutEffect(() => {
     const el = raiz.current;
     if (!el) return;
+    document.documentElement.classList.add("nav-claro");
+    // GSAP se carga aparte: el hero (título, comanda, póster) se pinta sin esperarlo.
+    let limpiar: (() => void) | undefined;
+    let cancelado = false;
+    // Se pide después del primer cuadro pintado (doble rAF): el título nunca espera a la animación.
+    let cuadro = requestAnimationFrame(() => {
+      cuadro = requestAnimationFrame(() => {
+        void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(
+          ([{ default: g }, { ScrollTrigger: st }]) => {
+            if (cancelado) return;
+            g.registerPlugin(st);
+            limpiar = armar(el, g, st);
+          },
+        );
+      });
+    });
+    return () => {
+      cancelado = true;
+      cancelAnimationFrame(cuadro);
+      limpiar?.();
+      document.documentElement.classList.remove("nav-claro");
+    };
+  }, [src.a, src.b, vertical, quieto]);
+
+  function armar(el: HTMLElement, gsap: Gsap, ScrollTrigger: ST): () => void {
     const q = gsap.utils.selector(el);
     const va = el.querySelector<HTMLVideoElement>(".hero__v--a")!;
     const vb = el.querySelector<HTMLVideoElement>(".hero__v--b")!;
@@ -93,8 +117,8 @@ export function Hero() {
       entrada
         .from(q(".barra"), { yPercent: -105, duration: 1.1, stagger: { each: 0.07, from: "start" } }, 0)
         .from(q(".hero__v--a"), { opacity: 0, duration: 1.2 }, 0)
-        .from(q(".hero__ticket"), { y: 48, opacity: 0, duration: 1, clearProps: "transform,opacity" }, 0.7)
-        .from(q("[data-in]"), { y: 18, opacity: 0, duration: 0.7, stagger: 0.07 }, 0.9);
+        // La comanda y su texto se ven quietos desde el primer cuadro (se pintan antes de que llegue GSAP).
+        .set(q(".hero__barras"), { visibility: "visible" }, 0);
 
       // Scroll nativo: la secuencia (fuego · mesa · asador) avanza a la velocidad normal de la rueda, el touchpad
       // o el dedo. Sin snap ni listeners propios: nada frena ni retiene el scroll.
@@ -103,7 +127,7 @@ export function Hero() {
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (vertical ? 2 : 2.2))}`,
+          end: () => `+=${Math.round(window.innerHeight * (vertical ? 2.3 : 2.6))}`,
           pin: true,
           scrub: 0.5,
           anticipatePin: 1,
@@ -196,7 +220,7 @@ export function Hero() {
       vb.pause();
       document.documentElement.classList.remove("nav-claro");
     };
-  }, [src.a, src.b, vertical, quieto]);
+  }
 
   /** Pausa o reanuda los videos (WCAG 2.2.2). Solo aparece al llegar con el teclado: no es un control visible. */
   function alternarVideos() {

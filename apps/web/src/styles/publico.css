@@ -190,6 +190,7 @@
 }
 .cargando {
   padding: 2rem 0;
+  min-height: 100svh; /* reserva el lugar del contenido que llega: evita que el pie salte */
   color: var(--tinta-3);
 }
 .dos-col {

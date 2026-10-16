@@ -3,7 +3,9 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import type { Db } from "./pool.ts";
 
-export const MIGRATIONS_DIR = path.resolve(import.meta.dirname, "../../../../db/migrations");
+export const MIGRATIONS_DIR = process.env.DV_DB_DIR
+  ? path.join(process.env.DV_DB_DIR, "migrations")
+  : path.resolve(import.meta.dirname, "../../../../db/migrations");
 
 export interface MigracionAplicada {
   nombre: string;

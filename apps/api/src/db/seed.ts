@@ -7,7 +7,9 @@ import type { Rol } from "@dv/shared";
 import type { Db } from "./pool.ts";
 import { exec, one, rows } from "./pool.ts";
 
-const CARTA_PATH = path.resolve(import.meta.dirname, "../../../../db/data/carta.json");
+const CARTA_PATH = process.env.DV_DB_DIR
+  ? path.join(process.env.DV_DB_DIR, "data", "carta.json")
+  : path.resolve(import.meta.dirname, "../../../../db/data/carta.json");
 
 const FUENTE_ALCANCE =
   "Declaración del Alcance v4 §1.5 (parámetro definido; valor a validar con el Encargado, actividad 1.2.3.4)";

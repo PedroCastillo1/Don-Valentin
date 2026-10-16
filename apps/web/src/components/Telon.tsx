@@ -1,7 +1,5 @@
 import { useLayoutEffect, useRef } from "react";
 import { useLocation } from "react-router";
-import gsap from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 
 /**
  * Transición entre páginas: al cambiar de ruta, un telón brasa con la marca cubre la pantalla y se levanta
@@ -12,27 +10,35 @@ export function Telon() {
   const ref = useRef<HTMLDivElement>(null);
   const primera = useRef(true);
   useLayoutEffect(() => {
-    window.scrollTo(0, 0);
     if (primera.current) {
       primera.current = false;
       return;
     }
+    window.scrollTo(0, 0);
+    void import("../lib/scroll.ts").then((m) => m.scrollA(0, { inmediato: true }));
     const el = ref.current;
     if (!el || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
-    const tl = gsap
-      .timeline({ onComplete: () => ScrollTrigger.refresh() })
-      .set(el, { display: "grid", yPercent: 0 })
-      .fromTo(
-        el.querySelector("p"),
-        { y: 0, opacity: 1 },
-        { y: -40, opacity: 0, duration: 0.35, ease: "power2.in" },
-        0.2,
-      )
-      .to(el, { yPercent: -100, duration: 0.85, ease: "power4.inOut" }, 0.3)
-      .set(el, { display: "none" });
+    el.style.display = "grid"; // cubre ya; la animación de salida llega con GSAP
+    let tl: { kill: () => void } | null = null;
+    let cancelado = false;
+    void Promise.all([import("gsap"), import("gsap/ScrollTrigger")]).then(([{ default: gsap }, { ScrollTrigger }]) => {
+      if (cancelado) return;
+      tl = gsap
+        .timeline({ onComplete: () => ScrollTrigger.refresh() })
+        .set(el, { display: "grid", yPercent: 0 })
+        .fromTo(
+          el.querySelector("p"),
+          { y: 0, opacity: 1 },
+          { y: -40, opacity: 0, duration: 0.35, ease: "power2.in" },
+          0.2,
+        )
+        .to(el, { yPercent: -100, duration: 0.85, ease: "power4.inOut" }, 0.3)
+        .set(el, { display: "none" });
+    });
     return () => {
-      tl.kill();
-      gsap.set(el, { display: "none" });
+      cancelado = true;
+      tl?.kill();
+      el.style.display = "none";
     };
   }, [pathname]);
   return (

@@ -2,7 +2,8 @@ import { lazy, Suspense } from "react";
 import { Route, Routes } from "react-router";
 import { Telon } from "./components/Telon.tsx";
 
-const Inicio = lazy(() => import("./pages/Inicio.tsx"));
+// La portada va en el paquete inicial (es la página más visitada y su título es el LCP).
+import Inicio from "./pages/Inicio.tsx";
 const AdminRoutes = lazy(() => import("./pages/AdminRoutes.tsx"));
 const Carta = lazy(() => import("./pages/Carta.tsx").then((m) => ({ default: m.Carta })));
 const ParrillaLibre = lazy(() => import("./pages/ParrillaLibre.tsx").then((m) => ({ default: m.ParrillaLibre })));

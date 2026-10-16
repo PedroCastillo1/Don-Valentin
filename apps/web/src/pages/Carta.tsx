@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
 import { precio } from "../lib/formato.ts";
+import { scrollA } from "../lib/scroll.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
 import "../styles/carta.css";
 
@@ -160,7 +161,7 @@ export function Carta() {
           const dif = el.getBoundingClientRect().top - desplazamientoSuperior();
           if (Math.abs(dif) > 4 && !(dif > 0 && window.scrollY >= max - 2)) {
             corregido = true;
-            window.scrollTo({ top: Math.min(max, window.scrollY + dif), behavior: "auto" });
+            scrollA(Math.min(max, window.scrollY + dif), { inmediato: true });
             cuadro = requestAnimationFrame(calcular);
             return;
           }
@@ -230,7 +231,7 @@ export function Carta() {
     const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     const max = document.documentElement.scrollHeight - window.innerHeight;
     const top = Math.min(max, el.getBoundingClientRect().top + window.scrollY - desplazamientoSuperior());
-    window.scrollTo({ top, behavior: quieto ? "auto" : "smooth" });
+    scrollA(top, { inmediato: quieto });
     window.dispatchEvent(new Event("scroll"));
     // el foco va al título de la categoría para lectores de pantalla y teclado
     el.querySelector<HTMLElement>("h3")?.focus({ preventScroll: true });

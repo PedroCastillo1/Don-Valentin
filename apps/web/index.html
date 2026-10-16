@@ -25,7 +25,35 @@
     <title>Don Valentín · Parrilla libre en San Miguel</title>
   </head>
   <body>
-    <div id="root"></div>
+    <div id="root">
+      <!--esqueleto-->
+      <div class="hero" aria-hidden="true">
+        <div class="hero__film">
+          <picture
+            ><source media="(max-aspect-ratio: 1/1)" srcset="/media/video/hero-a-m.webp" />
+            <img class="hero__v" src="/media/video/hero-a.webp" alt="" fetchpriority="high" width="1280" height="720"
+          /></picture>
+          <div class="hero__tono"></div>
+        </div>
+        <div class="hero__ticket">
+          <div class="hero__ticket-cuerpo">
+            <p class="hero__estado">Parrilla libre · San Miguel</p>
+            <p class="hero__titulo">La parrilla de siempre, con la mesa puesta.</p>
+            <p class="hero__bajada">
+              Parrilla libre en el salón, a cargo de la misma familia desde 1994. Elegí día y horario y te guardamos el
+              lugar.
+            </p>
+          </div>
+          <div class="hero__ticket-pie">
+            <div class="hero__acciones">
+              <span class="btn btn--brasa">Reservar mesa</span><span class="btn">Ver la carta</span>
+            </div>
+            <p class="hero__datos">Av. Pres. Arturo Umberto Illia 3873, San Miguel</p>
+          </div>
+        </div>
+      </div>
+      <!--/esqueleto-->
+    </div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>

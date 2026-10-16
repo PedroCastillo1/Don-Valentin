@@ -1,8 +1,9 @@
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import express from "express";
 import type { ErrorRequestHandler } from "express";
 import helmet from "helmet";
+import compression from "compression";
 import { rateLimit } from "express-rate-limit";
 import { PERMISOS_POR_ROL, loginSchema } from "@dv/shared";
 import type { Config } from "../config.ts";
@@ -27,6 +28,7 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
   app.disable("x-powered-by");
   app.set("trust proxy", cfg.trustProxy);
 
+  app.use(compression());
   app.use(
     helmet({
       contentSecurityPolicy: {
@@ -133,7 +135,20 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
         },
       }),
     );
-    app.get(/^\/(?!api\/).*/, (_req, res) => res.sendFile(path.join(dist, "index.html")));
+    // La portada sale con un esqueleto estático (el póster del hero) para pintar antes de que cargue el JS;
+    // el resto de las rutas recibe el mismo HTML sin ese esqueleto.
+    let paginas: { inicio: string; resto: string } | null = null;
+    const leer = () => {
+      if (!paginas || !cfg.isProd) {
+        const html = readFileSync(path.join(dist, "index.html"), "utf8");
+        paginas = { inicio: html, resto: html.replace(/<!--esqueleto-->[\s\S]*?<!--\/esqueleto-->/, "") };
+      }
+      return paginas;
+    };
+    app.get(/^\/(?!api\/).*/, (req, res) => {
+      const p = leer();
+      res.type("html").send(req.path === "/" ? p.inicio : p.resto);
+    });
   }
 
   const manejarError: ErrorRequestHandler = (err, _req, res, _next) => {

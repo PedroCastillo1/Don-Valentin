@@ -38,6 +38,7 @@
 
 /* Barras de hierro: columnas de carbón con una ranura de fuego entre cada una */
 .hero__barras {
+  visibility: hidden; /* aparecen cuando arranca la animación de entrada */
   display: flex;
   gap: clamp(0.35rem, 1vw, 0.9rem);
   pointer-events: none;
