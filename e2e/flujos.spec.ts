@@ -15,13 +15,56 @@ test.describe("sitio público", () => {
     expect(errores.filter((e) => !e.includes("401"))).toEqual([]);
   });
 
-  test("con movimiento reducido el hero queda legible y sin giro", async ({ browser }) => {
+  test("la secuencia del hero avanza con el scroll: barras, video, persiana y menú", async ({ page, isMobile }) => {
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await expect(page.locator("html")).toHaveClass(/nav-claro/);
+    const alto = await page.evaluate(() => window.innerHeight);
+    const total = Math.round(alto * (isMobile ? 3 : 3.6));
+    const mover = async (y: number) => {
+      await page.evaluate((py) => window.scrollTo(0, py), y);
+      await page.waitForTimeout(1300);
+    };
+    // 1) El primer video está cargado y reproduciéndose
+    await expect(page.locator(".hero__v--a")).toHaveAttribute("src", /hero-a/);
+    await expect
+      .poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.currentTime))
+      .toBeGreaterThan(0);
+    // 2) A mitad del recorrido las barras ya se abrieron y el segundo video carga
+    await mover(Math.round(total * 0.5));
+    const barra = await page
+      .locator(".barra")
+      .first()
+      .evaluate((el) => getComputedStyle(el).transform);
+    expect(barra === "none" || /matrix\(0(\.0+)?, /.test(barra) || barra.startsWith("matrix(0,")).toBe(true);
+    await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
+    // 3) Al final la persiana cubrió el video con la foto del asador y el texto es visible
+    await mover(Math.round(total * 0.95));
+    const clip = await page
+      .locator(".tira")
+      .last()
+      .evaluate((el) => getComputedStyle(el).clipPath);
+    expect(clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}\)|none/);
+    await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
+    // 4) Después del hero el menú deja de ser transparente
+    await mover(total + alto);
+    await expect(page.locator("html")).not.toHaveClass(/nav-claro/);
+    // 5) Al volver arriba, todo se reinicia
+    await mover(0);
+    await expect(page.locator("html")).toHaveClass(/nav-claro/);
+  });
+
+  test("con movimiento reducido el hero queda legible, sin video ni pin", async ({ browser }) => {
     const ctx = await browser.newContext({ reducedMotion: "reduce", baseURL: "http://127.0.0.1:3100" });
     const page = await ctx.newPage();
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
-    const transform = await page.locator(".hero__disco-img").evaluate((el) => getComputedStyle(el).transform);
-    expect(["none", "matrix(1.08, 0, 0, 1.08, 0, 0)"]).toContain(transform);
+    await page.waitForTimeout(1200);
+    await expect(page.locator(".hero__v--a")).not.toHaveAttribute("src", /.+/);
+    await expect(page.locator(".hero__v--b")).not.toHaveAttribute("src", /.+/);
+    const pin = await page.locator(".hero").evaluate((el) => !!el.parentElement?.classList.contains("pin-spacer"));
+    expect(pin).toBe(false);
+    await expect(page.getByRole("img", { name: /asador del local/ })).toBeVisible();
     await ctx.close();
   });
 
@@ -98,7 +141,7 @@ test.describe("administración", () => {
 
   test("módulos futuros muestran hito y fecha exactos", async ({ page }) => {
     await ingresar(page, "admin");
-    const riel = page.locator(".adm__riel");
+    const riel = page.locator("#contenido");
     await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026").first()).toBeVisible();
     await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026").first()).toBeVisible();
     await expect(riel.getByText("Programado para el Hito 5 — 13/11/2026")).toBeVisible();

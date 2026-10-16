@@ -33,8 +33,8 @@ export function MesaQr() {
       <SiteNav />
       <main id="contenido" className="pag">
         <header className="pag__cab">
-          <p className="pag__ojo">Bienvenidos a Don Valentín</p>
           <h1>{mesa ? `Mesa ${mesa.numero}` : "Tu mesa"}</h1>
+          <p className="pag__sub">Bienvenidos a Don Valentín</p>
         </header>
         <div className="pag__cuerpo pag__cuerpo--ancha">
           {error && (

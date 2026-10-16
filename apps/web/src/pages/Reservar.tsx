@@ -5,6 +5,7 @@ import { LOCAL } from "@dv/shared";
 import { api, ApiError } from "../lib/api.ts";
 import { diaLargo, hoyAr, sumarDias } from "../lib/fechas.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
+import { VideoLoop } from "../components/VideoLoop.tsx";
 
 interface Franja {
   id: number;
@@ -118,110 +119,127 @@ export function Reservar() {
     );
 
   return (
-    <PaginaPublica titulo="Reservá tu mesa" ojo="Elegí el día y el horario">
-      <form className="form-pub" onSubmit={enviar} noValidate>
-        <label>
-          Nombre
-          <input
-            value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
-            autoComplete="name"
-            required
-            maxLength={80}
-            aria-invalid={!!errores.nombre}
-          />
-          {errores.nombre && <span className="campo-error">{errores.nombre}</span>}
-        </label>
-        <label>
-          Teléfono
-          <input
-            value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
-            autoComplete="tel"
-            inputMode="tel"
-            required
-            aria-invalid={!!errores.telefono}
-          />
-          {errores.telefono && <span className="campo-error">{errores.telefono}</span>}
-        </label>
-        <div className="fila">
+    <PaginaPublica titulo="Reservá tu mesa" ojo="Elegí el día y el horario" ancha>
+      <div className="reservar">
+        <form className="form-pub" onSubmit={enviar} noValidate>
           <label>
-            Personas
+            Nombre
             <input
-              type="number"
-              min={1}
-              max={40}
-              value={personas}
-              onChange={(e) => setPersonas(Math.max(1, Number(e.target.value)))}
+              value={nombre}
+              onChange={(e) => setNombre(e.target.value)}
+              autoComplete="name"
               required
+              maxLength={80}
+              aria-invalid={!!errores.nombre}
             />
+            {errores.nombre && <span className="campo-error">{errores.nombre}</span>}
           </label>
           <label>
-            Día
+            Teléfono
             <input
-              type="date"
-              min={hoy}
-              max={sumarDias(hoy, diasMax)}
-              value={fecha}
-              onChange={(e) => setFecha(e.target.value)}
+              value={telefono}
+              onChange={(e) => setTelefono(e.target.value)}
+              autoComplete="tel"
+              inputMode="tel"
               required
+              aria-invalid={!!errores.telefono}
             />
+            {errores.telefono && <span className="campo-error">{errores.telefono}</span>}
           </label>
-        </div>
-        <fieldset>
-          <legend>Horario</legend>
-          <div className="franjas">
-            {franjas.map((f) => (
-              <label
-                key={f.id}
-                className={`franja ${franjaId === f.id ? "franja--sel" : ""} ${f.estado !== "disponible" ? "franja--no" : ""}`}
-              >
-                <input
-                  type="radio"
-                  name="franja"
-                  value={f.id}
-                  checked={franjaId === f.id}
-                  disabled={f.estado !== "disponible"}
-                  onChange={() => setFranjaId(f.id)}
-                />
-                <span>{f.nombre.replace(" a ", " – ")}</span>
-                {f.estado !== "disponible" && <small>no disponible</small>}
-              </label>
-            ))}
+          <div className="fila">
+            <label>
+              Personas
+              <input
+                type="number"
+                min={1}
+                max={40}
+                value={personas}
+                onChange={(e) => setPersonas(Math.max(1, Number(e.target.value)))}
+                required
+              />
+            </label>
+            <label>
+              Día
+              <input
+                type="date"
+                min={hoy}
+                max={sumarDias(hoy, diasMax)}
+                value={fecha}
+                onChange={(e) => setFecha(e.target.value)}
+                required
+              />
+            </label>
           </div>
-        </fieldset>
-        <label>
-          Comentarios (opcional)
-          <input
-            value={comentarios}
-            onChange={(e) => setComentarios(e.target.value)}
-            maxLength={200}
-            placeholder="Cumpleaños, silla para bebé…"
-          />
-        </label>
-        <label className="aviso">
-          <input type="checkbox" checked={aviso} onChange={(e) => setAviso(e.target.checked)} />
-          <span>
-            Acepto que Don Valentín use mi nombre y teléfono solo para gestionar esta reserva (Ley 25.326 de Protección
-            de Datos Personales).
-          </span>
-        </label>
-        {error && (
-          <p className="mensaje mensaje--error" role="alert">
-            {error}
+          <fieldset>
+            <legend>Horario</legend>
+            <div className="franjas">
+              {franjas.map((f) => (
+                <label
+                  key={f.id}
+                  className={`franja ${franjaId === f.id ? "franja--sel" : ""} ${f.estado !== "disponible" ? "franja--no" : ""}`}
+                >
+                  <input
+                    type="radio"
+                    name="franja"
+                    value={f.id}
+                    checked={franjaId === f.id}
+                    disabled={f.estado !== "disponible"}
+                    onChange={() => setFranjaId(f.id)}
+                  />
+                  <span>{f.nombre.replace(" a ", " – ")}</span>
+                  {f.estado !== "disponible" && <small>no disponible</small>}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label>
+            Comentarios (opcional)
+            <input
+              value={comentarios}
+              onChange={(e) => setComentarios(e.target.value)}
+              maxLength={200}
+              placeholder="Cumpleaños, silla para bebé…"
+            />
+          </label>
+          <label className="aviso">
+            <input type="checkbox" checked={aviso} onChange={(e) => setAviso(e.target.checked)} />
+            <span>
+              Acepto que Don Valentín use mi nombre y teléfono solo para gestionar esta reserva (Ley 25.326 de
+              Protección de Datos Personales).
+            </span>
+          </label>
+          {error && (
+            <p className="mensaje mensaje--error" role="alert">
+              {error}
+            </p>
+          )}
+          <button
+            className="btn btn--brasa btn--grande"
+            disabled={enviando || !franjaId || !aviso || !nombre || !telefono}
+          >
+            {enviando ? "Guardando…" : "Reservar mesa"}
+          </button>
+          <p className="form-pub__pie">
+            ¿Preferís llamar? <a href={`tel:${LOCAL.telefonos[0].tel}`}>{LOCAL.telefonos[0].valor}</a> (WhatsApp) o{" "}
+            <a href={`tel:${LOCAL.telefonos[1].tel}`}>{LOCAL.telefonos[1].valor}</a>.
           </p>
-        )}
-        <button
-          className="btn btn--brasa btn--grande"
-          disabled={enviando || !franjaId || !aviso || !nombre || !telefono}
-        >
-          {enviando ? "Guardando…" : "Reservar mesa"}
-        </button>
-        <p className="form-pub__pie">
-          ¿Preferís llamar? <a href={`tel:${LOCAL.telefonos[0].tel}`}>{LOCAL.telefonos[0].valor}</a> (WhatsApp) o{" "}
-          <a href={`tel:${LOCAL.telefonos[1].tel}`}>{LOCAL.telefonos[1].valor}</a>.
-        </p>
-      </form>
+        </form>
+        <aside className="reservar__lado" aria-label="Datos del local">
+          <VideoLoop src="/media/video/brasas.mp4" poster="/media/video/brasas.webp" />
+          <div className="reservar__datos">
+            <p className="rotulo__mono">Parrilla libre · San Miguel</p>
+            <p>
+              Todos los días de {LOCAL.horario.apertura} a {LOCAL.horario.cierre}.
+            </p>
+            <p>
+              {LOCAL.direccion}, {LOCAL.localidad}.
+            </p>
+            <p>
+              ¿Preferís hablar con nosotros? {LOCAL.telefonos[0].etiqueta}: <strong>{LOCAL.telefonos[0].valor}</strong>.
+            </p>
+          </div>
+        </aside>
+      </div>
     </PaginaPublica>
   );
 }

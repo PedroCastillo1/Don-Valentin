@@ -1,0 +1,2 @@
+Impeccable detect 0.1.15 (navegador real, URL en vivo). Corrida final: / /carta /reservar /parrilla-libre /como-llegar /admin/ingresar -> sin hallazgos (salida vacía, exit 0).
+Primera corrida (antes de corregir): 10 hallazgos: texto <11px (nav, "sin TACC"), cinta en loop infinito (marquee), 3 kickers sobre h1 (carta, reservar, login). Todos corregidos.

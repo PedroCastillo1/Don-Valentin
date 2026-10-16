@@ -18,8 +18,8 @@ export function PaginaPublica({
       <SiteNav />
       <main id="contenido" className="pag">
         <header className="pag__cab">
-          {ojo && <p className="pag__ojo">{ojo}</p>}
           <h1>{titulo}</h1>
+          {ojo && <p className="pag__sub">{ojo}</p>}
         </header>
         <div className={ancha ? "pag__cuerpo pag__cuerpo--ancha" : "pag__cuerpo"}>{children}</div>
       </main>

@@ -1,6 +1,10 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
+import { Link } from "react-router";
+import { MODULOS, textoProgramado } from "@dv/shared";
+import { Icono } from "../components/Iconos.tsx";
+import { PulsoDelDia, estadoDeAforo } from "../components/PulsoDelDia.tsx";
 
 interface Franja {
   id: number;
@@ -86,14 +90,22 @@ export function AdminInicio() {
     );
   if (!resumen) return <p className="cargando">Cargando el día…</p>;
 
-  const total = resumen.franjas.reduce((a, f) => a + f.aforo, 0);
-  const abiertas = mesas.filter((m) => m.sesionAbierta).length;
+  const aforoTotal = resumen.franjas.reduce((a, f) => a + f.aforo, 0);
+  const ocupacion = aforoTotal ? Math.round((resumen.personas / aforoTotal) * 100) : 0;
+  const activas = mesas.filter((m) => m.activa);
+  const abiertas = activas.filter((m) => m.sesionAbierta).length;
+  const pico = resumen.franjas.reduce<Franja | null>((m, f) => (f.personas > (m?.personas ?? 0) ? f : m), null);
   const primerNombre = usuario?.nombre.split(" ")[0] ?? "";
+  const porFranja = new Map(resumen.franjas.map((f) => [f.desde, estadoDeAforo(f.personas, f.aforo)]));
 
   return (
-    <>
-      <header className="inicio__cab">
+    <div className="tablero">
+      <header className="tablero__cab">
         <div>
+          <p className="tablero__fecha">{diaLargo(resumen.fecha)}</p>
+          <h1>Hola, {primerNombre}.</h1>
+        </div>
+        <div className="tablero__acciones">
           <div className="dia" role="group" aria-label="Día">
             <button type="button" aria-label="Día anterior" onClick={() => setFecha(sumar(resumen.fecha, -1))}>
               ‹
@@ -105,99 +117,143 @@ export function AdminInicio() {
               ›
             </button>
           </div>
-          <p className="inicio__fecha">{diaLargo(resumen.fecha)}</p>
-          <h1>Hola, {primerNombre}.</h1>
-        </div>
-        <div className="inicio__cifras">
-          <p>
-            <b>{resumen.reservas}</b>
-            <span>reservas</span>
-          </p>
-          <p>
-            <b>{resumen.personas}</b>
-            <span>personas</span>
-          </p>
-          <p>
-            <b>{abiertas}</b>
-            <span>mesas abiertas</span>
-          </p>
+          {puede("reservas:crear") && (
+            <Link className="btn btn--brasa btn--chico" to="/admin/reservas">
+              <Icono nombre="mas" tam={18} /> Nueva reserva
+            </Link>
+          )}
         </div>
       </header>
 
-      <section className="brasas" aria-labelledby="t-aforo">
-        <div className="brasas__cab">
-          <h2 id="t-aforo">Aforo por franja</h2>
+      <ul className="kpis" aria-label="Resumen del día">
+        <li className="kpi">
+          <span className="kpi__ic">
+            <Icono nombre="reservas" />
+          </span>
+          <p className="kpi__v">{resumen.reservas}</p>
+          <p className="kpi__t">Reservas</p>
+          <p className="kpi__n">{resumen.reservas === 1 ? "confirmada" : "confirmadas"} para el día</p>
+        </li>
+        <li className="kpi">
+          <span className="kpi__ic">
+            <Icono nombre="gente" />
+          </span>
+          <p className="kpi__v">{resumen.personas}</p>
+          <p className="kpi__t">Personas</p>
+          <p className="kpi__n">
+            {ocupacion}% del aforo del día ({aforoTotal})
+          </p>
+        </li>
+        <li className="kpi">
+          <span className="kpi__ic">
+            <Icono nombre="mesas" />
+          </span>
+          <p className="kpi__v">
+            {abiertas}
+            <small>/{activas.length}</small>
+          </p>
+          <p className="kpi__t">Mesas con sesión</p>
+          <p className="kpi__n">abiertas en el salón</p>
+        </li>
+        <li className="kpi">
+          <span className="kpi__ic">
+            <Icono nombre="fuego" />
+          </span>
+          <p className="kpi__v">{pico && pico.personas > 0 ? pico.desde : "—"}</p>
+          <p className="kpi__t">Franja más cargada</p>
+          <p className="kpi__n">{pico && pico.personas > 0 ? `${pico.personas} personas` : "sin reservas todavía"}</p>
+        </li>
+      </ul>
+
+      <section className="panel panel--pulso" aria-labelledby="t-pulso">
+        <div className="panel__cab">
+          <h2 id="t-pulso">Pulso del día</h2>
           <p>
-            Cada brasa muestra cuántas personas hay reservadas sobre el aforo de la franja (
-            {total ? Math.round(total / resumen.franjas.length) : 0} por franja, valor provisorio).
+            Personas reservadas en cada franja contra su aforo. El aforo (
+            {Math.round(aforoTotal / (resumen.franjas.length || 1))} por franja) es un valor provisorio, pendiente de
+            validar con el Encargado.
           </p>
         </div>
-        <ol className="brasas__lista">
-          {resumen.franjas.map((f) => {
-            const pct = f.aforo ? Math.min(100, Math.round((f.personas / f.aforo) * 100)) : 0;
-            return (
-              <li key={f.id} className="brasa" style={{ "--pct": `${pct}%` } as React.CSSProperties}>
-                <div
-                  className="brasa__barra"
-                  role="img"
-                  aria-label={`${f.nombre}: ${f.personas} de ${f.aforo} personas`}
-                >
-                  <span />
-                </div>
-                <b>{f.desde}</b>
-                <small>
-                  {f.personas}/{f.aforo}
-                </small>
-              </li>
-            );
-          })}
-        </ol>
+        <PulsoDelDia franjas={resumen.franjas} />
       </section>
 
-      <div className="inicio__dos">
-        <section aria-labelledby="t-res">
-          <h2 id="t-res">Reservas del día</h2>
+      <div className="tablero__dos">
+        <section className="panel" aria-labelledby="t-res">
+          <div className="panel__cab">
+            <h2 id="t-res">Reservas del día</h2>
+            <Link to="/admin/reservas" className="panel__ver">
+              Ver todas
+            </Link>
+          </div>
           {reservas.length === 0 ? (
             <p className="vacio">No hay reservas para este día.</p>
           ) : (
             <ul className="reservas">
-              {reservas.slice(0, 8).map((r) => (
-                <li key={r.id}>
-                  <time>{r.franja.desde}</time>
-                  <div>
-                    <strong>{r.aNombreDe}</strong>
-                    <small>
-                      {r.personas} personas · mesa {r.mesa} · {ORIGEN[r.origen] ?? r.origen}
-                    </small>
-                  </div>
-                  <code>{r.codigo}</code>
-                </li>
-              ))}
+              {reservas.slice(0, 8).map((r) => {
+                const est = porFranja.get(r.franja.desde);
+                return (
+                  <li key={r.id}>
+                    <time>{r.franja.desde}</time>
+                    <span className="avatar avatar--chico" aria-hidden="true">
+                      {r.aNombreDe.slice(0, 1)}
+                    </span>
+                    <div>
+                      <strong>{r.aNombreDe}</strong>
+                      <small>
+                        {r.personas} personas · mesa {r.mesa} · {ORIGEN[r.origen] ?? r.origen}
+                      </small>
+                    </div>
+                    {est && <span className={`etq etq--${est.clase}`}>{est.texto}</span>}
+                    <code>{r.codigo}</code>
+                  </li>
+                );
+              })}
             </ul>
           )}
         </section>
-        <section aria-labelledby="t-mesas">
-          <h2 id="t-mesas">Salón</h2>
+        <section className="panel" aria-labelledby="t-mesas">
+          <div className="panel__cab">
+            <h2 id="t-mesas">Salón</h2>
+            {puede("sesion_mesa:abrir") && (
+              <Link to="/admin/mesas" className="panel__ver">
+                Administrar mesas
+              </Link>
+            )}
+          </div>
           <ul className="mapa" aria-label="Mesas">
-            {mesas
-              .filter((m) => m.activa)
-              .map((m) => (
-                <li
-                  key={m.id}
-                  className={m.sesionAbierta ? "mesa mesa--abierta" : "mesa"}
-                  title={`Mesa ${m.numero}${m.sesionAbierta ? " · sesión abierta" : ""}`}
-                >
-                  {m.numero}
-                </li>
-              ))}
+            {activas.map((m) => (
+              <li
+                key={m.id}
+                className={m.sesionAbierta ? "mesa mesa--abierta" : "mesa"}
+                title={`Mesa ${m.numero}${m.sesionAbierta ? " · sesión abierta" : ""}`}
+              >
+                <b>{m.numero}</b>
+                <small>{m.capacidad} p.</small>
+              </li>
+            ))}
           </ul>
           <p className="leyenda">
-            <span className="mesa mesa--abierta" aria-hidden="true" /> Sesión abierta &nbsp;{" "}
+            <span className="mesa mesa--abierta" aria-hidden="true" /> Sesión abierta
             <span className="mesa" aria-hidden="true" /> Sin sesión
           </p>
-          <p className="nota">El estado libre / reservada / ocupada por franja llega con el Hito 3 — 30/10/2026.</p>
+          <p className="nota">Estado libre / reservada / ocupada por franja: {textoProgramado("H3")}.</p>
         </section>
       </div>
-    </>
+
+      <section className="panel" aria-labelledby="t-prox">
+        <div className="panel__cab">
+          <h2 id="t-prox">Próximos módulos</h2>
+          <p>Lo que se suma al panel en los próximos hitos del proyecto.</p>
+        </div>
+        <ul className="proximos">
+          {MODULOS.filter((m) => !m.disponible).map((m) => (
+            <li key={m.id}>
+              <span>{m.nombre}</span>
+              <small>{textoProgramado(m.hito)}</small>
+            </li>
+          ))}
+        </ul>
+      </section>
+    </div>
   );
 }

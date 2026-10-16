@@ -54,8 +54,8 @@ p {
   position: absolute;
   left: 12px;
   top: -60px;
-  background: var(--tinta);
-  color: var(--papel);
+  background: var(--carbon);
+  color: var(--ceniza);
   padding: 10px 14px;
   border-radius: 8px;
   z-index: 100;
@@ -88,17 +88,22 @@ p {
 }
 .btn--brasa {
   background: var(--brasa);
-  border-color: var(--brasa);
-  color: #fff7ee;
-  box-shadow: 0 10px 22px -12px var(--brasa-oscura);
+  border-color: var(--carbon);
+  color: var(--carbon);
+  box-shadow: 3px 3px 0 var(--carbon);
 }
 .btn--brasa:hover {
-  background: var(--brasa-oscura);
-  border-color: var(--brasa-oscura);
+  background: var(--brasa-clara);
+  transform: translate(-1px, -1px);
+  box-shadow: 4px 4px 0 var(--carbon);
+}
+.btn--brasa:active {
+  transform: translate(2px, 2px);
+  box-shadow: 1px 1px 0 var(--carbon);
 }
 .btn--claro {
-  border-color: rgba(255, 247, 238, 0.7);
-  color: #fff7ee;
+  border-color: rgba(233, 234, 236, 0.7);
+  color: var(--ceniza);
 }
 .btn[disabled] {
   opacity: 0.55;

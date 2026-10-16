@@ -16,16 +16,16 @@ Convención: ✅ probado con evidencia ejecutada · 🟡 implementado, probado e
 | API: disponibilidad y reserva pública/interna con aforo y asignación de mesa | ✅ incluida prueba de 60 reservas simultáneas: 25 aceptadas, 0 sobreventas, 0 mesas repetidas |
 | API: mesas, QR por mesa (SVG), `/m/:token`, sesión de mesa única con dos mozos simultáneos | ✅ probado |
 | API: carta pública, usuarios, auditoría | 🟡 carta probada; usuarios/auditoría sin test dedicado |
-| Web: hero (animación scroll, reduced-motion), login, Inicio admin con selector de día | 🟡 capturas desktop y móvil, 0 errores de consola; **sin axe ni Lighthouse todavía** |
+| Web v2: hero con video y persiana (scroll, reduced-motion, ahorro de datos), home, login, Inicio admin ("Pulso del día", KPIs, salón) | ✅ E2E de la secuencia + axe 0 violaciones + capturas y videos en `docs/evidencias/iteracion-2/`; 🟡 a la espera de visto bueno de Martín |
 | Web admin: Reservas (alta con aforo), Mesas y QR (QR real, sesión), Parámetros (edición, validación solo Encargado, CSV), Usuarios (+denegados) | ✅ E2E desktop y móvil |
 | Web pública: Reservar (aviso RNF-4), Carta (126 productos), Parrilla libre, Cómo llegar, `/m/:token` | ✅ E2E desktop y móvil |
-| E2E Playwright (24 corridas: 12 desktop + 12 móvil) y axe WCAG 2.2 AA sin violaciones en todas las pantallas | ✅ |
+| E2E Playwright (26 corridas: 13 desktop + 13 móvil) y axe WCAG 2.2 AA sin violaciones en todas las pantallas | ✅ |
 | Revisión de seguridad manual (`docs/evidencias/seguridad-n3.md`), test de rate limit, usuarios, entradas hostiles | ✅ |
-| Lighthouse móvil: a11y 100, SEO 100, BP 96, rendimiento 75–83 (meta ≥90 en H5, no alcanzada aún) | 🟡 `docs/evidencias/lighthouse/` |
+| Lighthouse v2: desktop 96/100/96/100; móvil a11y 100, SEO 100, BP 96, rendimiento 66 (meta ≥90 en H5, no alcanzada) | 🟡 `docs/evidencias/iteracion-2/lighthouse/` |
 | Exportación de la planilla a .xlsx (hoy CSV) | ⏳ |
 
 ## Calidad
-`npm run verify` en verde: typecheck + ESLint + Prettier + 43 tests (dominio, API contra MySQL real, carta, horario web) + `npm run e2e` (24 pruebas Playwright). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
+`npm run verify` en verde: typecheck + ESLint + Prettier + 43 tests (dominio, API contra MySQL real, carta, horario web) + `npm run e2e` (26 pruebas Playwright). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
 Seguridad: `SECURITY_GUIDANCE_DISABLE=0` fijado en `.claude/settings.json` y verificado ejecutando el hook directamente (con `=1` se saltea; con `=0` dispara con eval/innerHTML). La sesión de Claude Code ya iniciada conserva `=1` en su entorno: el cambio rige para sesiones nuevas.
 
 ## Fuera de N3 (no implementar de verdad; mostrar con hito y fecha)

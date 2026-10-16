@@ -1,25 +1,39 @@
-/* Sistema visual Don Valentín. Colores tomados de lo que se ve en las fotos oficiales:
-   brasa y hierro de la parrilla, ladrillo del asador, mármol verde de las mesas, papel de carta. */
+/* Sistema visual Don Valentín, 2ª iteración: ceniza y brasa.
+   Superficies de lectura en ceniza (gris frío, a propósito no beige), hierro y carbón para el fuego,
+   brasa como color de marca a pleno en bandas y acciones. */
 :root {
-  --papel: #f2eadb;
-  --papel-2: #e8dcc4;
-  --papel-3: #d9c9a8;
-  --tinta: #231a14;
-  --tinta-2: #4a3d33;
-  --tinta-3: #5f5043;
-  --brasa: #c4421a;
-  --brasa-oscura: #8e2b0e;
-  --brasa-clara: #f0a27b;
-  --malbec: #4a1b24;
+  --carbon: #17100c;
+  --carbon-2: #2a1d16;
+  --carbon-3: #3a2a20;
+  --brasa: #e8481a;
+  --brasa-oscura: #a8300c;
+  --brasa-clara: #ff9a6b;
+  --brasa-fondo: #fbd9cc;
+  --ceniza: #e9eaec;
+  --ceniza-2: #dcdee1;
+  --ceniza-3: #c4c7cc;
+  --humo: #565d66;
+  --malbec: #4b1424;
   --marmol: #3d5a47;
-  --marmol-claro: #c9d6c3;
-  --ok: #2f6b3f;
-  --alerta: #a56a00;
+  --marmol-claro: #cfdccf;
+  --ok: #1f6b3a;
+  --alerta: #8a5a00;
+  --error: #b3261e;
 
-  --f-display: "Caprasimo", "Georgia", serif;
+  /* alias de la 1ª iteración para no romper pantallas ya probadas */
+  --papel: var(--ceniza);
+  --papel-2: var(--ceniza-2);
+  --papel-3: var(--ceniza-3);
+  --tinta: var(--carbon);
+  --tinta-2: #3b342f;
+  --tinta-3: var(--humo);
+
+  --f-display: "Big Shoulders Display Variable", "Arial Narrow", Impact, sans-serif;
   --f-texto: "Instrument Sans Variable", system-ui, sans-serif;
+  --f-mono: "IBM Plex Mono", ui-monospace, monospace;
 
-  --radio: 14px;
-  --sombra: 0 1px 0 rgba(35, 26, 20, 0.06), 0 12px 32px -16px rgba(35, 26, 20, 0.28);
+  --radio: 10px;
+  --sombra: 0 1px 0 rgba(23, 16, 12, 0.06), 0 10px 24px -14px rgba(23, 16, 12, 0.35);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
+  --z-nav: 20;
 }

@@ -1,19 +1,39 @@
 .nav {
   position: fixed;
-  z-index: 20;
+  z-index: var(--z-nav);
   inset: 0 0 auto 0;
   display: flex;
   align-items: center;
   gap: 2rem;
-  padding: 1rem clamp(1.25rem, 5vw, 4.5rem);
-  color: var(--tinta);
-  transition: color 0.3s;
+  padding: 0.8rem clamp(1.25rem, 5vw, 4.5rem);
+  color: var(--carbon);
+  background: color-mix(in srgb, var(--ceniza) 92%, transparent);
+  backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--ceniza-3);
+  transition:
+    color 0.3s,
+    background 0.3s,
+    border-color 0.3s;
 }
 .nav__marca {
-  font-family: var(--f-display);
-  font-size: 1.5rem;
+  display: grid;
+  line-height: 0.9;
   text-decoration: none;
   margin-right: auto;
+}
+.nav__marca b {
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: 1.7rem;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+}
+.nav__marca small {
+  font-family: var(--f-mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--brasa-oscura);
 }
 .nav__links {
   display: flex;
@@ -34,14 +54,25 @@
   min-height: 42px;
 }
 @media (max-width: 720px) {
+  .nav {
+    gap: 0.75rem;
+    padding-block: 0.65rem;
+  }
   .nav__links {
     display: none;
   }
+  .nav__marca b {
+    font-size: 1.45rem;
+  }
 }
 
+/* Sobre el hero (fondo oscuro): sin fondo y en claro */
 .nav-claro .nav {
-  color: #fff7ee;
+  color: var(--ceniza);
+  background: transparent;
+  backdrop-filter: none;
+  border-color: transparent;
 }
-.nav-claro .nav__cta {
-  box-shadow: none;
+.nav-claro .nav__marca small {
+  color: var(--brasa-clara);
 }

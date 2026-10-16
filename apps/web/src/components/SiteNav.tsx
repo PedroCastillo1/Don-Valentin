@@ -7,8 +7,9 @@ export function SiteNav() {
       <a className="skip" href="#contenido">
         Saltar al contenido
       </a>
-      <Link to="/" className="nav__marca" aria-label="Don Valentín, inicio">
-        Don Valentín
+      <Link to="/" className="nav__marca">
+        <b>Don Valentín</b>
+        <small>Parrilla libre · San Miguel</small>
       </Link>
       <nav className="nav__links" aria-label="Principal">
         <Link to="/parrilla-libre">Parrilla libre</Link>
