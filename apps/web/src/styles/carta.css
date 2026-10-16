@@ -132,7 +132,7 @@
   margin-bottom: 0.4rem;
 }
 .cartapag .carta__cat ul {
-  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(20rem, 100%), 1fr));
   gap: 0 clamp(1.5rem, 4vw, 3.5rem);
 }
 .cartapag .carta__fila {
@@ -162,7 +162,7 @@
 
 @media (max-width: 960px) {
   .cartapag {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
     gap: 1rem;
   }
   .cartapag__indice {

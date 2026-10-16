@@ -114,6 +114,20 @@ test.describe("sitio público", () => {
     await ctx.close();
   });
 
+  test("carta en pantallas angostas: ninguna fila de precios se sale de la pantalla", async ({ page }) => {
+    for (const ancho of [320, 360, 412]) {
+      await page.setViewportSize({ width: ancho, height: 800 });
+      await page.goto("/carta");
+      await expect(page.locator(".carta__fila").first()).toBeVisible();
+      const fuera = await page.evaluate(
+        () =>
+          [...document.querySelectorAll(".carta__fila")].filter((f) => f.getBoundingClientRect().right > innerWidth + 1)
+            .length,
+      );
+      expect(fuera, `filas fuera de la pantalla con ${ancho}px`).toBe(0);
+    }
+  });
+
   test("la carta muestra precios reales y filtra", async ({ page }) => {
     await page.goto("/carta");
     await expect(page.getByText("Asado", { exact: true }).first()).toBeVisible();

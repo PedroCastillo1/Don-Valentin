@@ -346,7 +346,7 @@
   margin: 0;
   padding: 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(22rem, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(22rem, 100%), 1fr));
   gap: 0 3rem;
 }
 .carta__fila {
@@ -357,6 +357,8 @@
 }
 .carta__nombre {
   font-weight: 600;
+  min-width: 0;
+  overflow-wrap: anywhere;
 }
 .carta__puntos {
   flex: 1;
@@ -370,6 +372,7 @@
   font-variant-numeric: tabular-nums;
   font-weight: 700;
   white-space: nowrap;
+  flex: none;
 }
 .carta__precios small {
   font-weight: 500;
@@ -524,7 +527,10 @@
     grid-template-columns: 1fr;
   }
   .carta__cat ul {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
+  }
+  .carta__precios {
+    gap: 0.6rem;
   }
 }
 
