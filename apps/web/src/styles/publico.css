@@ -93,7 +93,7 @@
 }
 .pag__cab--medio h1 {
   font-size: clamp(3.6rem, 11vw, 9.5rem);
-  line-height: 1.04;
+  line-height: 1.12;
   text-shadow: 0 4px 40px rgb(0 0 0 / 0.45);
 }
 .pag__cab--medio .pag__sub {
@@ -108,7 +108,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(3rem, 8vw, 6rem);
-  line-height: 1.04;
+  line-height: 1.12;
   margin-top: 0.6rem;
   text-wrap: balance;
 }
@@ -145,7 +145,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(7rem, 19vw, 18rem);
-  line-height: 1.04;
+  line-height: 1.12;
   color: transparent;
   -webkit-text-stroke: 1.5px rgb(121 31 31 / 0.16);
 }
@@ -652,7 +652,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(3rem, 8vw, 6rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 
 /* Pie */
@@ -718,7 +718,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(4rem, 16.5vw, 19rem);
-  line-height: 1.04;
+  line-height: 1.12;
   letter-spacing: 0.005em;
   white-space: nowrap;
   color: var(--carbon-2);

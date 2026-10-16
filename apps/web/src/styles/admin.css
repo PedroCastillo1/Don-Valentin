@@ -50,7 +50,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: 2rem;
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .login__lado .login__sello small {
   display: block;
@@ -90,7 +90,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.4rem, 4vw, 3.2rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .login__intro {
   color: var(--tinta-2);
@@ -223,7 +223,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: 1.8rem;
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .adm__marca small {
   display: block;
@@ -406,7 +406,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.2rem, 3.6vw, 3.2rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .tablero__acciones {
   display: flex;
@@ -476,7 +476,7 @@
   font-family: var(--f-display);
   font-weight: 800;
   font-size: 2.9rem;
-  line-height: 1.04;
+  line-height: 1.12;
   font-variant-numeric: tabular-nums;
 }
 .kpi__v small {
@@ -1398,7 +1398,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(1.9rem, 3.6vw, 2.8rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .obra__cuando {
   font-size: 1.15rem;

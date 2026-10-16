@@ -63,14 +63,14 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(4rem, 11vw, 11rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .rec h3 {
   font-family: var(--f-display);
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(3.4rem, 7vw, 7rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .rec__t p:not(.rec__mono) {
   font-size: clamp(1.05rem, 1.35vw, 1.25rem);
@@ -82,7 +82,13 @@
   font-size: clamp(1.15rem, 1.7vw, 1.5rem) !important;
 }
 .rec__panel--portada .rec__t {
-  grid-column: 1 / -1;
+  grid-column: 1 / 7;
+  grid-row: 1;
+}
+/* portada: las brasas a la derecha, como el resto de los paneles */
+.rec__panel--portada .rec__m--grande {
+  grid-column: 7 / 13;
+  grid-row: 1;
 }
 .rec__m {
   position: relative;
@@ -204,7 +210,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(2.8rem, 6vw, 5.6rem);
-  line-height: 1.04;
+  line-height: 1.12;
   text-wrap: balance;
 }
 .salon__texto p:not(.rec__mono) {
@@ -294,7 +300,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(2.4rem, 4.4vw, 3.6rem);
-  line-height: 1.04;
+  line-height: 1.12;
 }
 .gal__tarjeta p:not(.comanda__cuando) {
   font-size: 1.05rem;
@@ -383,7 +389,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(3.4rem, 8vw, 7.5rem);
-  line-height: 1.04;
+  line-height: 1.12;
   color: var(--ceniza);
 }
 /* El precio va resaltado con una franja del color de marca debajo, como marcado con fibra. */
@@ -495,7 +501,7 @@
   font-weight: 900;
   text-transform: uppercase;
   font-size: clamp(3rem, 6.6vw, 5.8rem);
-  line-height: 1.04;
+  line-height: 1.12;
   text-wrap: balance;
 }
 .ubic__bajada {
@@ -541,7 +547,7 @@
 }
 .cierre h2 {
   font-size: clamp(3.6rem, 10vw, 8.5rem) !important;
-  line-height: 1.04 !important;
+  line-height: 1.12 !important;
   text-align: center;
 }
 .cierre__in {

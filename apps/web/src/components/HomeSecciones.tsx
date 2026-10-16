@@ -145,6 +145,9 @@ export function Recorrido() {
             </h2>
             <p className="rec__bajada">Primero la brasa, después la parrilla, al final la mesa.</p>
           </div>
+          <figure className="rec__m rec__m--grande">
+            <VideoLoop src="/media/video/brasas.mp4" poster="/media/video/brasas.webp" />
+          </figure>
         </div>
 
         <article className="rec__panel rec__panel--fuego">
