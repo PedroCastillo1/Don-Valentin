@@ -52,3 +52,9 @@ Base en Supabase cargada y usuarios del ambiente con contraseña igual al usuari
 Mesas y QR: el botón "Cerrar sesión" pasó a "Liberar mesa" (el QR queda fijo y la próxima sesión empieza con cuenta en cero). Diseño del permiso atado a la sesión para H4 en `docs/decisiones.md`.
 
 Sitio en vivo: https://don-valentin.vercel.app (Pedro lo desplegó). Ajustes del 16/10 a la tarde: ticket del hero derecho, Recorrido vertical, Salón sin pin y con foto apaisada en celular, Reservar con personas borrable y errores en español (z.config es). E2E 35/37: fallan solo los 2 del hero por falta de H.264 en este Chromium.
+
+## 16/10 (noche): revisión de capturas de Pedro y Martín
+- Hecho y probado: bordeaux #791f1f en todo; rótulos legibles en el hero; interlineado ≥1,04; carta y mesa QR sin nombres en columna; recorrido sin videos superpuestos; reels en 1280 px; precios en iPad.
+- `e2e/revision-16-10.spec.ts`: una prueba por cada problema marcado. Suite completa: 55 pasan; las 2 del video del hero fallan solo en el Chromium del contenedor (no reproduce H.264).
+- Presentación y guion regenerados (`Presentacion-Don-Valentin.html`, `Guion-presentacion-Don-Valentin.pdf`).
+- Pendiente: Martín corre `SUBIR-A-GITHUB.cmd` con el paquete nuevo y Pedro verifica el redeploy en Vercel.
