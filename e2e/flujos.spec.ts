@@ -15,72 +15,75 @@ test.describe("sitio público", () => {
     expect(errores.filter((e) => !e.includes("401"))).toEqual([]);
   });
 
-  test("el hero está limpio: sin botón de saltar, sin pasos ni rieles, solo una pausa discreta", async ({ page }) => {
+  test("el hero no muestra controles: ni saltar, ni pasos, ni pausa visible", async ({ page }) => {
     await page.goto("/");
     await page.waitForLoadState("load");
-    await expect(page.getByRole("button", { name: /Saltar/i })).toHaveCount(0);
-    await expect(page.locator("[data-parada], .hero__pasos, .hero__saltar")).toHaveCount(0);
-    await expect(page.getByRole("navigation", { name: /Pasos/i })).toHaveCount(0);
     await expect(page.locator(".hero__v--a")).toHaveAttribute("src", /hero-a/);
     await expect
       .poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.currentTime))
       .toBeGreaterThan(0);
-    // pausa accesible (WCAG 2.2.2): detiene los videos y se puede reanudar
-    const pausa = page.getByRole("button", { name: "Pausar los videos de la portada" });
-    await expect(pausa).toBeVisible();
-    await pausa.click();
-    await expect(page.getByRole("button", { name: "Reanudar los videos de la portada" })).toHaveAttribute(
-      "aria-pressed",
-      "true",
-    );
-    expect(await page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.paused)).toBe(true);
-    await page.getByRole("button", { name: "Reanudar los videos de la portada" }).click();
-    await expect.poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.paused)).toBe(false);
+    await expect(page.getByRole("button", { name: /Saltar/i })).toHaveCount(0);
+    await expect(page.locator("[data-parada], .hero__pasos")).toHaveCount(0);
+    // la pausa existe solo para teclado/lectores (WCAG 2.2.2): a la vista mide 1 px
+    const caja = await page.locator(".hero__pausa").boundingBox();
+    expect((caja?.width ?? 0) <= 1 && (caja?.height ?? 0) <= 1).toBe(true);
   });
 
-  test("el scroll del hero es nativo: sin pin, un solo gesto avanza y vuelve, y el menú cambia al salir", async ({
+  test("el scroll del hero está controlado: cada gesto avanza una escena y al final se sigue bajando", async ({
     page,
-    isMobile,
   }) => {
     await page.goto("/");
     await page.waitForLoadState("load");
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(1800);
     await expect(page.locator("html")).toHaveClass(/nav-claro/);
-    // nada retiene el scroll: no hay pin-spacer ni elementos fijados por GSAP
-    expect(await page.locator(".pin-spacer").count()).toBe(0);
-    const alto = await page.evaluate(() => window.innerHeight);
-    if (isMobile) {
-      await page.keyboard.press("PageDown");
-    } else {
-      await page.mouse.move(600, 400);
-      await page.mouse.wheel(0, 900);
-    }
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 2500 }).toBeGreaterThan(alto * 0.6);
-    // un gesto fuerte hacia abajo supera la portada (3 escenas): no hay que repetirlo
-    if (!isMobile) {
-      await page.mouse.wheel(0, 2400);
-      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 2500 }).toBeGreaterThan(alto * 2.5);
-    }
-    await page.evaluate(() => window.scrollTo(0, 3.1 * window.innerHeight));
-    await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 3000 });
-    // la persiana de la tercera escena queda completa y se lee el texto
-    await page.evaluate(() => document.querySelector(".asador")!.scrollIntoView());
+    const opacidad = (sel: string) =>
+      page
+        .locator(sel)
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+    const gesto = async () => {
+      await page.keyboard.press("ArrowDown");
+      await page.waitForTimeout(1700);
+    };
+    await gesto(); // fuego
+    expect(await opacidad(".hero__rotulo--1 .rotulo__t")).toBeGreaterThan(0.9);
+    await gesto(); // mesa
+    expect(await opacidad(".hero__rotulo--2 .rotulo__t")).toBeGreaterThan(0.9);
+    await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
+    await gesto(); // asador
     await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
-    await page.waitForTimeout(1200);
     const clip = await page
       .locator(".tira")
       .last()
       .evaluate((el) => getComputedStyle(el).clipPath);
     expect(clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}\)|none/);
-    // segunda escena: el video se carga y reproduce cuando entra
-    await page.evaluate(() => document.querySelector(".portada__fuego")!.scrollIntoView());
-    await expect(page.locator(".portada__fuego-v")).toHaveAttribute("src", /hero-b/);
-    // de vuelta arriba con un solo gesto
-    if (!isMobile) {
-      await page.mouse.wheel(0, -9000);
-      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3000 }).toBe(0);
-      await expect(page.locator("html")).toHaveClass(/nav-claro/);
+    // después de la última escena el scroll es el normal del navegador: se llega al pie
+    await page.keyboard.press("End");
+    await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 4000 });
+    await expect(page.locator("footer")).toBeInViewport({ timeout: 4000 });
+    // y se puede volver arriba
+    await page.keyboard.press("Home");
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 4000 }).toBeLessThan(5);
+  });
+
+  test("un gesto fuerte de rueda mueve una sola escena, no la pasa volando", async ({ page, isMobile }) => {
+    test.skip(isMobile, "la rueda es de escritorio; en móvil se prueba con teclado");
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(1800);
+    await page.mouse.move(600, 400);
+    for (let i = 0; i < 50; i++) {
+      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
+      await page.waitForTimeout(30);
     }
+    await page.waitForTimeout(1800);
+    const op = (sel: string) =>
+      page
+        .locator(sel)
+        .first()
+        .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
+    expect(await op(".hero__rotulo--1 .rotulo__t")).toBeGreaterThan(0.9);
+    expect(await op(".hero__rotulo--2 .rotulo__t")).toBeLessThan(0.1);
   });
 
   test("el inicio cuenta del fuego a la mesa, muestra el precio con su contexto y el mapa", async ({ page }) => {
@@ -118,9 +121,8 @@ test.describe("sitio público", () => {
     await expect(page.getByRole("heading", { level: 1 })).toBeVisible();
     await page.waitForTimeout(1200);
     await expect(page.locator(".hero__v--a")).not.toHaveAttribute("src", /.+/);
-    await expect(page.locator(".portada__fuego-v")).not.toHaveAttribute("src", /.+/);
+    await expect(page.locator(".hero__v--b")).not.toHaveAttribute("src", /.+/);
     expect(await page.locator(".pin-spacer").count()).toBe(0);
-    await expect(page.getByRole("button", { name: /Pausar|Reanudar/ })).toHaveCount(0);
     await expect(page.getByRole("img", { name: /asador del local/ })).toBeVisible();
     await ctx.close();
   });
@@ -132,6 +134,40 @@ test.describe("sitio público", () => {
     await page.getByPlaceholder("Buscar en la carta").fill("vacío");
     await expect(page.getByText("Vacío", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Asado", { exact: true })).toHaveCount(0);
+  });
+
+  test("carta: cada categoría elegida queda activa y visible (también en orden inverso y con clics rápidos)", async ({
+    page,
+  }) => {
+    await page.goto("/carta");
+    const nav = page.getByRole("navigation", { name: "Categorías" });
+    const botones = nav.getByRole("button");
+    await expect(botones.first()).toBeVisible();
+    const nombres = await botones.allTextContents();
+    expect(nombres.length).toBeGreaterThan(3);
+    const comprobar = async (nombre: string) => {
+      await nav.getByRole("button", { name: nombre, exact: true }).click();
+      await page.waitForTimeout(1100);
+      await expect(nav.getByRole("button", { name: nombre, exact: true })).toHaveAttribute("aria-current", "true");
+      await expect(nav.locator("[aria-current=true]")).toHaveCount(1);
+      const titulo = page.locator(".carta__cat h3", { hasText: new RegExp(`^${nombre}$`) });
+      await expect(titulo).toBeInViewport();
+    };
+    for (const n of nombres) await comprobar(n.trim());
+    for (const n of [...nombres].reverse()) await comprobar(n.trim());
+    // clics rápidos: gana el último
+    const i = nombres.findIndex((n) => /Guarniciones/i.test(n));
+    if (i >= 0 && i + 1 < nombres.length) {
+      await nav.getByRole("button", { name: nombres[i + 1]!.trim(), exact: true }).click();
+      await comprobar(nombres[i]!.trim());
+      // al seguir leyendo de verdad, recién ahí cambia a la siguiente
+      await page.evaluate(() => window.scrollBy(0, 40));
+      await page.waitForTimeout(300);
+      await expect(nav.getByRole("button", { name: nombres[i]!.trim(), exact: true })).toHaveAttribute(
+        "aria-current",
+        "true",
+      );
+    }
   });
 
   test("parrilla libre usa los precios de la carta", async ({ page }) => {

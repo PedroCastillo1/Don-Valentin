@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link } from "react-router";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
@@ -23,6 +23,20 @@ export interface CartaPublica {
   }[];
 }
 
+/** Alto de lo que queda fijo arriba (menú y, en celulares, el índice de categorías) + un margen de lectura. */
+function desplazamientoSuperior(): number {
+  let max = 0;
+  for (const sel of [".nav", ".cartapag__indice"]) {
+    const el = document.querySelector<HTMLElement>(sel);
+    if (!el) continue;
+    const cs = getComputedStyle(el);
+    if (cs.position === "fixed") max = Math.max(max, el.getBoundingClientRect().bottom);
+    else if (cs.position === "sticky" && el.getBoundingClientRect().width > window.innerWidth * 0.6)
+      max = Math.max(max, (parseFloat(cs.top) || 0) + el.offsetHeight);
+  }
+  return Math.round(max + 16);
+}
+
 export function CartaVista({ carta, filtro }: { carta: CartaPublica; filtro: string }) {
   const q = filtro.trim().toLowerCase();
   return (
@@ -40,7 +54,7 @@ export function CartaVista({ carta, filtro }: { carta: CartaPublica; filtro: str
             <h2 id={`g-${g.grupo}`}>{g.grupo}</h2>
             {cats.map((c) => (
               <div key={c.id} id={c.id} className="carta__cat">
-                <h3>{c.nombre}</h3>
+                <h3 tabIndex={-1}>{c.nombre}</h3>
                 <ul>
                   {c.productos.map((p) => (
                     <li key={p.id}>
@@ -108,26 +122,99 @@ export function Carta() {
     );
   }, [carta, filtro]);
 
-  // Resalta en el índice la categoría que se está leyendo.
+  // Resalta en el índice la categoría que se está leyendo. Se calcula por posición (no por IntersectionObserver):
+  // la activa es la última categoría cuyo título ya pasó la línea de lectura, que coincide con el
+  // scroll-margin-top usado al saltar. Mientras dura un salto programático, la categoría elegida queda fija.
+  const destino = useRef<string | null>(null);
+  const activaRef = useRef(activa);
+  activaRef.current = activa;
   useEffect(() => {
     if (!carta) return;
-    const io = new IntersectionObserver(
-      (es) => {
-        const e = es.find((x) => x.isIntersecting);
-        if (e) setActiva(e.target.id);
-      },
-      { rootMargin: "-25% 0px -65% 0px" },
-    );
-    document.querySelectorAll(".carta__cat").forEach((el) => io.observe(el));
-    return () => io.disconnect();
+    let cuadro = 0;
+    let quietoDesde = 0;
+    let ultimoY = -1;
+    let corregido = false;
+    const calcular = () => {
+      cuadro = 0;
+      const cats = Array.from(document.querySelectorAll<HTMLElement>(".carta__cat"));
+      if (!cats.length) return;
+      if (destino.current) {
+        // el salto termina cuando el scroll deja de moverse 150 ms
+        const y = window.scrollY;
+        if (y !== ultimoY) {
+          ultimoY = y;
+          quietoDesde = performance.now();
+          cuadro = requestAnimationFrame(calcular);
+          return;
+        }
+        if (performance.now() - quietoDesde < 150) {
+          cuadro = requestAnimationFrame(calcular);
+          return;
+        }
+        // corrección final: si el título no quedó en su lugar (cambió el alto del índice), se ajusta sin animación
+        const el = document.getElementById(destino.current);
+        const max = document.documentElement.scrollHeight - window.innerHeight;
+        if (el && !corregido) {
+          const dif = el.getBoundingClientRect().top - desplazamientoSuperior();
+          if (Math.abs(dif) > 4 && !(dif > 0 && window.scrollY >= max - 2)) {
+            corregido = true;
+            window.scrollTo({ top: Math.min(max, window.scrollY + dif), behavior: "auto" });
+            cuadro = requestAnimationFrame(calcular);
+            return;
+          }
+        }
+        destino.current = null;
+        corregido = false;
+        return;
+      }
+      // Al final de la página las últimas categorías no llegan a la línea: si la elegida se ve, se respeta.
+      const alFinal = window.scrollY + window.innerHeight >= document.documentElement.scrollHeight - 4;
+      const actual = activaRef.current ? document.getElementById(activaRef.current) : null;
+      if (alFinal && actual) {
+        const r = actual.getBoundingClientRect();
+        if (r.top >= 0 && r.top < window.innerHeight) return;
+      }
+      const linea = desplazamientoSuperior() + 12;
+      let activa = cats[0]!.id;
+      for (const c of cats) {
+        if (c.getBoundingClientRect().top <= linea) activa = c.id;
+        else break;
+      }
+      setActiva(activa);
+    };
+    const alScroll = () => {
+      if (!cuadro) cuadro = requestAnimationFrame(calcular);
+    };
+    calcular();
+    window.addEventListener("scroll", alScroll, { passive: true });
+    window.addEventListener("resize", alScroll);
+    return () => {
+      cancelAnimationFrame(cuadro);
+      window.removeEventListener("scroll", alScroll);
+      window.removeEventListener("resize", alScroll);
+    };
   }, [carta, filtro]);
+
+  // En celulares el índice es una tira horizontal: la categoría activa se mantiene a la vista.
+  useEffect(() => {
+    const nav = document.querySelector<HTMLElement>(".cartapag__nav");
+    const b = nav?.querySelector<HTMLElement>("[aria-current=true]");
+    if (!nav || !b || nav.scrollWidth <= nav.clientWidth) return;
+    nav.scrollTo({ left: Math.max(0, b.offsetLeft - nav.offsetLeft - 16), behavior: "smooth" });
+  }, [activa]);
 
   function ir(id: string) {
     const el = document.getElementById(id);
     if (!el) return;
+    destino.current = id;
     setActiva(id);
     const quieto = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    el.scrollIntoView({ behavior: quieto ? "auto" : "smooth", block: "start" });
+    const max = document.documentElement.scrollHeight - window.innerHeight;
+    const top = Math.min(max, el.getBoundingClientRect().top + window.scrollY - desplazamientoSuperior());
+    window.scrollTo({ top, behavior: quieto ? "auto" : "smooth" });
+    window.dispatchEvent(new Event("scroll"));
+    // el foco va al título de la categoría para lectores de pantalla y teclado
+    el.querySelector<HTMLElement>("h3")?.focus({ preventScroll: true });
   }
 
   return (
