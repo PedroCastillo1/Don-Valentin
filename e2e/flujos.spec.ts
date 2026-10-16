@@ -174,6 +174,7 @@ test.describe("sitio público", () => {
     await page.getByLabel(/Acepto que Don Valentín use mi nombre/).check();
     await enviar.click();
     await expect(page.getByRole("heading", { name: /tu mesa está reservada/ })).toBeVisible();
+    await expect(page.getByRole("heading", { name: /tu mesa está reservada/ })).toBeInViewport();
     const codigo = (await page.locator(".ticket__codigo").textContent())!.trim();
     expect(codigo).toMatch(/^[A-Z0-9]{8}$/);
     await expect(page.getByText(/mesa \d+/i)).toHaveCount(0); // la mesa asignada es interna

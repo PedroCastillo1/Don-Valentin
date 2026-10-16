@@ -83,6 +83,11 @@ export function Reservar() {
     };
   }, [fecha, personas]);
 
+  // Al confirmar, la página cambia de contenido: llevamos al comensal arriba para que vea el ticket y su código.
+  useEffect(() => {
+    if (ok) void import("../lib/scroll.ts").then((m) => m.scrollA(0, { inmediato: true }));
+  }, [ok]);
+
   async function enviar(e: FormEvent) {
     e.preventDefault();
     setErrores({});
