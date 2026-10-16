@@ -4,14 +4,24 @@ import { useLocation } from "react-router";
 /**
  * Transición entre páginas: al cambiar de ruta, un telón brasa con la marca cubre la pantalla y se levanta
  * revelando la página nueva. En la primera carga no aparece (el hero tiene su propia entrada). Sin movimiento, nada.
+ * En el panel aparece una sola vez (al entrar o al ingresar): entre secciones del panel no se repite.
  */
+const enPanel = (ruta: string) => ruta.startsWith("/admin") && !ruta.startsWith("/admin/ingresar");
+
 export function Telon() {
   const { pathname } = useLocation();
   const ref = useRef<HTMLDivElement>(null);
   const primera = useRef(true);
+  const anterior = useRef(pathname);
   useLayoutEffect(() => {
+    const previa = anterior.current;
+    anterior.current = pathname;
     if (primera.current) {
       primera.current = false;
+      return;
+    }
+    if (enPanel(previa) && enPanel(pathname)) {
+      window.scrollTo(0, 0);
       return;
     }
     window.scrollTo(0, 0);

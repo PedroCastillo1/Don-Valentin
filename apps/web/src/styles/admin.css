@@ -1235,8 +1235,53 @@
   .dos {
     grid-template-columns: minmax(0, 1fr);
   }
-  .tabla-wrap .tabla {
+  .tabla-wrap .tabla:not(.tabla--tarjetas) {
     min-width: 34rem;
+  }
+}
+
+/* Mesas en celular: cada fila es una tarjeta con sus datos rotulados (sin desplazar de costado) */
+@media (max-width: 700px) {
+  .tabla--tarjetas thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    overflow: hidden;
+    clip-path: inset(50%);
+  }
+  .tabla--tarjetas,
+  .tabla--tarjetas tbody {
+    display: block;
+  }
+  .tabla--tarjetas tr {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    padding: 0.8rem 0.2rem;
+    border-bottom: 1px dashed var(--papel-3);
+  }
+  .tabla--tarjetas td {
+    display: grid;
+    gap: 0.2rem;
+    align-content: start;
+    padding: 0;
+    border: 0;
+    min-width: 0;
+  }
+  .tabla--tarjetas td::before {
+    content: attr(data-etiqueta);
+    font: 500 0.66rem/1 var(--f-mono);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--tinta-3);
+  }
+  .tabla--tarjetas td.acciones {
+    grid-column: 1 / -1;
+    display: flex;
+    flex-wrap: wrap;
+  }
+  .tabla--tarjetas td.acciones::before {
+    flex-basis: 100%;
   }
 }
 

@@ -76,7 +76,7 @@ export function AdminMesas() {
         descripcion="Hoy cada QR abre la mesa correcta y muestra la carta. El pedido desde la mesa y su envío a cocina, parrilla o barra se completan en el Hito 4."
       />
       <div className="tabla-wrap">
-        <table className="tabla">
+        <table className="tabla tabla--tarjetas">
           <thead>
             <tr>
               <th>Mesa</th>
@@ -93,10 +93,12 @@ export function AdminMesas() {
               .filter((m) => m.activa)
               .map((m) => (
                 <tr key={m.id}>
-                  <td className="hora">{m.numero}</td>
-                  {admin && <td>{m.sector}</td>}
+                  <td className="hora" data-etiqueta="Mesa">
+                    {m.numero}
+                  </td>
+                  {admin && <td data-etiqueta="Sector">{m.sector}</td>}
                   {admin && (
-                    <td>
+                    <td data-etiqueta="Capacidad">
                       <CapacidadEditable
                         mesa={m}
                         onGuardar={(c) =>
@@ -109,23 +111,23 @@ export function AdminMesas() {
                     </td>
                   )}
                   {admin && (
-                    <td>
+                    <td data-etiqueta="Valores">
                       <Estado valor={m.validacion} />
                     </td>
                   )}
                   {admin && (
-                    <td>
+                    <td data-etiqueta="Código QR">
                       <code className="qr-codigo">{m.qrCodigo}</code>
                     </td>
                   )}
-                  <td>
+                  <td data-etiqueta="Sesión">
                     {m.sesionAbierta ? (
                       <span className="chip chip--on">Abierta</span>
                     ) : (
                       <span className="chip">Sin sesión</span>
                     )}
                   </td>
-                  <td className="acciones">
+                  <td className="acciones" data-etiqueta="Acciones">
                     {m.sesionAbierta ? (
                       puede("sesion_mesa:cerrar") && (
                         <button

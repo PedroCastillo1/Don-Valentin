@@ -45,3 +45,6 @@ Esperando visto bueno de Martín sobre la v2/v3 (ya extendida a toda la web púb
 
 ## Advertencias
 No reutilizar el diseño del prototipo anterior ni la v0 beige/Caprasimo. No inventar fechas, precios ni funciones. No publicar videos ni fotos con personas sin confirmación. No editar migraciones aplicadas. No tocar `documentacion/`.
+
+## 16/10 (tarde): despliegue y ajustes
+Base en Supabase cargada y usuarios del ambiente con contraseña igual al usuario (hash argon2). Vercel lo configura Pedro con `vercel.json` (instalación `npm ci --include=dev`). Pendiente: URL final, `PUBLIC_BASE_URL` y probar carta, login, reserva y QR en vivo. Panel: telón de marca una sola vez; Mesas y QR en tarjetas en celular. Presentación y guion corregidos (el QR se queda en el alcance; Supabase y Vercel figuran como ya montados: confirmar que el sitio esté arriba antes de presentar).
