@@ -1,3 +1,4 @@
+import { createHash } from "node:crypto";
 import QRCode from "qrcode";
 import type { Db } from "../db/pool.ts";
 import { exec, one, rows } from "../db/pool.ts";
@@ -14,9 +15,17 @@ export interface MesaDto {
   validacion: string;
   sesionAbierta: boolean;
   qrGeneradoEn: string;
+  /** Huella corta del código vigente (no es el token): cambia cada vez que se genera un QR nuevo. */
+  qrCodigo: string;
 }
 
-const SELECT_MESA = `SELECT m.id, m.numero, m.sector_salon_id, s.nombre AS sector, m.capacidad, m.activa, m.estado_validacion, m.qr_generado_en,
+/** "a1b2c3d4…" → "A1B2-C3": se imprime debajo del QR y se ve en el panel para comprobar cuál está vigente. */
+export function codigoQr(token: string): string {
+  const h = createHash("sha256").update(token).digest("hex").slice(0, 6).toUpperCase();
+  return `${h.slice(0, 4)}-${h.slice(4)}`;
+}
+
+const SELECT_MESA = `SELECT m.id, m.numero, m.sector_salon_id, s.nombre AS sector, m.capacidad, m.activa, m.estado_validacion, m.qr_generado_en, m.qr_token,
   EXISTS (SELECT 1 FROM sesiones_mesa x WHERE x.mesa_id = m.id AND x.estado = 'abierta') AS sesion_abierta
   FROM mesas m JOIN sectores_salon s ON s.id = m.sector_salon_id`;
 
@@ -31,6 +40,7 @@ function dto(x: Record<string, unknown>): MesaDto {
     validacion: String(x.estado_validacion),
     sesionAbierta: Number(x.sesion_abierta) === 1,
     qrGeneradoEn: `${String(x.qr_generado_en).replace(" ", "T")}Z`,
+    qrCodigo: codigoQr(String(x.qr_token)),
   };
 }
 
@@ -109,6 +119,22 @@ export async function regenerarQr(db: Db, id: number): Promise<MesaDto> {
   return dto((await one(db, `${SELECT_MESA} WHERE m.id = ?`, [id]))!);
 }
 
+/** Agrega debajo del QR el número de mesa y el código vigente, para verificar a simple vista el impreso. */
+function conRotulo(svg: string, numero: number, codigo: string): string {
+  const m = svg.match(/viewBox="0 0 (\d+) (\d+)"/);
+  if (!m) return svg;
+  const w = Number(m[1]);
+  const h = Number(m[2]);
+  const extra = Math.max(4, Math.round(w * 0.16));
+  const fs = Math.max(2, Math.round(extra * 0.42));
+  return svg
+    .replace(`viewBox="0 0 ${w} ${h}"`, `viewBox="0 0 ${w} ${h + extra}"`)
+    .replace(
+      "</svg>",
+      `<rect y="${h}" width="${w}" height="${extra}" fill="#ffffff"/><text x="${w / 2}" y="${h + extra * 0.62}" font-family="monospace" font-size="${fs}" text-anchor="middle" fill="#000000">Mesa ${numero} · ${codigo}</text></svg>`,
+    );
+}
+
 export function urlQr(baseUrl: string, token: string): string {
   return `${baseUrl.replace(/\/$/, "")}/m/${token}`;
 }
@@ -121,7 +147,11 @@ export async function qrSvgDeMesa(
   const m = await one(db, "SELECT numero, qr_token FROM mesas WHERE id = ?", [id]);
   if (!m) throw new ErrorDeDominio(404, "MESA_NO_ENCONTRADA", "La mesa no existe.");
   const url = urlQr(baseUrl, m.qr_token);
-  const svg = await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 });
+  const svg = conRotulo(
+    await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 }),
+    m.numero as number,
+    codigoQr(m.qr_token as string),
+  );
   return { svg, url, numero: m.numero };
 }
 
@@ -133,7 +163,11 @@ export async function qrDeTodas(db: Db, baseUrl: string): Promise<{ numero: numb
       return {
         numero: m.numero as number,
         url,
-        svg: await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 }),
+        svg: conRotulo(
+          await QRCode.toString(url, { type: "svg", errorCorrectionLevel: "M", margin: 2 }),
+          m.numero as number,
+          codigoQr(m.qr_token as string),
+        ),
       };
     }),
   );

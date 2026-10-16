@@ -1263,3 +1263,384 @@
   letter-spacing: 0.02em;
   color: var(--tinta-3);
 }
+
+/* Código vigente del QR: huella corta que cambia al regenerar y va impresa debajo del código */
+.qr-codigo {
+  font: 600 0.95rem/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  padding: 0.2rem 0.45rem;
+  border-radius: 4px;
+  background: var(--ceniza-2);
+  color: var(--carbon);
+  white-space: nowrap;
+}
+.qr-vigente {
+  display: grid;
+  justify-items: center;
+  gap: 0.35rem;
+  text-align: center;
+  margin: 0.4rem 0 0.2rem;
+}
+.qr-vigente small {
+  color: var(--humo);
+}
+.qr--nuevo {
+  outline: 4px solid var(--brasa);
+  outline-offset: 4px;
+  animation: qr-nuevo 0.6s var(--ease);
+}
+@keyframes qr-nuevo {
+  from {
+    transform: scale(0.94);
+    opacity: 0.4;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .qr--nuevo {
+    animation: none;
+  }
+}
+.modal__confirmar {
+  display: grid;
+  gap: 0.6rem;
+  padding: 0.9rem;
+  border: 2px solid var(--brasa);
+  border-radius: 8px;
+  background: var(--brasa-fondo);
+}
+
+/* ───── Cartel de obra: "En construcción" con hito y fecha ───── */
+.obra {
+  position: relative;
+  display: grid;
+  gap: 1.4rem;
+  padding: clamp(1.4rem, 3vw, 2.2rem);
+  padding-top: calc(clamp(1.4rem, 3vw, 2.2rem) + 18px);
+  border: 2px solid var(--carbon);
+  border-radius: 10px;
+  background: #fff;
+  overflow: hidden;
+}
+.obra__cinta {
+  position: absolute;
+  inset: 0 0 auto 0;
+  height: 18px;
+  background: repeating-linear-gradient(-45deg, var(--brasa) 0 14px, var(--carbon) 14px 28px);
+}
+.obra__etiqueta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  font: 700 0.85rem/1 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brasa-oscura);
+}
+.obra__etiqueta::before {
+  content: "";
+  width: 0.7rem;
+  height: 0.7rem;
+  background: var(--brasa);
+  rotate: 45deg;
+}
+.obra__cab {
+  display: grid;
+  gap: 0.55rem;
+  max-width: 46rem;
+}
+.obra__t {
+  font-family: var(--f-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: clamp(1.9rem, 3.6vw, 2.8rem);
+  line-height: 0.95;
+}
+.obra__cuando {
+  font-size: 1.15rem;
+}
+.obra__cuando strong {
+  color: var(--brasa-oscura);
+}
+.obra__hito {
+  font: 500 0.82rem/1.3 var(--f-mono);
+  color: var(--humo);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.obra__d {
+  font-size: 1.02rem;
+  line-height: 1.55;
+  color: var(--tinta-2);
+}
+.obra__req {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.obra__req li {
+  font: 600 0.78rem/1 var(--f-mono);
+  padding: 0.35rem 0.55rem;
+  border: 1.5px solid var(--carbon);
+  border-radius: 999px;
+}
+.obra--compacta {
+  grid-template-columns: 1fr;
+  gap: 0.3rem;
+  padding: 1rem 1.2rem 1rem;
+  padding-top: calc(1rem + 12px);
+  margin-bottom: 1.2rem;
+}
+.obra--compacta .obra__cinta {
+  height: 12px;
+}
+.obra--compacta .obra__t {
+  font-size: 1.35rem;
+  margin: 0.35rem 0 0.2rem;
+}
+.obra--compacta .obra__d {
+  font-size: 0.95rem;
+}
+.obra__proto {
+  margin: 0;
+  border: 2px dashed var(--ceniza-3);
+  border-radius: 10px;
+  padding: 1rem;
+  background: var(--ceniza);
+}
+.obra__sello {
+  display: inline-block;
+  margin-bottom: 0.9rem;
+  font: 600 0.75rem/1 var(--f-mono);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--carbon);
+  background: var(--brasa-fondo);
+  padding: 0.4rem 0.6rem;
+  border-radius: 4px;
+}
+.obra__proto-cuerpo {
+  filter: saturate(0.6);
+  opacity: 0.9;
+  pointer-events: none;
+  user-select: none;
+}
+.mini--off {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+.adm__badge {
+  margin-left: auto;
+  font: 700 0.68rem/1 var(--f-mono);
+  padding: 0.25rem 0.4rem;
+  border-radius: 4px;
+  background: var(--brasa);
+  color: var(--carbon);
+}
+.adm__link.active .adm__badge {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+
+/* Prototipos */
+.proto-salon__franjas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-bottom: 0.8rem;
+}
+.proto-salon__franjas span {
+  font: 600 0.8rem/1 var(--f-mono);
+  padding: 0.45rem 0.6rem;
+  border-radius: 999px;
+  border: 1.5px solid var(--carbon);
+}
+.proto-salon__franjas .on {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.proto-salon__mesas {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.6rem, 1fr));
+  gap: 0.5rem;
+}
+.proto-salon__mesas li {
+  display: grid;
+  justify-items: center;
+  padding: 0.5rem 0.2rem;
+  border-radius: 8px;
+  border: 2px solid var(--carbon);
+  background: #fff;
+}
+.proto-salon__mesas b {
+  font-family: var(--f-display);
+  font-size: 1.4rem;
+}
+.proto-salon__mesas small {
+  font-size: 0.72rem;
+  text-transform: capitalize;
+}
+.proto-salon__mesas .m-reservada {
+  background: var(--brasa-fondo);
+}
+.proto-salon__mesas .m-ocupada {
+  background: var(--brasa);
+}
+.proto-acciones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  margin-top: 0.9rem;
+}
+.proto-tel {
+  width: min(20rem, 100%);
+  margin-inline: auto;
+  border: 3px solid var(--carbon);
+  border-radius: 28px;
+  padding: 1.2rem 1rem;
+  background: #fff;
+  display: grid;
+  gap: 0.55rem;
+}
+.proto-tel__cab {
+  font-family: var(--f-display);
+  font-weight: 900;
+  text-transform: uppercase;
+  font-size: 1.3rem;
+}
+.proto-tel__cat {
+  font: 600 0.75rem/1 var(--f-mono);
+  text-transform: uppercase;
+  color: var(--brasa-oscura);
+}
+.proto-tel__item {
+  display: grid;
+  grid-template-columns: 1fr auto 2rem;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.55rem 0;
+  border-bottom: 1px solid var(--ceniza-2);
+}
+.proto-tel__mas {
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 50%;
+  background: var(--brasa);
+  font-weight: 700;
+}
+.proto-tel__total {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 0.4rem;
+}
+.proto-kanban {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(13rem, 1fr));
+  gap: 0.8rem;
+}
+.proto-kanban section {
+  background: #fff;
+  border: 2px solid var(--carbon);
+  border-radius: 10px;
+  padding: 0.8rem;
+}
+.proto-kanban h3 {
+  font: 700 0.82rem/1 var(--f-mono);
+  text-transform: uppercase;
+  margin-bottom: 0.6rem;
+}
+.proto-kanban ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.5rem;
+}
+.proto-kanban li {
+  display: grid;
+  gap: 0.15rem;
+  padding: 0.6rem;
+  border-radius: 8px;
+  background: var(--ceniza);
+}
+.proto-kanban li.tarde {
+  background: var(--brasa-fondo);
+  border: 2px solid var(--brasa);
+}
+.proto-form {
+  display: grid;
+  gap: 0.6rem;
+  max-width: 24rem;
+}
+.proto-form p {
+  display: grid;
+  gap: 0.25rem;
+}
+.proto-input {
+  padding: 0.65rem 0.8rem;
+  border: 2px solid var(--carbon);
+  border-radius: 8px;
+  background: #fff;
+}
+.carta-adm {
+  display: grid;
+  gap: 1.4rem;
+}
+.carta-adm h3 {
+  font: 700 0.85rem/1.2 var(--f-mono);
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+}
+.carta-adm .num {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+.dias {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.3rem;
+}
+.dias__d {
+  min-width: 2.9rem;
+  min-height: 38px;
+  padding: 0 0.5rem;
+  border: 2px solid var(--carbon);
+  border-radius: 999px;
+  background: #fff;
+  font: 600 0.8rem/1 var(--f-mono);
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.dias__d--on {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.dias__d:disabled {
+  cursor: not-allowed;
+}
+.proximos a {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 0.15rem 0.6rem;
+  color: inherit;
+  text-decoration: none;
+  padding: 0.3rem 0.2rem;
+  border-radius: 6px;
+}
+.proximos a:hover {
+  background: var(--brasa-fondo);
+}
+.proximos a .adm__badge {
+  margin: 0;
+  grid-row: span 2;
+}

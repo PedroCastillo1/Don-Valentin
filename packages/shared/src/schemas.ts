@@ -70,7 +70,8 @@ export const mesaEdicionSchema = z.object({
 });
 
 export const parametroEdicionSchema = z.object({
-  valor: z.string().trim().min(1).max(255),
+  // vacío solo tiene sentido en "dias_cerrados" (sin cierres): lo controla el servicio
+  valor: z.string().trim().max(255),
 });
 export const aforoEdicionSchema = z.object({
   aforoPersonas: z.number().int().min(0).max(2000),

@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
+import { EnConstruccion } from "../components/EnConstruccion.tsx";
 import { Cabecera, Estado, Mensaje } from "../components/ui.tsx";
 
 interface Mesa {
@@ -13,7 +14,18 @@ interface Mesa {
   activa: boolean;
   validacion: string;
   sesionAbierta: boolean;
+  qrCodigo?: string;
+  qrGeneradoEn?: string;
 }
+
+const fechaHora = (iso?: string) =>
+  iso
+    ? new Date(iso).toLocaleString("es-AR", {
+        timeZone: "America/Argentina/Buenos_Aires",
+        dateStyle: "short",
+        timeStyle: "short",
+      })
+    : "";
 
 export function AdminMesas() {
   const { puede } = useSesion();
@@ -57,10 +69,12 @@ export function AdminMesas() {
         bajada="Abrí la sesión cuando se sientan los comensales. Cada mesa tiene un código QR único."
       />
       {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
-      <p className="nota nota--arriba">
-        Los pedidos desde el QR: Programado para el Hito 4 — 06/11/2026. Hoy el QR lleva a la mesa correcta y muestra la
-        carta.
-      </p>
+      <EnConstruccion
+        compacto
+        hito="H4"
+        titulo="Pedidos desde el QR"
+        descripcion="Hoy cada QR abre la mesa correcta y muestra la carta. El pedido desde la mesa y su envío a cocina, parrilla o barra se completan en el Hito 4."
+      />
       <div className="tabla-wrap">
         <table className="tabla">
           <thead>
@@ -69,6 +83,7 @@ export function AdminMesas() {
               {admin && <th>Sector</th>}
               {admin && <th>Capac.</th>}
               {admin && <th>Valores</th>}
+              {admin && <th>Código QR</th>}
               <th>Sesión</th>
               <th>Acciones</th>
             </tr>
@@ -96,6 +111,11 @@ export function AdminMesas() {
                   {admin && (
                     <td>
                       <Estado valor={m.validacion} />
+                    </td>
+                  )}
+                  {admin && (
+                    <td>
+                      <code className="qr-codigo">{m.qrCodigo}</code>
                     </td>
                   )}
                   <td>
@@ -149,12 +169,10 @@ export function AdminMesas() {
         <ModalQr
           mesa={qr}
           onCerrar={() => setQr(null)}
-          onRegenerar={() =>
-            void accion(
-              () => api(`/admin/mesas/${qr.id}/qr`, { method: "POST" }),
-              `Mesa ${qr.numero}: se generó un QR nuevo. El anterior dejó de funcionar.`,
-            )
-          }
+          onRegenerado={(nueva) => {
+            setQr(nueva);
+            void cargar();
+          }}
         />
       )}
     </>
@@ -220,8 +238,31 @@ function NuevaMesa({ onCreada }: { onCreada: () => void }) {
   );
 }
 
-function ModalQr({ mesa, onCerrar, onRegenerar }: { mesa: Mesa; onCerrar: () => void; onRegenerar: () => void }) {
+function ModalQr({
+  mesa,
+  onCerrar,
+  onRegenerado,
+}: {
+  mesa: Mesa;
+  onCerrar: () => void;
+  onRegenerado: (m: Mesa) => void;
+}) {
   const [version, setVersion] = useState(0);
+  const [confirmar, setConfirmar] = useState(false);
+  const [cambio, setCambio] = useState<{ antes?: string; ahora?: string } | null>(null);
+  const [error, setError] = useState("");
+  async function regenerar() {
+    setError("");
+    try {
+      const nueva = await api<Mesa>(`/admin/mesas/${mesa.id}/qr`, { method: "POST" });
+      setCambio({ antes: mesa.qrCodigo, ahora: nueva.qrCodigo });
+      setConfirmar(false);
+      setVersion((v) => v + 1);
+      onRegenerado(nueva);
+    } catch (e) {
+      setError(e instanceof ApiError ? e.message : "No se pudo generar el QR nuevo.");
+    }
+  }
   return (
     <div
       className="modal"
@@ -233,29 +274,60 @@ function ModalQr({ mesa, onCerrar, onRegenerar }: { mesa: Mesa; onCerrar: () => 
       <div className="modal__caja" onClick={(e) => e.stopPropagation()}>
         <h2>Mesa {mesa.numero}</h2>
         <img
-          className="qr"
-          src={`/api/admin/mesas/${mesa.id}/qr.svg?v=${version}`}
-          alt={`Código QR de la mesa ${mesa.numero}`}
+          key={mesa.qrCodigo}
+          className={cambio ? "qr qr--nuevo" : "qr"}
+          src={`/api/admin/mesas/${mesa.id}/qr.svg?v=${version}-${mesa.qrCodigo ?? ""}`}
+          alt={`Código QR de la mesa ${mesa.numero}, código ${mesa.qrCodigo ?? ""}`}
           width={260}
           height={260}
         />
-        <div className="modal__acciones">
-          <a className="btn" href={`/api/admin/mesas/${mesa.id}/qr.svg`} download={`mesa-${mesa.numero}.svg`}>
-            Descargar SVG
-          </a>
-          <button
-            className="btn"
-            onClick={() => {
-              onRegenerar();
-              setVersion((v) => v + 1);
-            }}
-          >
-            Generar uno nuevo
-          </button>
-          <button className="btn btn--brasa" onClick={onCerrar}>
-            Cerrar
-          </button>
-        </div>
+        <p className="qr-vigente">
+          Código vigente <code className="qr-codigo">{mesa.qrCodigo}</code>
+          <small>Generado el {fechaHora(mesa.qrGeneradoEn)} · el mismo código va impreso debajo del QR</small>
+        </p>
+        {cambio && (
+          <p className="mensaje mensaje--ok" role="status">
+            QR nuevo generado: <code className="qr-codigo">{cambio.antes}</code> →{" "}
+            <code className="qr-codigo">{cambio.ahora}</code>. El QR impreso anterior ya no abre la mesa: imprimí este.
+          </p>
+        )}
+        {error && (
+          <p className="mensaje mensaje--error" role="alert">
+            {error}
+          </p>
+        )}
+        {confirmar ? (
+          <div className="modal__confirmar" role="group" aria-label="Confirmar QR nuevo">
+            <p>
+              <strong>¿Generar un QR nuevo para la mesa {mesa.numero}?</strong> El que está impreso ahora (código{" "}
+              {mesa.qrCodigo}) va a dejar de funcionar.
+            </p>
+            <div className="modal__acciones">
+              <button className="btn btn--brasa" onClick={() => void regenerar()}>
+                Sí, generar QR nuevo
+              </button>
+              <button className="btn" onClick={() => setConfirmar(false)}>
+                Cancelar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <div className="modal__acciones">
+            <a
+              className="btn"
+              href={`/api/admin/mesas/${mesa.id}/qr.svg`}
+              download={`mesa-${mesa.numero}-${mesa.qrCodigo ?? "qr"}.svg`}
+            >
+              Descargar SVG
+            </a>
+            <button className="btn" onClick={() => setConfirmar(true)}>
+              Generar uno nuevo
+            </button>
+            <button className="btn btn--brasa" onClick={onCerrar}>
+              Cerrar
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );

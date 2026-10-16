@@ -3,6 +3,7 @@ import type { FormEvent } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
 import { diaLargo, ORIGEN, sumarDias } from "../lib/fechas.ts";
+import { EnConstruccion } from "../components/EnConstruccion.tsx";
 import { Cabecera, Mensaje } from "../components/ui.tsx";
 
 interface Reserva {
@@ -70,9 +71,24 @@ export function AdminReservas() {
           >
             ›
           </button>
+          <label className="dia__fecha">
+            <span className="sr-only">Ir a la fecha</span>
+            <input
+              type="date"
+              value={fecha}
+              onChange={(e) => e.target.value && void cargar(e.target.value)}
+              aria-label="Ir a la fecha"
+            />
+          </label>
         </div>
       </Cabecera>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
+      <EnConstruccion
+        compacto
+        hito="H3"
+        titulo="Buscar, modificar y cancelar reservas"
+        descripcion="Búsqueda por nombre o teléfono en todas las fechas, ver el detalle de una reserva, cambiarle día, horario o personas, cancelarla (libera el cupo) y marcar no-show. Hoy podés ver cualquier fecha con el calendario de arriba y cargar reservas nuevas."
+      />
       <div className="dos">
         <section aria-labelledby="t-lista">
           <h2 id="t-lista">{reservas.length} reservas</h2>
@@ -111,7 +127,6 @@ export function AdminReservas() {
               </table>
             </div>
           )}
-          <p className="nota">Modificar y cancelar reservas: Programado para el Hito 3 — 30/10/2026.</p>
         </section>
         {puede("reservas:crear") && <NuevaReserva fechaInicial={fecha} onCreada={(f) => void cargar(f)} />}
       </div>

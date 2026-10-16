@@ -1,3 +1,4 @@
+import { DIAS_SEMANA } from "@dv/shared";
 import type { Db } from "../db/pool.ts";
 import { exec, one, rows } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
@@ -109,10 +110,27 @@ const PATRON_HORA = /^([01]\d|2[0-3]):[0-5]\d$/;
 export async function editarParametro(db: Db, clave: string, valor: string, usuarioId: number): Promise<void> {
   const p = await one(db, "SELECT tipo FROM parametros WHERE clave = ?", [clave]);
   if (!p) throw new ErrorDeDominio(404, "PARAMETRO_NO_ENCONTRADO", "El parámetro no existe.");
+  if (valor === "" && clave !== "dias_cerrados") throw new ErrorDeDominio(400, "VALOR_INVALIDO", "Ingresá un valor.");
   if (p.tipo === "entero" && !/^\d{1,5}$/.test(valor))
     throw new ErrorDeDominio(400, "VALOR_INVALIDO", "Ese parámetro es un número entero.");
   if ((clave === "local_apertura" || clave === "local_cierre") && !PATRON_HORA.test(valor))
     throw new ErrorDeDominio(400, "VALOR_INVALIDO", "Usá el formato HH:MM, por ejemplo 12:00.");
+  if (clave === "dias_atencion") {
+    const dias = valor.split(",").map((x) => x.trim().toLowerCase());
+    if (!dias.length || !dias.every((d) => (DIAS_SEMANA as readonly string[]).includes(d)))
+      throw new ErrorDeDominio(400, "VALOR_INVALIDO", "Usá días separados por coma: lun,mar,mie,jue,vie,sab,dom.");
+    valor = DIAS_SEMANA.filter((d) => dias.includes(d)).join(",");
+  }
+  if (clave === "dias_cerrados" && valor.trim() !== "") {
+    const fechas = valor.split(",").map((x) => x.trim());
+    if (!fechas.every((f) => /^\d{4}-\d{2}-\d{2}$/.test(f) && !Number.isNaN(Date.parse(f))))
+      throw new ErrorDeDominio(
+        400,
+        "VALOR_INVALIDO",
+        "Usá fechas AAAA-MM-DD separadas por coma, por ejemplo 2026-12-25.",
+      );
+    valor = [...new Set(fechas)].sort().join(",");
+  }
   if (p.tipo === "entero" && Number(valor) === 0 && clave !== "tolerancia_no_show_min")
     throw new ErrorDeDominio(400, "VALOR_INVALIDO", "El valor debe ser mayor que cero.");
   await exec(

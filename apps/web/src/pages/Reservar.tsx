@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
-import { LOCAL, PARRILLA_LIBRE } from "@dv/shared";
+import { DIA_NOMBRE, LOCAL, PARRILLA_LIBRE, localAbre, parsearDias } from "@dv/shared";
 import { precio } from "../lib/formato.ts";
 import { api, ApiError } from "../lib/api.ts";
 import { diaLargo, hoyAr, sumarDias } from "../lib/fechas.ts";
@@ -40,11 +40,30 @@ export function Reservar() {
   const franjaElegida = franjas.find((f) => f.id === franjaId);
   const desde = Math.min(...PARRILLA_LIBRE.formulas.map((f) => f.precioPorPersona));
 
+  const [dias, setDias] = useState({ atencion: "lun,mar,mie,jue,vie,sab,dom", cerrados: "" });
   useEffect(() => {
-    api<{ reservaDiasMax: number }>("/public/info")
-      .then((i) => setDiasMax(i.reservaDiasMax))
+    api<{ reservaDiasMax: number; diasAtencion?: string; diasCerrados?: string }>("/public/info")
+      .then((i) => {
+        setDiasMax(i.reservaDiasMax);
+        const at = i.diasAtencion ?? "lun,mar,mie,jue,vie,sab,dom";
+        const ce = i.diasCerrados ?? "";
+        setDias({ atencion: at, cerrados: ce });
+        // si el día propuesto no abre, pasamos al próximo día de atención
+        setFecha((f) => {
+          let d = f;
+          for (let k = 0; k < 14 && !localAbre(d, at, ce); k++) d = sumarDias(d, 1);
+          return d;
+        });
+      })
       .catch(() => undefined);
   }, []);
+  const textoDias =
+    parsearDias(dias.atencion).length === 7
+      ? "Atendemos todos los días."
+      : `Atendemos ${parsearDias(dias.atencion)
+          .map((d) => DIA_NOMBRE[d])
+          .join(", ")
+          .replace(/, ([^,]*)$/, " y $1")}.`;
   useEffect(() => {
     let vivo = true;
     api<{ franjas: Franja[] }>(`/public/disponibilidad?fecha=${fecha}&personas=${personas}`)
@@ -181,8 +200,13 @@ export function Reservar() {
                 max={sumarDias(hoy, diasMax)}
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
+                aria-describedby="dias-atencion"
                 required
               />
+              <small id="dias-atencion" className="ayuda">
+                {textoDias}
+                {fecha && !localAbre(fecha, dias.atencion, dias.cerrados) && " Ese día el local está cerrado."}
+              </small>
             </label>
           </div>
           <fieldset>

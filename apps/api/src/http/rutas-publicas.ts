@@ -13,7 +13,13 @@ export function rutasPublicas(db: Db, ahora: () => Date, limitarReservas: Reques
 
   r.get("/info", async (_req, res) => {
     const cfg = await leerConfigLocal(db);
-    res.json({ ...LOCAL, horario: { apertura: cfg.apertura, cierre: cfg.cierre }, reservaDiasMax: cfg.diasMax });
+    res.json({
+      ...LOCAL,
+      horario: { apertura: cfg.apertura, cierre: cfg.cierre },
+      reservaDiasMax: cfg.diasMax,
+      diasAtencion: cfg.diasAtencion,
+      diasCerrados: cfg.diasCerrados,
+    });
   });
 
   r.get("/carta", async (_req, res) => {

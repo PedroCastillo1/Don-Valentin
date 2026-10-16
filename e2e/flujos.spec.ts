@@ -214,7 +214,22 @@ test.describe("administración", () => {
     const img = page.getByRole("img", { name: `Código QR de la mesa ${n}` });
     await expect(img).toBeVisible();
     expect(await img.evaluate((i: HTMLImageElement) => i.naturalWidth)).toBeGreaterThan(0);
+    // Regenerar pide confirmación y muestra el código anterior y el nuevo; el impreso viejo deja de abrir la mesa.
+    const dialogo = page.getByRole("dialog", { name: `Código QR de la mesa ${n}` });
+    const antes = (await dialogo.locator(".qr-vigente .qr-codigo").textContent())!.trim();
+    expect(antes).toMatch(/^[0-9A-F]{4}-[0-9A-F]{2}$/);
+    const urlVieja = (
+      (await (await page.request.get("/api/admin/qr")).json()).codigos as { numero: number; url: string }[]
+    ).find((c) => c.numero === n)!.url;
+    await dialogo.getByRole("button", { name: "Generar uno nuevo" }).click();
+    await dialogo.getByRole("button", { name: "Sí, generar QR nuevo" }).click();
+    await expect(dialogo.getByRole("status")).toContainText(antes);
+    const despues = (await dialogo.locator(".qr-vigente .qr-codigo").textContent())!.trim();
+    expect(despues).not.toBe(antes);
+    await expect(fila.locator(".qr-codigo")).toHaveText(despues);
     await page.getByRole("button", { name: "Cerrar", exact: true }).click();
+    const vieja = await page.request.get(`/api/public/mesa/${new URL(urlVieja).pathname.split("/").pop()}`);
+    expect(vieja.status()).toBe(404);
 
     // El QR de esa mesa lleva a la mesa correcta.
     const { codigos } = await (await page.request.get("/api/admin/qr")).json();
@@ -229,6 +244,40 @@ test.describe("administración", () => {
     await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026").first()).toBeVisible();
     await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026").first()).toBeVisible();
     await expect(riel.getByText("Programado para el Hito 5 — 13/11/2026")).toBeVisible();
+  });
+
+  test("los módulos de hitos futuros dicen «En construcción» con hito y fecha, y el encargado no gestiona administradores", async ({
+    page,
+  }) => {
+    await ingresar(page, "encargado");
+    const casos: [string, string][] = [
+      ["/admin/salon", "Hito 3 — 30/10/2026"],
+      ["/admin/pedidos", "Hito 4 — 06/11/2026"],
+      ["/admin/sectores", "Hito 4 — 06/11/2026"],
+      ["/admin/mozo", "Hito 4 — 06/11/2026"],
+      ["/admin/carta", "Hito 4 — 06/11/2026"],
+      ["/admin/medicion", "Hito 5 — 13/11/2026"],
+      ["/admin/reservas", "Hito 3 — 30/10/2026"],
+      ["/admin/mesas", "Hito 4 — 06/11/2026"],
+    ];
+    for (const [ruta, hito] of casos) {
+      await page.goto(ruta);
+      const obra = page.locator(".obra").first();
+      await expect(obra).toContainText(/En construcción/i);
+      await expect(obra).toContainText(hito);
+    }
+    await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toHaveCount(0);
+    await page.goto("/admin/salon");
+    await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toBeVisible();
+    // la carta del panel muestra los precios reales
+    await page.goto("/admin/carta");
+    await expect(page.getByRole("heading", { name: "Carta vigente" })).toBeVisible();
+    await expect(page.getByRole("cell", { name: "Vacío", exact: true }).first()).toBeVisible();
+    // jerarquía: el encargado no puede desactivar al administrador
+    await page.goto("/admin/usuarios");
+    const filaAdmin = page.locator("tr", { hasText: "admin (prueba)" });
+    await expect(filaAdmin.getByRole("button", { name: /Desactivar|Activar/ })).toHaveCount(0);
+    await expect(filaAdmin).toContainText("Solo lo gestiona Administración");
   });
 
   test("el mozo no ve ni alcanza la administración (RNF-3) y el intento queda auditado", async ({ page }) => {
@@ -266,7 +315,19 @@ test.describe("administración", () => {
 
   test("accesibilidad (axe) en las pantallas del administrador", async ({ page }) => {
     await ingresar(page, "encargado");
-    for (const ruta of ["/admin", "/admin/reservas", "/admin/mesas", "/admin/parametros", "/admin/usuarios"]) {
+    for (const ruta of [
+      "/admin",
+      "/admin/reservas",
+      "/admin/mesas",
+      "/admin/parametros",
+      "/admin/usuarios",
+      "/admin/carta",
+      "/admin/salon",
+      "/admin/pedidos",
+      "/admin/sectores",
+      "/admin/mozo",
+      "/admin/medicion",
+    ]) {
       await page.goto(ruta);
       await page.waitForTimeout(1200);
       expect(await axe(page), `violaciones en ${ruta}`).toEqual([]);

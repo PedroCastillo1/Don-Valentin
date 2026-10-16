@@ -1,5 +1,6 @@
 import { randomInt } from "node:crypto";
 import type { OrigenReserva } from "@dv/shared";
+import { DIA_NOMBRE, diaDeSemana, localAbre, parsearFechas } from "@dv/shared";
 import type { Db, Row } from "../db/pool.ts";
 import { exec, one, rows, withTx } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
@@ -12,12 +13,14 @@ export interface ConfigLocal {
   cierre: string;
   diasMax: number;
   toleranciaNoShowMin: number;
+  diasAtencion: string;
+  diasCerrados: string;
 }
 
 export async function leerConfigLocal(db: Db): Promise<ConfigLocal> {
   const r = await rows(
     db,
-    "SELECT clave, valor FROM parametros WHERE clave IN ('local_apertura','local_cierre','reserva_dias_max','tolerancia_no_show_min')",
+    "SELECT clave, valor FROM parametros WHERE clave IN ('local_apertura','local_cierre','reserva_dias_max','tolerancia_no_show_min','dias_atencion','dias_cerrados')",
   );
   const m = new Map(r.map((x) => [x.clave as string, x.valor as string]));
   return {
@@ -25,6 +28,8 @@ export async function leerConfigLocal(db: Db): Promise<ConfigLocal> {
     cierre: m.get("local_cierre") ?? "02:00",
     diasMax: Number(m.get("reserva_dias_max") ?? 30),
     toleranciaNoShowMin: Number(m.get("tolerancia_no_show_min") ?? 15),
+    diasAtencion: m.get("dias_atencion") ?? "lun,mar,mie,jue,vie,sab,dom",
+    diasCerrados: m.get("dias_cerrados") ?? "",
   };
 }
 
@@ -49,6 +54,14 @@ function validarFecha(fecha: string, cfg: ConfigLocal, ahora: Date): void {
       400,
       "FECHA_FUERA_DE_RANGO",
       `Se puede reservar con hasta ${cfg.diasMax} días de anticipación.`,
+    );
+  if (!localAbre(fecha, cfg.diasAtencion, cfg.diasCerrados))
+    throw new ErrorDeDominio(
+      400,
+      "LOCAL_CERRADO",
+      parsearFechas(cfg.diasCerrados).includes(fecha)
+        ? "Ese día el local está cerrado. Elegí otra fecha."
+        : `Los ${DIA_NOMBRE[diaDeSemana(fecha)]} el local no abre. Elegí otro día.`,
     );
 }
 

@@ -66,3 +66,26 @@ Cobros/facturación/caja/sueldos; **control de stock** (CR-001); tablero para el
 
 ## 7. Regla de presentación de estado
 Nada posterior a H2 se presenta como terminado. Cada requisito RF/RNF figura "No implementado / No probado" hasta que exista evidencia ejecutada (test, medición o conformidad del Sponsor). El prototipo visto en la grabación **no cuenta** como evidencia: no hay código en la carpeta ni se sabe su origen.
+
+
+## 7. Estado del producto al 16/10/2026 (después de la revisión de Martín)
+
+Lo que existe y está probado (45 tests de API/dominio contra MySQL real + 36 pruebas Playwright con axe):
+
+| Pantalla / función | Hito | Estado en el panel |
+| --- | --- | --- |
+| Modelo de datos unificado (migración 0001) | H2 | Implementado y probado |
+| Planilla de parametrización (franjas, aforo, tiempos, horario, **días de atención y cierres**, anticipación, tolerancia) con validación del Encargado y exportación CSV | H2 | Implementado y probado; valores **provisorios** hasta la validación (19–23/10) |
+| Prototipos UX/UI del sitio y del panel, incluidos los módulos de H3–H5 (rotulados «Prototipo de pantalla · datos de ejemplo») | H2 | Implementado |
+| Alta de reserva web e interna con asignación de mesa y control de aforo (RF-R1, RF-R2); rechazo de días sin atención | H3 (adelantado, sin conformidad) | Implementado y probado |
+| Reservas: ver cualquier fecha (calendario) | H3 | Implementado |
+| Buscar, modificar, cancelar, no-show (RF-R4) | H3 | **En construcción — Hito 3, 30/10/2026** (cartel en Reservas) |
+| Estado del salón por franja, walk-in (RF-R3) | H3 | **En construcción — Hito 3** (pantalla con prototipo) |
+| Mesas y QR único por mesa, código vigente impreso y visible, regeneración con confirmación (RF-Q1) | H4 (adelantado) | Implementado y probado |
+| Pedido desde el QR, paneles de cocina/parrilla/barra, carga del mozo (RF-Q2–Q4) | H4 | **En construcción — Hito 4, 06/11/2026** (pantallas con prototipo) |
+| Carta y precios: carta real visible en el panel; edición de precios para sitio y QR | H4 | Visible real; edición **en construcción — Hito 4** |
+| Usuarios y roles con jerarquía (el Encargado no gestiona Administración) y auditoría de intentos (RNF-3) | H5/H6 | Implementado y probado |
+| GA4 + Search Console (RF-W3) | H5 | **En construcción — Hito 5, 13/11/2026** |
+| Lighthouse (RNF-1/2) | H5 | Medido: inicio celular 93–98, escritorio 100; a11y/BP/SEO 100 |
+
+Adelantar una función no la da por aceptada: la conformidad del Sponsor sigue siendo la del hito correspondiente.

@@ -1,4 +1,5 @@
 import type { Rol } from "@dv/shared";
+import { ROL_NOMBRE, puedeGestionarRol } from "@dv/shared";
 import type { Db } from "../db/pool.ts";
 import { exec, one, rows } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
@@ -19,7 +20,21 @@ export async function listarUsuarios(db: Db) {
   }));
 }
 
-export async function crearUsuario(db: Db, i: { usuario: string; nombre: string; rol: Rol; password: string }) {
+function exigirJerarquia(actorRol: Rol, objetivo: Rol) {
+  if (!puedeGestionarRol(actorRol, objetivo))
+    throw new ErrorDeDominio(
+      403,
+      "JERARQUIA",
+      `Tu perfil no puede administrar usuarios con el rol ${ROL_NOMBRE[objetivo]}. Pedíselo a Administración.`,
+    );
+}
+
+export async function crearUsuario(
+  db: Db,
+  i: { usuario: string; nombre: string; rol: Rol; password: string },
+  actorRol: Rol,
+) {
+  exigirJerarquia(actorRol, i.rol);
   const rol = await one(db, "SELECT id FROM roles WHERE codigo = ?", [i.rol]);
   if (!rol) throw new ErrorDeDominio(400, "ROL_INVALIDO", "El rol no existe.");
   try {
@@ -37,8 +52,21 @@ export async function crearUsuario(db: Db, i: { usuario: string; nombre: string;
   }
 }
 
-export async function cambiarActivo(db: Db, id: number, activo: boolean, actorId: number): Promise<void> {
+export async function cambiarActivo(
+  db: Db,
+  id: number,
+  activo: boolean,
+  actorId: number,
+  actorRol: Rol,
+): Promise<void> {
   if (id === actorId && !activo) throw new ErrorDeDominio(409, "AUTO_BAJA", "No podés desactivar tu propio usuario.");
+  const objetivo = await one(
+    db,
+    "SELECT r.codigo AS rol FROM usuarios u JOIN roles r ON r.id = u.rol_id WHERE u.id = ?",
+    [id],
+  );
+  if (!objetivo) throw new ErrorDeDominio(404, "USUARIO_NO_ENCONTRADO", "El usuario no existe.");
+  exigirJerarquia(actorRol, objetivo.rol as Rol);
   const r = await exec(db, "UPDATE usuarios SET activo = ? WHERE id = ?", [activo ? 1 : 0, id]);
   if (r.affectedRows === 0) throw new ErrorDeDominio(404, "USUARIO_NO_ENCONTRADO", "El usuario no existe.");
   if (!activo) await exec(db, "DELETE FROM sesiones_usuario WHERE usuario_id = ?", [id]);

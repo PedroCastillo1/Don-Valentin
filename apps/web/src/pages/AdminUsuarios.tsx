@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
-import { ROLES, ROL_NOMBRE } from "@dv/shared";
+import { ROLES_GESTIONABLES, ROL_NOMBRE, puedeGestionarRol } from "@dv/shared";
+import { useSesion } from "../lib/sesion.tsx";
 import type { Permiso, Rol } from "@dv/shared";
 import { api, ApiError } from "../lib/api.ts";
 import { Cabecera, Mensaje } from "../components/ui.tsx";
@@ -23,6 +24,7 @@ interface Evento {
 }
 
 export function AdminUsuarios() {
+  const { usuario: yo } = useSesion();
   const [usuarios, setUsuarios] = useState<U[]>([]);
   const [permisos, setPermisos] = useState<Record<string, Permiso[]>>({});
   const [eventos, setEventos] = useState<Evento[]>([]);
@@ -90,9 +92,15 @@ export function AdminUsuarios() {
                         : "Nunca"}
                     </td>
                     <td>
-                      <button className="mini" onClick={() => void activo(u, !u.activo)}>
-                        {u.activo ? "Desactivar" : "Activar"}
-                      </button>
+                      {yo && u.id === yo.id ? (
+                        <small className="nota">Tu usuario</small>
+                      ) : yo && puedeGestionarRol(yo.rol, u.rol) ? (
+                        <button className="mini" onClick={() => void activo(u, !u.activo)}>
+                          {u.activo ? "Desactivar" : "Activar"}
+                        </button>
+                      ) : (
+                        <small className="nota">Solo lo gestiona Administración</small>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -125,13 +133,21 @@ export function AdminUsuarios() {
             </ul>
           )}
         </section>
-        <NuevoUsuario onCreado={() => void cargar()} permisos={permisos} />
+        <NuevoUsuario onCreado={() => void cargar()} permisos={permisos} roles={yo ? ROLES_GESTIONABLES[yo.rol] : []} />
       </div>
     </>
   );
 }
 
-function NuevoUsuario({ onCreado, permisos }: { onCreado: () => void; permisos: Record<string, Permiso[]> }) {
+function NuevoUsuario({
+  onCreado,
+  permisos,
+  roles,
+}: {
+  onCreado: () => void;
+  permisos: Record<string, Permiso[]>;
+  roles: readonly Rol[];
+}) {
   const [usuario, setUsuario] = useState("");
   const [nombre, setNombre] = useState("");
   const [rol, setRol] = useState<Rol>("mozo");
@@ -173,7 +189,7 @@ function NuevoUsuario({ onCreado, permisos }: { onCreado: () => void; permisos: 
         <label>
           Rol
           <select value={rol} onChange={(e) => setRol(e.target.value as Rol)}>
-            {ROLES.map((r) => (
+            {roles.map((r) => (
               <option key={r} value={r}>
                 {ROL_NOMBRE[r]}
               </option>

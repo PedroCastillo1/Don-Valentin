@@ -54,3 +54,20 @@ export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
 export function puede(rol: Rol, permiso: Permiso): boolean {
   return PERMISOS_POR_ROL[rol].includes(permiso);
 }
+
+/**
+ * Jerarquía para administrar usuarios (RNF-3): nadie gestiona a un rol igual o superior al propio.
+ * Administración gestiona a todos; el Encargado de Salón solo al personal operativo.
+ */
+export const ROLES_GESTIONABLES: Record<Rol, readonly Rol[]> = {
+  admin: ROLES,
+  encargado: ["mozo", "parrillero", "cocinero", "barra"],
+  mozo: [],
+  parrillero: [],
+  cocinero: [],
+  barra: [],
+};
+
+export function puedeGestionarRol(actor: Rol, objetivo: Rol): boolean {
+  return ROLES_GESTIONABLES[actor].includes(objetivo);
+}

@@ -317,6 +317,79 @@ describe("límite de tasa y administración de usuarios", () => {
       (await request(app).post("/api/auth/login").send({ usuario: "mozo2", password: "Clave-larga-segura-9" })).status,
     ).toBe(401);
   });
+  it("jerarquía: el Encargado no crea ni desactiva administradores (y queda auditado); Administración sí", async () => {
+    const e = await login("encargado");
+    const lista = (await e.agent.get("/api/admin/usuarios")).body.usuarios as { id: number; usuario: string }[];
+    const idAdmin = lista.find((u) => u.usuario === "admin")!.id;
+    const baja = await e.agent
+      .patch(`/api/admin/usuarios/${idAdmin}/activo`)
+      .set("X-CSRF-Token", e.csrf)
+      .send({ activo: false });
+    expect(baja.status).toBe(403);
+    expect(baja.body.error.codigo).toBe("JERARQUIA");
+    const crearAdmin = await e.agent
+      .post("/api/admin/usuarios")
+      .set("X-CSRF-Token", e.csrf)
+      .send({ usuario: "jefe2", nombre: "Otro admin (prueba)", rol: "admin", password: "Clave-larga-segura-9" });
+    expect(crearAdmin.status).toBe(403);
+    const otroEncargado = await e.agent
+      .post("/api/admin/usuarios")
+      .set("X-CSRF-Token", e.csrf)
+      .send({ usuario: "enc2", nombre: "Otro encargado (prueba)", rol: "encargado", password: "Clave-larga-segura-9" });
+    expect(otroEncargado.status).toBe(403);
+    const aud = (await e.agent.get("/api/admin/auditoria?denegados=1")).body.eventos as { accion: string }[];
+    expect(aud.some((x) => x.accion === "usuario:desactivar")).toBe(true);
+    // Administración sí puede (y lo vuelve a activar)
+    const a = await login("admin");
+    const idEnc = lista.find((u) => u.usuario === "encargado")!.id;
+    expect(
+      (await a.agent.patch(`/api/admin/usuarios/${idEnc}/activo`).set("X-CSRF-Token", a.csrf).send({ activo: false }))
+        .status,
+    ).toBe(204);
+    expect(
+      (await a.agent.patch(`/api/admin/usuarios/${idEnc}/activo`).set("X-CSRF-Token", a.csrf).send({ activo: true }))
+        .status,
+    ).toBe(204);
+  });
+  it("días de atención y cierres: el local no acepta reservas los días que no abre", async () => {
+    const e = await login("encargado");
+    const hoy = new Date(AHORA.getTime() - 3 * 3600_000).toISOString().slice(0, 10);
+    const dia = (n: number) =>
+      new Date(Date.UTC(+hoy.slice(0, 4), +hoy.slice(5, 7) - 1, +hoy.slice(8, 10) + n)).toISOString().slice(0, 10);
+    const f = dia(3);
+    const dias = ["dom", "lun", "mar", "mie", "jue", "vie", "sab"];
+    const dsem = dias[new Date(`${f}T12:00:00Z`).getUTCDay()]!;
+    const disp = () => request(app).get(`/api/public/disponibilidad?fecha=${f}&personas=2`);
+    const r0 = await disp();
+    expect(r0.status, JSON.stringify(r0.body)).toBe(200);
+    // ese día de la semana deja de atender
+    const resto = ["lun", "mar", "mie", "jue", "vie", "sab", "dom"].filter((d) => d !== dsem).join(",");
+    const put = (clave: string, valor: string) =>
+      e.agent.put(`/api/admin/parametros/${clave}`).set("X-CSRF-Token", e.csrf).send({ valor });
+    expect((await put("dias_atencion", resto)).status).toBe(204);
+    const r1 = await disp();
+    expect(r1.status).toBe(400);
+    expect(r1.body.error.codigo).toBe("LOCAL_CERRADO");
+    expect((await put("dias_atencion", "lun,mar,mie,jue,vie,sab,dom")).status).toBe(204);
+    // cierre puntual
+    expect((await put("dias_cerrados", `${f}`)).status).toBe(204);
+    const r2 = await disp();
+    expect(r2.body.error.codigo).toBe("LOCAL_CERRADO");
+    const alta = await request(app).post("/api/public/reservas").send({
+      nombre: "Cierre (prueba)",
+      telefono: "1155550199",
+      personas: 2,
+      fecha: f,
+      franjaId: 1,
+      aceptaAviso: true,
+    });
+    expect(alta.status).toBe(400);
+    expect((await put("dias_cerrados", "")).status).toBe(204);
+    expect((await disp()).status).toBe(200);
+    // valores inválidos
+    expect((await put("dias_atencion", "lunes")).status).toBe(400);
+    expect((await put("dias_cerrados", "25/12/2026")).status).toBe(400);
+  });
   it("solo el Encargado valida valores de la planilla: Administración recibe 403", async () => {
     const a = await login("admin");
     const r = await a.agent

@@ -1,3 +1,4 @@
+import { DIAS_SEMANA, DIA_NOMBRE, parsearDias } from "@dv/shared";
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
@@ -145,11 +146,22 @@ export function AdminParametros() {
                   <small>{x.clave}</small>
                 </td>
                 <td>
-                  {editar ? (
+                  {editar && x.clave === "dias_atencion" ? (
+                    <DiasEditor
+                      valor={x.valor}
+                      onGuardar={(v) =>
+                        hacer(
+                          () => api(`/admin/parametros/${x.clave}`, { method: "PUT", body: { valor: v } }),
+                          "Días de atención guardados. Las reservas web ya no aceptan los días que no atiende.",
+                        )
+                      }
+                    />
+                  ) : editar ? (
                     <Celda
                       valor={x.valor}
                       unidad={x.unidad}
                       etiqueta={x.descripcion}
+                      vacioPermitido={x.clave === "dias_cerrados"}
                       onGuardar={(v) =>
                         hacer(
                           () => api(`/admin/parametros/${x.clave}`, { method: "PUT", body: { valor: v } }),
@@ -295,11 +307,13 @@ function Celda({
   unidad,
   etiqueta,
   onGuardar,
+  vacioPermitido = false,
 }: {
   valor: string;
   unidad: string | null;
   etiqueta: string;
   onGuardar: (v: string) => void;
+  vacioPermitido?: boolean;
 }) {
   const [v, setV] = useState(valor);
   useEffect(() => setV(valor), [valor]);
@@ -309,10 +323,37 @@ function Celda({
         value={v}
         aria-label={etiqueta}
         onChange={(e) => setV(e.target.value)}
-        onBlur={() => v !== valor && v.trim() !== "" && onGuardar(v.trim())}
+        onBlur={() => v !== valor && (v.trim() !== "" || vacioPermitido) && onGuardar(v.trim())}
+        placeholder={vacioPermitido ? "Sin cierres (AAAA-MM-DD, AAAA-MM-DD)" : undefined}
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
       />
       {unidad && <small>{unidad}</small>}
+    </span>
+  );
+}
+
+/** Días de atención: un botón por día (encendido = el local abre). Nunca deja la semana vacía. */
+function DiasEditor({ valor, onGuardar }: { valor: string; onGuardar: (v: string) => void }) {
+  const activos = parsearDias(valor);
+  return (
+    <span className="dias" role="group" aria-label="Días de atención">
+      {DIAS_SEMANA.map((d) => {
+        const on = activos.includes(d);
+        return (
+          <button
+            key={d}
+            type="button"
+            className={on ? "dias__d dias__d--on" : "dias__d"}
+            aria-pressed={on}
+            title={DIA_NOMBRE[d]}
+            disabled={on && activos.length === 1}
+            onClick={() => onGuardar(DIAS_SEMANA.filter((x) => (x === d ? !on : activos.includes(x))).join(","))}
+          >
+            {d}
+            <span className="sr-only"> ({DIA_NOMBRE[d]})</span>
+          </button>
+        );
+      })}
     </span>
   );
 }

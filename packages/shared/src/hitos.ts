@@ -119,6 +119,14 @@ export const MODULOS: readonly Modulo[] = [
     requisitos: ["RF-Q2", "RF-Q3", "RF-Q4"],
   },
   {
+    id: "carta-precios",
+    nombre: "Edición de carta y precios",
+    descripcion: "Cambiar precios y productos desde el panel, con impacto en el sitio y en el pedido por QR.",
+    hito: "H4",
+    disponible: false,
+    requisitos: ["RF-Q1"],
+  },
+  {
     id: "paneles-sector",
     nombre: "Paneles de cocina, parrilla y barra",
     descripcion: "Pedidos por sector con estados y alerta por demora.",

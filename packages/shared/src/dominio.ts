@@ -27,3 +27,44 @@ export const LOCAL = {
   ],
   instagram: "https://www.instagram.com/parrilladonvalentin",
 } as const;
+
+/** Días de la semana en el orden de la planilla (dias_atencion). */
+export const DIAS_SEMANA = ["lun", "mar", "mie", "jue", "vie", "sab", "dom"] as const;
+export type DiaSemana = (typeof DIAS_SEMANA)[number];
+export const DIA_NOMBRE: Record<DiaSemana, string> = {
+  lun: "lunes",
+  mar: "martes",
+  mie: "miércoles",
+  jue: "jueves",
+  vie: "viernes",
+  sab: "sábado",
+  dom: "domingo",
+};
+
+/** Día de la semana de una fecha de servicio AAAA-MM-DD (la fecha del turno, no la del reloj). */
+export function diaDeSemana(fecha: string): DiaSemana {
+  const [a, m, d] = fecha.split("-").map(Number);
+  const js = new Date(Date.UTC(a ?? 2026, (m ?? 1) - 1, d ?? 1)).getUTCDay(); // 0 = domingo
+  return DIAS_SEMANA[(js + 6) % 7]!;
+}
+
+/** "lun,mar,…" → lista válida (ignora valores desconocidos). */
+export function parsearDias(valor: string): DiaSemana[] {
+  return valor
+    .split(",")
+    .map((x) => x.trim().toLowerCase())
+    .filter((x): x is DiaSemana => (DIAS_SEMANA as readonly string[]).includes(x));
+}
+
+/** "2026-12-25, 2027-01-01" → fechas válidas AAAA-MM-DD. */
+export function parsearFechas(valor: string): string[] {
+  return valor
+    .split(",")
+    .map((x) => x.trim())
+    .filter((x) => /^\d{4}-\d{2}-\d{2}$/.test(x));
+}
+
+/** ¿El local atiende ese día de servicio? */
+export function localAbre(fecha: string, diasAtencion: string, diasCerrados: string): boolean {
+  return parsearDias(diasAtencion).includes(diaDeSemana(fecha)) && !parsearFechas(diasCerrados).includes(fecha);
+}

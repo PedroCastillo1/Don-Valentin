@@ -3,6 +3,16 @@ import { api } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
 import { Link } from "react-router";
 import { MODULOS, textoProgramado } from "@dv/shared";
+
+/** Pantalla de cada módulo en construcción (con su cartel de obra y el prototipo). */
+const RUTA_MODULO: Record<string, string> = {
+  "estado-salon": "/admin/salon",
+  "modificar-reserva": "/admin/reservas",
+  "carta-digital": "/admin/pedidos",
+  "carta-precios": "/admin/carta",
+  "paneles-sector": "/admin/sectores",
+  "medicion-sitio": "/admin/medicion",
+};
 import { Icono } from "../components/Iconos.tsx";
 import { PulsoDelDia, estadoDeAforo } from "../components/PulsoDelDia.tsx";
 
@@ -248,8 +258,11 @@ export function AdminInicio() {
         <ul className="proximos">
           {MODULOS.filter((m) => !m.disponible).map((m) => (
             <li key={m.id}>
-              <span>{m.nombre}</span>
-              <small>{textoProgramado(m.hito)}</small>
+              <Link to={RUTA_MODULO[m.id] ?? "/admin"}>
+                <span className="adm__badge">{m.hito}</span>
+                <span>{m.nombre}</span>
+                <small>En construcción · {textoProgramado(m.hito)}</small>
+              </Link>
             </li>
           ))}
         </ul>

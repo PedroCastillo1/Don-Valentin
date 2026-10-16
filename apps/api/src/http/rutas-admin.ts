@@ -52,6 +52,16 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
     return fechaServicioActual(ahora(), c.apertura, c.cierre);
   };
   const actor = (req: Request): number => req.sesion!.usuario.id;
+  /** Ejecuta la acción y, si la jerarquía la rechaza, deja el intento registrado en la auditoría (RNF-3). */
+  async function conAuditoriaDenegada<T>(req: Request, accion: string, recurso: string, f: () => Promise<T>) {
+    try {
+      return await f();
+    } catch (e) {
+      if (e instanceof ErrorDeDominio && e.codigo === "JERARQUIA")
+        await registrarAuditoria(db, { usuarioId: actor(req), accion, recurso, resultado: "denegado", ip: req.ip });
+      throw e;
+    }
+  }
 
   // Reservas (RF-R1, RF-R2)
   r.get("/resumen", exigirPermiso(db, "reservas:ver"), async (req, res) => {
@@ -227,7 +237,10 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
     res.json({ usuarios: await listarUsuarios(db), permisosPorRol: PERMISOS_POR_ROL });
   });
   r.post("/usuarios", exigirPermiso(db, "usuarios:administrar"), async (req, res) => {
-    const u = await crearUsuario(db, parsear(usuarioNuevoSchema, req.body));
+    const datos = parsear(usuarioNuevoSchema, req.body);
+    const u = await conAuditoriaDenegada(req, "usuario:crear", datos.usuario, () =>
+      crearUsuario(db, datos, req.sesion!.usuario.rol),
+    );
     await registrarAuditoria(db, {
       usuarioId: actor(req),
       accion: "usuario:crear",
@@ -240,7 +253,9 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   });
   r.patch("/usuarios/:id/activo", exigirPermiso(db, "usuarios:administrar"), async (req, res) => {
     const { activo } = parsear(z.object({ activo: z.boolean() }), req.body);
-    await cambiarActivo(db, idParam(req.params.id), activo, actor(req));
+    await conAuditoriaDenegada(req, activo ? "usuario:activar" : "usuario:desactivar", `usuario ${req.params.id}`, () =>
+      cambiarActivo(db, idParam(req.params.id), activo, actor(req), req.sesion!.usuario.rol),
+    );
     await registrarAuditoria(db, {
       usuarioId: actor(req),
       accion: activo ? "usuario:activar" : "usuario:desactivar",
