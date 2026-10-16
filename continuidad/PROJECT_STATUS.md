@@ -17,12 +17,13 @@ Convención: ✅ probado con evidencia ejecutada · 🟡 implementado, probado e
 | API: mesas, QR por mesa (SVG), `/m/:token`, sesión de mesa única con dos mozos simultáneos | ✅ probado |
 | API: carta pública, usuarios, auditoría | 🟡 carta probada; usuarios/auditoría sin test dedicado |
 | Web: hero (animación scroll, reduced-motion), login, Inicio admin con selector de día | 🟡 capturas desktop y móvil, 0 errores de consola; **sin axe ni Lighthouse todavía** |
-| Web: Reservas (admin), Mesas y QR, Parámetros, Usuarios | ⏳ |
-| Web pública: Reservar, Carta, Parrilla libre, Cómo llegar, landing `/m/:token` | ⏳ |
-| E2E Playwright, axe, Lighthouse, revisión de seguridad manual documentada | ⏳ |
+| Web admin: Reservas (alta con aforo), Mesas y QR (QR real, sesión), Parámetros (edición, validación solo Encargado, CSV), Usuarios (+denegados) | ✅ E2E desktop y móvil |
+| Web pública: Reservar (aviso RNF-4), Carta (126 productos), Parrilla libre, Cómo llegar, `/m/:token` | ✅ E2E desktop y móvil |
+| E2E Playwright (24 corridas: 12 desktop + 12 móvil) y axe WCAG 2.2 AA sin violaciones en todas las pantallas | ✅ |
+| Lighthouse, revisión de seguridad manual documentada, exportación .xlsx, test de rate limit | ⏳ |
 
 ## Calidad
-`npm run verify` en verde: typecheck + ESLint + Prettier + 34 tests (11 de dominio, 20 de API contra MySQL real, 3 de horario web). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
+`npm run verify` en verde: typecheck + ESLint + Prettier + 36 tests (dominio, API contra MySQL real, carta, horario web) + `npm run e2e` (24 pruebas Playwright). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
 Seguridad: `SECURITY_GUIDANCE_DISABLE=0` fijado en `.claude/settings.json` y verificado ejecutando el hook directamente (con `=1` se saltea; con `=0` dispara con eval/innerHTML). La sesión de Claude Code ya iniciada conserva `=1` en su entorno: el cambio rige para sesiones nuevas.
 
 ## Fuera de N3 (no implementar de verdad; mostrar con hito y fecha)
