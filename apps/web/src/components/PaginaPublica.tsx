@@ -72,6 +72,18 @@ export function PaginaPublica({
           scrollTrigger: { trigger: cab, start: "top top", end: "bottom top", scrub: true },
         });
       }
+      // Letras de fondo: cada fila corre en sentido contrario a la anterior mientras se baja.
+      el.querySelectorAll<HTMLElement>(".pag__fondo-letras p").forEach((p, i) => {
+        gsap.fromTo(
+          p,
+          { xPercent: i % 2 ? -30 : 0 },
+          {
+            xPercent: i % 2 ? 0 : -30,
+            ease: "none",
+            scrollTrigger: { trigger: el, start: "top top", end: "bottom bottom", scrub: 1 },
+          },
+        );
+      });
       // Cuerpo: cada bloque sube al entrar; las fotos se destapan con una máscara.
       const bloques = gsap.utils.toArray<HTMLElement>(el.querySelectorAll(".pag__cuerpo > *:not(.cartapag)"));
       gsap.set(bloques, { y: 48, opacity: 0 });
@@ -153,6 +165,11 @@ export function PaginaPublica({
             </span>
           </p>
         </header>
+        <div className="pag__fondo-letras" aria-hidden="true">
+          <p>{`${titulo} · ${titulo} · ${titulo}`}</p>
+          <p>{`${titulo} · ${titulo} · ${titulo}`}</p>
+          <p>{`${titulo} · ${titulo} · ${titulo}`}</p>
+        </div>
         <div className={ancha ? "pag__cuerpo pag__cuerpo--ancha" : "pag__cuerpo"}>{children}</div>
       </main>
       <Pie />

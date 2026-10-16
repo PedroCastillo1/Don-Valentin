@@ -70,7 +70,7 @@
   z-index: 2;
 }
 .rec__mono {
-  font: 500 0.82rem/1 var(--f-mono);
+  font: 600 clamp(0.92rem, 1.1vw, 1.05rem)/1.2 var(--f-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
   color: var(--brasa-clara);
@@ -572,6 +572,9 @@
 /* ───── Cierre: palabras que suben ───── */
 .cierre {
   min-height: 100svh !important;
+  align-items: center !important;
+  justify-items: center;
+  padding-block: clamp(7rem, 14vh, 10rem) clamp(4rem, 10vh, 7rem) !important;
 }
 .cierre__linea {
   display: block;
@@ -582,13 +585,24 @@
   display: inline-block;
 }
 .cierre h2 {
-  font-size: clamp(4rem, 13vw, 11rem) !important;
-  line-height: 0.84 !important;
+  font-size: clamp(3.6rem, 10vw, 8.5rem) !important;
+  line-height: 0.86 !important;
+  text-align: center;
 }
 .cierre__in {
   max-width: 60rem !important;
+  justify-items: center !important;
+  text-align: center;
+  gap: clamp(1.4rem, 3vh, 2.2rem) !important;
 }
 .cierre__in > p {
+  font-size: clamp(1.25rem, 2vw, 1.7rem);
+  line-height: 1.45;
+  max-width: 34rem;
+  text-shadow: 0 2px 20px rgb(0 0 0 / 0.6);
+}
+.cierre__in .btn {
   font-size: clamp(1.1rem, 1.5vw, 1.3rem);
-  max-width: 30rem;
+  min-height: 3.6rem;
+  padding-inline: 2.2rem;
 }

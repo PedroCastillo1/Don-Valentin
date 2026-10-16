@@ -16,9 +16,9 @@ export function ParrillaLibre() {
         posicion: "50% 40%",
       }}
     >
-      <p className="lead">
-        Pagás un precio por persona y comés a gusto: parrilla, pastas con la salsa que elijas y pizzas. Entra una
-        entrada y un postre.
+      <p className="lead lead--entrada">
+        Pagás <mark>un precio por persona</mark> y comés a gusto: parrilla, pastas con la salsa que elijas y pizzas.
+        Entran una entrada y un postre.
       </p>
       <figure className="pl__foto">
         <img

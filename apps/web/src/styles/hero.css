@@ -89,7 +89,7 @@
 .rotulo__mono,
 .hero__datos {
   font-family: var(--f-mono);
-  font-size: 0.78rem;
+  font-size: 0.85rem;
   font-weight: 500;
   letter-spacing: 0.04em;
   text-transform: uppercase;
@@ -162,6 +162,8 @@
 }
 .rotulo__mono {
   color: var(--brasa-clara);
+  font-size: clamp(0.92rem, 1.1vw, 1.05rem) !important;
+  font-weight: 600 !important;
 }
 .hero__rotulo {
   text-shadow: 0 2px 28px rgb(0 0 0 / 0.65);

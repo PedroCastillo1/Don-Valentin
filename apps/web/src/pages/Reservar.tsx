@@ -131,12 +131,7 @@ export function Reservar() {
       titulo="Reservá tu mesa"
       ojo="Elegí el día y el horario"
       ancha
-      medio={{
-        tipo: "foto",
-        n: 4,
-        alt: "Una pareja almorzando en el salón, con la parrillada en brasero sobre la mesa",
-        posicion: "35% 45%",
-      }}
+      medio={{ tipo: "video", src: "/media/video/reel-3.mp4", poster: "/media/video/reel-3.webp", posicion: "50% 60%" }}
     >
       <div className="reservar">
         <form className="form-pub" onSubmit={enviar} noValidate>

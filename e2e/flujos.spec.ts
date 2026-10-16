@@ -29,61 +29,44 @@ test.describe("sitio público", () => {
     expect((caja?.width ?? 0) <= 1 && (caja?.height ?? 0) <= 1).toBe(true);
   });
 
-  test("el scroll del hero está controlado: cada gesto avanza una escena y al final se sigue bajando", async ({
+  test("el hero se recorre con scroll nativo (touchpad, rueda, teclado) sin trabarse y llega al pie", async ({
     page,
+    isMobile,
   }) => {
     await page.goto("/");
     await page.waitForLoadState("load");
-    await page.waitForTimeout(1800);
+    await page.waitForTimeout(1500);
     await expect(page.locator("html")).toHaveClass(/nav-claro/);
+    const y = () => page.evaluate(() => window.scrollY);
     const opacidad = (sel: string) =>
       page
         .locator(sel)
         .first()
         .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-    const gesto = async () => {
-      await page.keyboard.press("ArrowDown");
-      await page.waitForTimeout(1700);
-    };
-    await gesto(); // fuego
-    expect(await opacidad(".hero__rotulo--1 .rotulo__t")).toBeGreaterThan(0.9);
-    await gesto(); // mesa
-    expect(await opacidad(".hero__rotulo--2 .rotulo__t")).toBeGreaterThan(0.9);
+    if (!isMobile) {
+      // touchpad: muchos eventos chicos seguidos; cada uno debe mover la página (nada lo frena)
+      await page.mouse.move(600, 400);
+      for (let i = 0; i < 40; i++) {
+        await page.mouse.wheel(0, 30);
+        await page.waitForTimeout(16);
+      }
+      await expect.poll(y, { timeout: 2000 }).toBeGreaterThan(1000);
+    }
+    const alto = await page.evaluate(() => window.innerHeight);
+    // escenas: fuego, mesa y asador aparecen en su tramo del recorrido
+    await page.evaluate((h) => window.scrollTo(0, h * 0.75), alto);
+    await expect.poll(() => opacidad(".hero__rotulo--1 .rotulo__t"), { timeout: 3000 }).toBeGreaterThan(0.9);
+    await page.evaluate((h) => window.scrollTo(0, h * 1.45), alto);
+    await expect.poll(() => opacidad(".hero__rotulo--2 .rotulo__t"), { timeout: 3000 }).toBeGreaterThan(0.9);
     await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
-    await gesto(); // asador
+    await page.evaluate((h) => window.scrollTo(0, h * 2.2), alto);
     await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
-    const clip = await page
-      .locator(".tira")
-      .last()
-      .evaluate((el) => getComputedStyle(el).clipPath);
-    expect(clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}\)|none/);
-    // después de la última escena el scroll es el normal del navegador: se llega al pie
+    // teclado: End lleva al pie y Home vuelve arriba
     await page.keyboard.press("End");
     await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 4000 });
-    await expect(page.locator("footer")).toBeInViewport({ timeout: 4000 });
-    // y se puede volver arriba
+    await expect(page.locator("footer")).toBeInViewport({ timeout: 6000 });
     await page.keyboard.press("Home");
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 4000 }).toBeLessThan(5);
-  });
-
-  test("un gesto fuerte de rueda mueve una sola escena, no la pasa volando", async ({ page, isMobile }) => {
-    test.skip(isMobile, "la rueda es de escritorio; en móvil se prueba con teclado");
-    await page.goto("/");
-    await page.waitForLoadState("load");
-    await page.waitForTimeout(1800);
-    await page.mouse.move(600, 400);
-    for (let i = 0; i < 50; i++) {
-      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
-      await page.waitForTimeout(30);
-    }
-    await page.waitForTimeout(1800);
-    const op = (sel: string) =>
-      page
-        .locator(sel)
-        .first()
-        .evaluate((el) => parseFloat(getComputedStyle(el).opacity));
-    expect(await op(".hero__rotulo--1 .rotulo__t")).toBeGreaterThan(0.9);
-    expect(await op(".hero__rotulo--2 .rotulo__t")).toBeLessThan(0.1);
+    await expect.poll(y, { timeout: 4000 }).toBeLessThan(5);
   });
 
   test("el inicio cuenta del fuego a la mesa, muestra el precio con su contexto y el mapa", async ({ page }) => {

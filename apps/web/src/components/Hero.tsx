@@ -96,36 +96,19 @@ export function Hero() {
         .from(q(".hero__ticket"), { y: 48, opacity: 0, duration: 1, clearProps: "transform,opacity" }, 0.7)
         .from(q("[data-in]"), { y: 18, opacity: 0, duration: 0.7, stagger: 0.07 }, 0.9);
 
-      // Scroll: cuatro paradas (inicio · fuego · mesa · asador). Con snap direccional, un gesto rápido siempre
-      // termina en la parada siguiente y nunca "pasa volando" el hero.
-      const paradas = ["inicio", "fuego", "mesa", "asador"] as const;
+      // Scroll nativo: la secuencia (fuego · mesa · asador) avanza a la velocidad normal de la rueda, el touchpad
+      // o el dedo. Sin snap ni listeners propios: nada frena ni retiene el scroll.
       const tl: gsap.core.Timeline = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (vertical ? 3 : 3.2))}`,
+          end: () => `+=${Math.round(window.innerHeight * (vertical ? 2 : 2.2))}`,
           pin: true,
-          scrub: 0.6,
+          scrub: 0.5,
           anticipatePin: 1,
           invalidateOnRefresh: true,
           fastScrollEnd: true,
-          snap: {
-            // Parada direccional con tolerancia: si ya estás sobre una parada te quedás; si no, vas a la siguiente
-            // en el sentido en que venías scrolleando (aunque el gesto haya sido fuerte).
-            snapTo: (valor: number, st?: ScrollTrigger) => {
-              const total = tl.duration();
-              const marcas = paradas.map((n) => (tl.labels[n] ?? 0) / total);
-              const cerca = marcas.find((m) => Math.abs(m - valor) < 0.02);
-              if (cerca !== undefined) return cerca;
-              const dir = st?.direction ?? 1;
-              if (dir > 0) return marcas.find((m) => m > valor) ?? 1;
-              return [...marcas].reverse().find((m) => m < valor) ?? 0;
-            },
-            duration: { min: 0.4, max: 0.9 },
-            delay: 0.08,
-            ease: "power2.inOut",
-          },
           onLeave: () => raizHtml.classList.remove("nav-claro"),
           onEnterBack: () => raizHtml.classList.add("nav-claro"),
           onLeaveBack: () => raizHtml.classList.add("nav-claro"),
@@ -204,121 +187,6 @@ export function Hero() {
         )
         .addLabel("asador", 11.2)
         .to({}, { duration: 0.01 }, 11.2);
-
-      // Control del gesto: cada gesto (rueda, toque o teclado) mueve UNA parada, sin importar la fuerza ni la inercia.
-      // Fuera de las paradas (primera hacia arriba, última hacia abajo) el scroll sigue siendo el normal del navegador.
-      const st = tl.scrollTrigger!;
-      const marcas = () => paradas.map((n) => st.start + ((tl.labels[n] ?? 0) / tl.duration()) * (st.end - st.start));
-      const indice = () => {
-        const y = window.scrollY;
-        let k = 0;
-        let d = Infinity;
-        marcas().forEach((v, i) => {
-          if (Math.abs(v - y) < d) {
-            d = Math.abs(v - y);
-            k = i;
-          }
-        });
-        return k;
-      };
-      const enZona = () => window.scrollY >= st.start - 2 && window.scrollY <= st.end + 2;
-      let animando = false;
-      let bloqueado = false; // el gesto en curso ya movió una parada: se ignora hasta que pare la rueda
-      let ultimoGesto = 0;
-      let girar: gsap.core.Tween | null = null;
-
-      const mover = (destino: number) => {
-        girar?.kill();
-        const prox = { y: window.scrollY };
-        animando = true;
-        girar = gsap.to(prox, {
-          y: destino,
-          duration: 1.05,
-          ease: "power3.inOut",
-          onUpdate: () => window.scrollTo(0, prox.y),
-          onComplete: () => {
-            // enfriamiento: la inercia de la rueda puede seguir un rato más
-            window.setTimeout(() => {
-              animando = false;
-            }, 300);
-          },
-        });
-      };
-      const aParada = (i: number) => mover(marcas()[i] ?? st.start);
-
-      const siguiente = (dir: 1 | -1) => {
-        const sig = indice() + dir;
-        return sig < 0 || sig >= paradas.length ? null : sig;
-      };
-
-      const alRueda = (e: WheelEvent) => {
-        if (!enZona() || e.ctrlKey) return;
-        const ahora = performance.now();
-        if (ahora - ultimoGesto > 220) bloqueado = false;
-        ultimoGesto = ahora;
-        if (animando || bloqueado) {
-          e.preventDefault();
-          return;
-        }
-        if (Math.abs(e.deltaY) < 1) return;
-        const sig = siguiente(e.deltaY > 0 ? 1 : -1);
-        if (sig === null) return;
-        e.preventDefault();
-        bloqueado = true;
-        aParada(sig);
-      };
-
-      let y0 = 0;
-      let tocado = false;
-      const alTocar = (e: TouchEvent) => {
-        y0 = e.touches[0]?.clientY ?? 0;
-        tocado = false;
-      };
-      const alArrastrar = (e: TouchEvent) => {
-        if (!enZona()) return;
-        const dy = y0 - (e.touches[0]?.clientY ?? y0);
-        if (animando || tocado) {
-          if (e.cancelable) e.preventDefault();
-          return;
-        }
-        if (Math.abs(dy) < 8) return;
-        const sig = siguiente(dy > 0 ? 1 : -1);
-        if (sig === null) return;
-        if (e.cancelable) e.preventDefault();
-        if (Math.abs(dy) >= 28) {
-          tocado = true;
-          aParada(sig);
-        }
-      };
-
-      const alTeclear = (e: KeyboardEvent) => {
-        if (!enZona() || e.altKey || e.ctrlKey || e.metaKey) return;
-        const t = e.target as HTMLElement | null;
-        if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
-        const dir =
-          e.key === "ArrowDown" || e.key === "PageDown" ? 1 : e.key === "ArrowUp" || e.key === "PageUp" ? -1 : 0;
-        if (!dir) return;
-        if (animando) {
-          e.preventDefault();
-          return;
-        }
-        const sig = siguiente(dir);
-        if (sig === null) return;
-        e.preventDefault();
-        aParada(sig);
-      };
-
-      window.addEventListener("wheel", alRueda, { passive: false });
-      window.addEventListener("touchstart", alTocar, { passive: true });
-      window.addEventListener("touchmove", alArrastrar, { passive: false });
-      window.addEventListener("keydown", alTeclear);
-      return () => {
-        window.removeEventListener("wheel", alRueda);
-        window.removeEventListener("touchstart", alTocar);
-        window.removeEventListener("touchmove", alArrastrar);
-        window.removeEventListener("keydown", alTeclear);
-        girar?.kill();
-      };
     });
 
     return () => {
