@@ -20,11 +20,13 @@ API: `apps/api/src/{config,errors}.ts`, `src/db/*`, `src/domain/*`, `src/service
 - Videos: sin procesar ni publicar (licencia sin confirmar). Foto 5 muestra a un empleado (derechos de imagen).
 - Las sesiones E2E comparten base `dv_e2e` entre desktop y móvil: cada test usa datos propios por proyecto.
 
+- **Sincronización a `D:\don valentin` pendiente** (el puente se cayó): copiar a la raíz de D: los .md de `continuidad/` + `CLAUDE.md`, y extraer el repo en `D:\don valentin\app`. Hasta entonces la fuente es el repo en la nube.
+
 ## Bloqueos
 Esperando visto bueno de Martín sobre la dirección artística antes de extenderla a toda la web. N4 sin fecha. Context7 sin OAuth.
 
 ## Próxima acción exacta
-1) Verificar MySQL y `npm run verify` + `npm run e2e`. 2) Aplicar el feedback de Martín al hero/admin si llegó. 3) Lighthouse (móvil y desktop) sobre `/`, `/carta`, `/reservar` y guardar en `docs/evidencias/`; corregir lo que quede bajo meta. 4) Revisión de seguridad manual (lista en AGENTS.md) + test de rate limit + tests de usuarios/auditoría. 5) Exportar planilla a .xlsx. 6) Procesar videos solo si se confirma licencia. 7) Actualizar docs (`trazabilidad`, `decisiones`) y este traspaso.
+1) Verificar MySQL y `npm run verify` (43 tests) + `npm run e2e` (24). 2) Aplicar el feedback de Martín al hero/admin si llegó. 3) Subir rendimiento Lighthouse a ≥90 (reducir bundle base de 260 kB, preload de la imagen del hero, AVIF). 4) Exportar planilla a .xlsx. 5) Procesar videos solo si se confirma licencia. 6) Actualizar docs (`trazabilidad`, `decisiones`) y este traspaso.
 
 ## Advertencias
 No reutilizar el diseño del prototipo anterior. No inventar fechas, precios ni funciones. No publicar videos ni fotos con personas sin confirmación. No editar migraciones aplicadas. No tocar `documentacion/`.

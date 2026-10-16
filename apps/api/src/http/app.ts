@@ -143,6 +143,10 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
         .json({ error: { codigo: err.codigo, mensaje: err.message, ...(err.campos ? { campos: err.campos } : {}) } });
       return;
     }
+    if (typeof err === "object" && err && (err as { type?: string }).type === "entity.too.large") {
+      res.status(413).json({ error: { codigo: "PETICION_MUY_GRANDE", mensaje: "La petición es demasiado grande." } });
+      return;
+    }
     if (err instanceof SyntaxError && "body" in err) {
       res
         .status(400)

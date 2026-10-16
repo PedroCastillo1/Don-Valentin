@@ -20,10 +20,12 @@ Convención: ✅ probado con evidencia ejecutada · 🟡 implementado, probado e
 | Web admin: Reservas (alta con aforo), Mesas y QR (QR real, sesión), Parámetros (edición, validación solo Encargado, CSV), Usuarios (+denegados) | ✅ E2E desktop y móvil |
 | Web pública: Reservar (aviso RNF-4), Carta (126 productos), Parrilla libre, Cómo llegar, `/m/:token` | ✅ E2E desktop y móvil |
 | E2E Playwright (24 corridas: 12 desktop + 12 móvil) y axe WCAG 2.2 AA sin violaciones en todas las pantallas | ✅ |
-| Lighthouse, revisión de seguridad manual documentada, exportación .xlsx, test de rate limit | ⏳ |
+| Revisión de seguridad manual (`docs/evidencias/seguridad-n3.md`), test de rate limit, usuarios, entradas hostiles | ✅ |
+| Lighthouse móvil: a11y 100, SEO 100, BP 96, rendimiento 75–83 (meta ≥90 en H5, no alcanzada aún) | 🟡 `docs/evidencias/lighthouse/` |
+| Exportación de la planilla a .xlsx (hoy CSV) | ⏳ |
 
 ## Calidad
-`npm run verify` en verde: typecheck + ESLint + Prettier + 36 tests (dominio, API contra MySQL real, carta, horario web) + `npm run e2e` (24 pruebas Playwright). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
+`npm run verify` en verde: typecheck + ESLint + Prettier + 43 tests (dominio, API contra MySQL real, carta, horario web) + `npm run e2e` (24 pruebas Playwright). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
 Seguridad: `SECURITY_GUIDANCE_DISABLE=0` fijado en `.claude/settings.json` y verificado ejecutando el hook directamente (con `=1` se saltea; con `=0` dispara con eval/innerHTML). La sesión de Claude Code ya iniciada conserva `=1` en su entorno: el cambio rige para sesiones nuevas.
 
 ## Fuera de N3 (no implementar de verdad; mostrar con hito y fecha)

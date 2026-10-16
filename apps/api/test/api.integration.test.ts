@@ -287,3 +287,67 @@ describe("cabeceras de seguridad", () => {
     expect(r.headers["x-powered-by"]).toBeUndefined();
   });
 });
+
+describe("límite de tasa y administración de usuarios", () => {
+  it("la reserva pública corta con 429 tras demasiados intentos desde la misma IP", async () => {
+    const limitada = createApp({ db, cfg, ahora: () => AHORA, limitarTasa: true });
+    const respuestas: number[] = [];
+    for (let i = 0; i < 10; i++)
+      respuestas.push((await request(limitada).post("/api/public/reservas").send({})).status);
+    expect(respuestas.slice(0, 8).every((s) => s === 400)).toBe(true);
+    expect(respuestas.slice(8)).toEqual([429, 429]);
+  });
+  it("el encargado crea un usuario, que puede ingresar; desactivarlo bloquea el ingreso", async () => {
+    const e = await login("encargado");
+    const nuevo = await e.agent
+      .post("/api/admin/usuarios")
+      .set("X-CSRF-Token", e.csrf)
+      .send({ usuario: "mozo2", nombre: "Mozo Dos (prueba)", rol: "mozo", password: "Clave-larga-segura-9" });
+    expect(nuevo.status).toBe(201);
+    expect(JSON.stringify(nuevo.body)).not.toMatch(/password|hash/i);
+    const ok = await request(app).post("/api/auth/login").send({ usuario: "mozo2", password: "Clave-larga-segura-9" });
+    expect(ok.status).toBe(200);
+    const lista = (await e.agent.get("/api/admin/usuarios")).body.usuarios as { id: number; usuario: string }[];
+    const id = lista.find((u) => u.usuario === "mozo2")!.id;
+    expect(
+      (await e.agent.patch(`/api/admin/usuarios/${id}/activo`).set("X-CSRF-Token", e.csrf).send({ activo: false }))
+        .status,
+    ).toBe(204);
+    expect(
+      (await request(app).post("/api/auth/login").send({ usuario: "mozo2", password: "Clave-larga-segura-9" })).status,
+    ).toBe(401);
+  });
+  it("solo el Encargado valida valores de la planilla: Administración recibe 403", async () => {
+    const a = await login("admin");
+    const r = await a.agent
+      .post("/api/admin/parametros-validar")
+      .set("X-CSRF-Token", a.csrf)
+      .send({ tipo: "parametro", id: "tolerancia_no_show_min" });
+    expect(r.status).toBe(403);
+    expect(r.body.error.codigo).toBe("SOLO_ENCARGADO");
+  });
+  it("cerrar sesión invalida el token", async () => {
+    const c = await login("encargado");
+    expect((await c.agent.post("/api/auth/logout").set("X-CSRF-Token", c.csrf)).status).toBe(204);
+    expect((await c.agent.get("/api/admin/mesas")).status).toBe(401);
+  });
+});
+
+describe("entradas hostiles", () => {
+  it("un cuerpo enorme devuelve 413 y no 500", async () => {
+    const r = await request(app)
+      .post("/api/auth/login")
+      .send({ usuario: "a", password: "x".repeat(40_000) });
+    expect(r.status).toBe(413);
+  });
+  it("JSON roto devuelve 400", async () => {
+    const r = await request(app).post("/api/auth/login").set("Content-Type", "application/json").send("{roto");
+    expect(r.status).toBe(400);
+  });
+  it("parámetros con SQL se rechazan por validación", async () => {
+    const r = await request(app)
+      .get("/api/public/disponibilidad")
+      .query({ fecha: "2026-10-17' OR 1=1--", personas: "2" });
+    expect(r.status).toBe(400);
+  });
+});

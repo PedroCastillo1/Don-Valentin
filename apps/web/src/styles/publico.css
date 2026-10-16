@@ -458,3 +458,8 @@
     grid-template-columns: 1fr;
   }
 }
+
+.pag__cuerpo {
+  min-height: 60svh;
+  align-content: start;
+}
