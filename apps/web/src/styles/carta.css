@@ -105,7 +105,7 @@
   font-family: var(--f-display);
   font-weight: 900;
   font-size: clamp(2.8rem, 6vw, 5rem);
-  line-height: 0.9;
+  line-height: 1.04;
   color: var(--carbon);
   border-bottom: 2px solid var(--carbon);
   padding-bottom: 0.5rem;

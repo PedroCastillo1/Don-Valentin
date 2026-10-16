@@ -149,12 +149,7 @@ export function Recorrido() {
 
         <article className="rec__panel rec__panel--fuego">
           <figure className="rec__m rec__m--grande">
-            <img
-              src="/media/video/reel-2.webp"
-              alt="Cortes sobre la parrilla encendida"
-              loading="lazy"
-              decoding="async"
-            />
+            <VideoLoop src="/media/video/reel-2.mp4" poster="/media/video/reel-2.webp" />
           </figure>
           <div className="rec__t">
             <p className="rec__mono">Primero</p>
@@ -169,9 +164,6 @@ export function Recorrido() {
         <article className="rec__panel rec__panel--parrilla">
           <figure className="rec__m rec__m--grande">
             <Foto n={6} alt="La parrilla del local con cortes, pollo, verduras y papas asadas sobre las chapas" />
-          </figure>
-          <figure className="rec__m rec__m--chico">
-            <VideoLoop src="/media/video/reel-1.mp4" poster="/media/video/reel-1.webp" />
           </figure>
           <div className="rec__t">
             <p className="rec__mono">Después</p>
@@ -190,9 +182,6 @@ export function Recorrido() {
               alt="Una parrillada servida en brasero sobre la mesa, con papas fritas"
               sizes="(max-width: 900px) 100vw, 40vw"
             />
-          </figure>
-          <figure className="rec__m rec__m--chico">
-            <VideoLoop src="/media/video/reel-3.mp4" poster="/media/video/reel-3.webp" />
           </figure>
           <div className="rec__t">
             <p className="rec__mono">Al final</p>

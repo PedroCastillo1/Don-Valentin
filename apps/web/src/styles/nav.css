@@ -17,7 +17,7 @@
 }
 .nav__marca {
   display: grid;
-  line-height: 0.9;
+  line-height: 1.04;
   text-decoration: none;
   margin-right: auto;
 }
@@ -74,5 +74,5 @@
   border-color: transparent;
 }
 .nav-claro .nav__marca small {
-  color: var(--brasa-clara);
+  color: var(--ceniza-3);
 }

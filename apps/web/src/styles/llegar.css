@@ -56,7 +56,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.6rem, 4.4vw, 3.8rem);
-  line-height: 0.92;
+  line-height: 1.04;
   text-wrap: balance;
 }
 .llegar__ciudad {
@@ -136,7 +136,7 @@
 .pag .venir h2 {
   grid-row: span 2;
   font-size: clamp(2.4rem, 5vw, 4.2rem);
-  line-height: 0.95;
+  line-height: 1.04;
   margin: 0;
 }
 .venir__tabs {

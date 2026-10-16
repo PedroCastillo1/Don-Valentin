@@ -31,7 +31,7 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, rgb(23 16 12 / 0.82), transparent 55%),
+    linear-gradient(to top, rgb(23 16 12 / 0.88), rgb(23 16 12 / 0.4) 45%, transparent 70%),
     linear-gradient(to bottom, rgb(23 16 12 / 0.55), transparent 22%);
   pointer-events: none;
 }
@@ -125,7 +125,7 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.6rem, 4.4vw, 4.3rem);
-  line-height: 0.93;
+  line-height: 1.02;
   letter-spacing: 0.005em;
   margin: 0.7rem 0 0.8rem;
   text-wrap: balance;
@@ -160,20 +160,29 @@
 .hero__rotulo--2 {
   opacity: 1;
 }
+/* Rótulo chico sobre foto o video: va en una etiqueta de color de marca para que se lea sobre cualquier fondo. */
 .rotulo__mono {
-  color: var(--brasa-clara);
-  font-size: clamp(0.92rem, 1.1vw, 1.05rem) !important;
+  justify-self: start;
+  width: fit-content;
+  padding: 0.38rem 0.7rem 0.32rem;
+  border-radius: 4px;
+  background: var(--brasa);
+  color: var(--sobre-brasa);
+  font-size: clamp(0.85rem, 1.05vw, 1rem) !important;
   font-weight: 600 !important;
+  text-shadow: none;
 }
 .hero__rotulo {
-  text-shadow: 0 2px 28px rgb(0 0 0 / 0.65);
+  text-shadow:
+    0 2px 6px rgb(0 0 0 / 0.55),
+    0 4px 30px rgb(0 0 0 / 0.7);
 }
 .rotulo__t {
   font-family: var(--f-display);
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.6rem, 6vw, 5.5rem);
-  line-height: 0.92;
+  line-height: 1.04;
   max-width: 14ch;
   text-wrap: balance;
 }
@@ -206,7 +215,8 @@
   position: absolute;
   inset: 0;
   background:
-    linear-gradient(to top, rgb(23 16 12 / 0.78), transparent 55%),
+    linear-gradient(to top, rgb(23 16 12 / 0.9), rgb(23 16 12 / 0.45) 50%, transparent 75%),
+    linear-gradient(to right, rgb(23 16 12 / 0.55), transparent 60%),
     linear-gradient(to bottom, rgb(23 16 12 / 0.6), transparent 18%);
 }
 .hero__asador-texto {
@@ -224,8 +234,11 @@
   font-weight: 800;
   text-transform: uppercase;
   font-size: clamp(2.2rem, 4.6vw, 4.2rem);
-  line-height: 0.95;
+  line-height: 1.04;
   max-width: 18ch;
+  text-shadow:
+    0 2px 6px rgb(0 0 0 / 0.55),
+    0 4px 30px rgb(0 0 0 / 0.7);
   text-wrap: balance;
 }
 

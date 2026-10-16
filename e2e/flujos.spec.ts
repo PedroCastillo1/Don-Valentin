@@ -125,6 +125,21 @@ test.describe("sitio público", () => {
             .length,
       );
       expect(fuera, `filas fuera de la pantalla con ${ancho}px`).toBe(0);
+      // Ningún nombre queda como columna de letras (caso "Ensalada de frutas", que tiene dos precios largos).
+      const angostos = await page.evaluate(() =>
+        [...document.querySelectorAll(".carta__nombre")]
+          .filter((n) => n.getBoundingClientRect().width < 80)
+          .map((n) => n.textContent),
+      );
+      expect(angostos, `nombres angostos con ${ancho}px`).toEqual([]);
+    }
+    for (const ancho of [390, 1024]) {
+      await page.setViewportSize({ width: ancho, height: 800 });
+      await page.goto("/carta");
+      const ensalada = page.locator(".carta__fila", { hasText: "Ensalada de frutas" }).first();
+      await expect(ensalada.locator(".carta__nombre")).toHaveText("Ensalada de frutas");
+      const alto = await ensalada.locator(".carta__nombre").evaluate((n) => n.getBoundingClientRect().height);
+      expect(alto, `el nombre ocupa una sola línea con ${ancho}px`).toBeLessThan(40);
     }
   });
 
