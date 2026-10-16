@@ -40,12 +40,18 @@ const cfg = loadConfig();
 const admin = createPool(cfg, { multipleStatements: true });
 await migrate(admin);
 await seedBase(admin);
-const creadas = await seedUsuarios(admin, USUARIOS_PRUEBA);
+// Solo en esta vista local (base temporal, accesible únicamente desde esta compu): una contraseña fija y simple
+// para poder revisar el panel sin buscar un archivo. Nunca se usa en el servidor real.
+const CLAVE_LOCAL = "donvalentin";
+const creadas = await seedUsuarios(
+  admin,
+  USUARIOS_PRUEBA.map((u) => ({ ...u, password: CLAVE_LOCAL })),
+);
 await admin.end();
 const archivo = path.join(base, "CREDENCIALES-DE-PRUEBA.txt");
 await writeFile(
   archivo,
-  "Usuarios de PRUEBA de la vista local (se crean de nuevo, con otras contraseñas, cada vez que se abre).\n\n" +
+  "Usuarios de PRUEBA de la vista local (solo funcionan en esta compu, mientras la ventana está abierta).\n\n" +
     Object.entries(creadas)
       .map(([usuario, clave]) => `Usuario: ${usuario}\nContraseña: ${clave}\n`)
       .join("\n"),
@@ -55,10 +61,10 @@ await import("./db/seed-demo.ts");
 
 const db = createPool(cfg);
 const app = createApp({ db, cfg });
-const server = app.listen(cfg.PORT, () => {
+const server = app.listen(cfg.PORT, "127.0.0.1", () => {
   console.log(`\nDon Valentín (sistema completo) corriendo en http://localhost:${cfg.PORT}`);
   console.log(`Panel: http://localhost:${cfg.PORT}/admin/ingresar`);
-  console.log(`Usuarios y contraseñas de prueba: ${archivo}`);
+  console.log(`Usuario: encargado (o admin, mozo, parrilla, cocina, barra)  ·  Contraseña: ${CLAVE_LOCAL}`);
   console.log("Cerrá esta ventana para detenerlo (se borran los datos de prueba).");
   if (process.env.DV_ABRIR === "1" && process.platform === "win32")
     exec(`start "" "http://localhost:${cfg.PORT}/admin/ingresar"`);
