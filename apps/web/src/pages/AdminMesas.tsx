@@ -66,7 +66,7 @@ export function AdminMesas() {
     <>
       <Cabecera
         titulo="Mesas y QR"
-        bajada="Abrí la sesión cuando se sientan los comensales. Cada mesa tiene un código QR único."
+        bajada="Abrí la sesión cuando se sientan los comensales y liberá la mesa cuando se van: el QR queda fijo y el próximo grupo empieza con la cuenta en cero."
       />
       {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
       <EnConstruccion
@@ -135,11 +135,11 @@ export function AdminMesas() {
                           onClick={() =>
                             void accion(
                               () => api(`/admin/mesas/${m.id}/sesion`, { method: "DELETE" }),
-                              `Mesa ${m.numero}: sesión cerrada.`,
+                              `Mesa ${m.numero} liberada: la próxima cuenta empieza en cero. El QR no cambia.`,
                             )
                           }
                         >
-                          Cerrar sesión
+                          Liberar mesa
                         </button>
                       )
                     ) : (
