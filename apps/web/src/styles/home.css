@@ -401,7 +401,7 @@
   text-transform: uppercase;
   font-size: clamp(3.6rem, 9vw, 8rem);
   line-height: 0.85;
-  color: var(--brasa);
+  color: var(--brasa-clara);
 }
 .precios__monto {
   white-space: nowrap;

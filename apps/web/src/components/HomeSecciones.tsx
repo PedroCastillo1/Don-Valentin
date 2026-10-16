@@ -149,7 +149,12 @@ export function Recorrido() {
 
         <article className="rec__panel rec__panel--fuego">
           <figure className="rec__m rec__m--grande">
-            <VideoLoop src="/media/video/reel-2.mp4" poster="/media/video/reel-2.webp" />
+            <img
+              src="/media/video/reel-2.webp"
+              alt="Cortes sobre la parrilla encendida"
+              loading="lazy"
+              decoding="async"
+            />
           </figure>
           <div className="rec__t">
             <p className="rec__mono">Primero</p>

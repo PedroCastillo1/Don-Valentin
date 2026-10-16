@@ -50,7 +50,7 @@
     linear-gradient(to bottom, var(--carbon-2), var(--carbon) 70%);
   box-shadow:
     inset -1px 0 0 rgb(255 255 255 / 0.05),
-    0 0 40px 6px rgb(232 72 26 / 0.18);
+    0 0 40px 6px rgb(121 31 31 / 0.18);
   transform-origin: 50% 50%;
   will-change: transform;
 }
@@ -109,15 +109,15 @@
 }
 .punto--on {
   background: var(--brasa);
-  box-shadow: 0 0 0 0 rgb(232 72 26 / 0.6);
+  box-shadow: 0 0 0 0 rgb(121 31 31 / 0.6);
   animation: latido 2.4s infinite;
 }
 @keyframes latido {
   70% {
-    box-shadow: 0 0 0 0.6rem rgb(232 72 26 / 0);
+    box-shadow: 0 0 0 0.6rem rgb(121 31 31 / 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgb(232 72 26 / 0);
+    box-shadow: 0 0 0 0 rgb(121 31 31 / 0);
   }
 }
 .hero__titulo {

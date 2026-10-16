@@ -89,11 +89,11 @@ p {
 .btn--brasa {
   background: var(--brasa);
   border-color: var(--carbon);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   box-shadow: 3px 3px 0 var(--carbon);
 }
 .btn--brasa:hover {
-  background: var(--brasa-clara);
+  background: var(--brasa-oscura);
   transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 var(--carbon);
 }
@@ -145,7 +145,7 @@ p {
   display: none;
   place-items: center;
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   pointer-events: none;
 }
 .telon p {

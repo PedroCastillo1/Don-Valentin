@@ -10,7 +10,7 @@
   justify-content: space-between;
   gap: 1.2rem 3rem;
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   padding: 8rem clamp(1.25rem, 5vw, 4.5rem) clamp(2.4rem, 5vw, 3.6rem);
   border-bottom: 2px solid var(--carbon);
   margin-bottom: clamp(1.5rem, 3vw, 2.5rem);
@@ -147,7 +147,7 @@
   font-size: clamp(7rem, 19vw, 18rem);
   line-height: 0.85;
   color: transparent;
-  -webkit-text-stroke: 1.5px rgb(232 72 26 / 0.16);
+  -webkit-text-stroke: 1.5px rgb(121 31 31 / 0.16);
 }
 .pag__fondo-letras p:nth-child(2) {
   -webkit-text-stroke-color: rgb(23 16 12 / 0.07);
@@ -542,7 +542,7 @@
 /* ───── Inicio, 2ª iteración ───── */
 .cinta {
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   overflow: hidden;
   border-block: 2px solid var(--carbon);
 }

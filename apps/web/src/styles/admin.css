@@ -248,7 +248,7 @@
   letter-spacing: 0.08em;
   text-transform: uppercase;
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   padding: 0.22rem 0.55rem;
   border-radius: 4px;
 }
@@ -289,7 +289,7 @@
 }
 .adm__link.active {
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
 }
 .adm__futuros {
   margin-inline: 0.4rem;
@@ -340,7 +340,7 @@
   aspect-ratio: 1;
   border-radius: 50%;
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
   font-weight: 800;
   text-transform: uppercase;
 }
@@ -807,7 +807,7 @@
 .mesa--abierta {
   background: var(--brasa);
   border-color: var(--carbon);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
 }
 .mesa--abierta small {
   color: var(--carbon);
@@ -1059,7 +1059,7 @@
 .mini--brasa {
   background: var(--brasa);
   border-color: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
 }
 .mini--brasa:hover {
   background: var(--brasa-oscura);
@@ -1076,7 +1076,7 @@
 }
 .chip--on {
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
 }
 .estado {
   display: inline-block;
@@ -1482,7 +1482,7 @@
   padding: 0.25rem 0.4rem;
   border-radius: 4px;
   background: var(--brasa);
-  color: var(--carbon);
+  color: var(--sobre-brasa);
 }
 .adm__link.active .adm__badge {
   background: var(--carbon);

@@ -5,13 +5,14 @@
   --carbon: #17100c;
   --carbon-2: #2a1d16;
   --carbon-3: #3a2a20;
-  --brasa: #e8481a;
-  --brasa-oscura: #a8300c;
-  --brasa-clara: #ff9a6b;
-  --brasa-fondo: #fbd9cc;
+  --brasa: #791f1f; /* Rojo Bordeaux 6041 */
+  --brasa-oscura: #561313;
+  --brasa-clara: #e8908a; /* el mismo rojo, aclarado, para texto sobre fondos oscuros */
+  --brasa-fondo: #f0d8d6;
   --ceniza: #e9eaec;
   --ceniza-2: #dcdee1;
   --ceniza-3: #c4c7cc;
+  --sobre-brasa: #f6f1ee; /* texto sobre fondos de color de marca */
   --humo: #565d66;
   --malbec: #4b1424;
   --marmol: #3d5a47;
