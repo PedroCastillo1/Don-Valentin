@@ -9,3 +9,4 @@ playwright-report
 .impeccable-cache
 apps/web/dist-preview/
 apps/web/dist-archivo/
+CREDENCIALES-DE-PRUEBA.txt
