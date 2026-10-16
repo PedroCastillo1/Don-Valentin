@@ -1,6 +1,6 @@
 import { expect, test } from "@playwright/test";
 import type { Page } from "@playwright/test";
-import { ingresar } from "./helpers.ts";
+import { axe, ingresar } from "./helpers.ts";
 
 /**
  * Revisión del 16/10: una prueba por cada problema que marcó el equipo (capturas, mensajes y pedidos).
@@ -170,6 +170,31 @@ test.describe("revisión del 16/10", () => {
           .length,
       }));
       expect(r, `${ancho}px`).toEqual({ desborde: 0, angostos: 0 });
+    }
+  });
+});
+
+test.describe("modo oscuro", () => {
+  test("el botón alterna claro y oscuro, lo recuerda y no deja textos ilegibles ni desbordes", async ({ page }) => {
+    await page.goto("/carta");
+    const boton = page.getByRole("button", { name: "Modo oscuro" });
+    await expect(boton).toBeVisible();
+    const inicial = await page.evaluate(() => document.documentElement.dataset.tema);
+    await boton.click();
+    const otro = inicial === "oscuro" ? "claro" : "oscuro";
+    await expect(page.locator("html")).toHaveAttribute("data-tema", otro);
+    await page.reload();
+    await expect(page.locator("html")).toHaveAttribute("data-tema", otro);
+    if (otro === "claro") {
+      await page.getByRole("button", { name: "Modo oscuro" }).click();
+      await expect(page.locator("html")).toHaveAttribute("data-tema", "oscuro");
+    }
+    for (const ruta of ["/", "/carta", "/parrilla-libre", "/reservar", "/como-llegar", "/admin/ingresar"]) {
+      await page.goto(ruta);
+      await expect(page.locator("html")).toHaveAttribute("data-tema", "oscuro");
+      expect(await page.evaluate(() => document.documentElement.scrollWidth - innerWidth), ruta).toBe(0);
+      const v = (await axe(page)).filter((x) => x.id === "color-contrast");
+      expect(v, ruta).toEqual([]);
     }
   });
 });

@@ -34,7 +34,7 @@
   font-weight: 900;
   font-size: 1.6rem;
   line-height: 1;
-  color: var(--brasa-oscura);
+  color: var(--brasa-texto);
 }
 .pag .tickets + .dos-col {
   margin-top: 1rem;

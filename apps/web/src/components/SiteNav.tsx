@@ -1,4 +1,5 @@
 import { Link } from "react-router";
+import { BotonTema } from "./BotonTema.tsx";
 import "../styles/nav.css";
 
 export function SiteNav() {
@@ -16,6 +17,7 @@ export function SiteNav() {
         <Link to="/carta">Carta</Link>
         <Link to="/como-llegar">Cómo llegar</Link>
       </nav>
+      <BotonTema />
       <Link className="btn btn--brasa nav__cta" to="/reservar">
         Reservar
       </Link>

@@ -167,3 +167,33 @@ html.lenis body {
 .lenis.lenis-stopped {
   overflow: hidden;
 }
+
+/* Botón de modo claro/oscuro (sol y luna) */
+.tema {
+  display: inline-grid;
+  place-items: center;
+  flex: none;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid currentColor;
+  border-radius: 50%;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.tema:hover {
+  background: color-mix(in srgb, currentColor 14%, transparent);
+}
+.tema:focus-visible {
+  outline: 3px solid var(--brasa-texto);
+  outline-offset: 2px;
+}
+.tema--adm {
+  width: 40px;
+  height: 40px;
+  border-width: 1.5px;
+}

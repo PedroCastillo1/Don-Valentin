@@ -33,7 +33,7 @@
   font-size: 0.7rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: var(--brasa-oscura);
+  color: var(--brasa-texto);
 }
 .nav__links {
   display: flex;

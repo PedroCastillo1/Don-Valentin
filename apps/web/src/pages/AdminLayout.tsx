@@ -3,6 +3,7 @@ import type { Permiso } from "@dv/shared";
 import { ROL_NOMBRE } from "@dv/shared";
 import { useSesion } from "../lib/sesion.tsx";
 import { Icono } from "../components/Iconos.tsx";
+import { BotonTema } from "../components/BotonTema.tsx";
 import "../styles/admin.css";
 
 const ACTIVOS: {
@@ -91,6 +92,7 @@ export function AdminLayout() {
       <header className="adm__tope">
         <p className="adm__marca">Don Valentín</p>
         <span className="adm__ambiente">Ambiente de prueba</span>
+        <BotonTema className="tema--adm" />
         <button className="adm__salir" onClick={() => void salir()} aria-label="Salir">
           <Icono nombre="salir" />
         </button>
@@ -138,6 +140,7 @@ export function AdminLayout() {
             <strong>{usuario.nombre}</strong>
             <small>{ROL_NOMBRE[usuario.rol]}</small>
           </div>
+          <BotonTema className="tema--adm" />
           <button className="adm__salir" onClick={() => void salir()}>
             Salir
           </button>

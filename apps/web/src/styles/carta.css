@@ -21,7 +21,7 @@
   min-height: 48px;
   border: 2px solid var(--carbon);
   border-radius: 8px;
-  background: #fff;
+  background: var(--superficie);
   padding: 0 1rem;
 }
 .cartapag .carta__buscar input:focus {
@@ -37,7 +37,7 @@
   font: 500 0.72rem/1 var(--f-mono);
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--brasa-oscura);
+  color: var(--brasa-texto);
   padding-bottom: 0.4rem;
   border-bottom: 2px solid var(--carbon);
   margin-bottom: 0.3rem;

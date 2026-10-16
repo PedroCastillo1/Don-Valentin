@@ -28,6 +28,13 @@
   --tinta-2: #3b342f;
   --tinta-3: var(--humo);
 
+  /* Tokens que cambian con el modo oscuro */
+  --brasa-texto: var(--brasa-oscura); /* bordeaux como letra sobre fondo claro */
+  --superficie: #ffffff; /* tarjetas, campos y paneles sobre la ceniza */
+  --tinte-ambar: #f6e2b5;
+  --tinte-rosa: #f8ddd8;
+  color-scheme: light;
+
   --f-display: "Big Shoulders Display Variable", "Arial Narrow", Impact, sans-serif;
   --f-texto: "Instrument Sans Variable", system-ui, sans-serif;
   --f-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -36,4 +43,83 @@
   --sombra: 0 1px 0 rgba(23, 16, 12, 0.06), 0 10px 24px -14px rgba(23, 16, 12, 0.35);
   --ease: cubic-bezier(0.22, 1, 0.36, 1);
   --z-nav: 20;
+}
+
+/* ───── Modo oscuro (botón sol/luna; la primera vez sigue al sistema) ─────
+   Se invierten las superficies de lectura. Las secciones que ya son oscuras por diseño (hero, recorrido, salón,
+   precios, cierre, pie, panel lateral…) y las islas que deben quedar claras (mapa, QR, tickets) vuelven a los
+   valores originales, así se ven igual en los dos modos. */
+:root[data-tema="oscuro"] {
+  --carbon: #ece8e4;
+  --carbon-2: #d9d3cd;
+  --carbon-3: #b9b1aa;
+  --ceniza: #16110e;
+  --ceniza-2: #211915;
+  --ceniza-3: #3b302a;
+  --humo: #aaa39c;
+  --tinta-2: #d6d0ca;
+  --brasa-fondo: #3a1817;
+  --brasa-oscura: #3f0f0f;
+  --brasa-texto: #e07a72;
+  --superficie: #201814;
+  --tinte-ambar: #3a2d12;
+  --tinte-rosa: #3a1c19;
+  --marmol-claro: #1f3125;
+  --ok: #7fd19b;
+  --alerta: #e9b45a;
+  --error: #f08a80;
+  --sombra: 0 1px 0 rgba(0, 0, 0, 0.3), 0 10px 24px -14px rgba(0, 0, 0, 0.7);
+  color-scheme: dark;
+}
+:root[data-tema="oscuro"]
+  :is(
+    .hero,
+    .rec,
+    .salon,
+    .precios,
+    .cierre,
+    .pie,
+    .telon,
+    .pag__cab--medio,
+    .nav-claro .nav,
+    .login__lado,
+    .adm__riel,
+    .adm__tope,
+    .reservar__video,
+    .mapa:has(.mapa__svg),
+    .qr,
+    .etq,
+    .estado,
+    .chip,
+    .tacc,
+    .mensaje
+  ) {
+  --carbon: #17100c;
+  --carbon-2: #2a1d16;
+  --carbon-3: #3a2a20;
+  --ceniza: #e9eaec;
+  --ceniza-2: #dcdee1;
+  --ceniza-3: #c4c7cc;
+  --humo: #565d66;
+  --tinta-2: #3b342f;
+  --brasa-fondo: #f0d8d6;
+  --brasa-oscura: #561313;
+  --brasa-texto: var(--brasa-oscura);
+  --superficie: #ffffff;
+  --tinte-ambar: #f6e2b5;
+  --tinte-rosa: #f8ddd8;
+  --marmol-claro: #cfdccf;
+  --ok: #1f6b3a;
+  --alerta: #8a5a00;
+  --error: #b3261e;
+  --papel: var(--ceniza);
+  --papel-2: var(--ceniza-2);
+  --papel-3: var(--ceniza-3);
+  --tinta: var(--carbon);
+  --tinta-3: var(--humo);
+  color-scheme: light;
+}
+/* Las islas claras llevan su propio color de letra (no heredan el claro del modo oscuro) */
+:root[data-tema="oscuro"] :is(.mapa:has(.mapa__svg), .qr) {
+  color: var(--carbon);
 }
