@@ -290,8 +290,7 @@ export function Galeria() {
         );
       });
       gsap.from(el.querySelector(".gal__tarjeta"), {
-        scale: 0.85,
-        rotate: -4,
+        scale: 0.9,
         opacity: 0,
         duration: 1,
         ease: "back.out(1.6)",

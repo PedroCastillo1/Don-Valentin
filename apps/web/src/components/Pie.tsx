@@ -52,8 +52,9 @@ export function Pie() {
         <div>
           <p className="pie__t">Seguinos</p>
           <p>
+            Instagram:{" "}
             <a href={LOCAL.instagram} rel="noopener noreferrer" target="_blank">
-              Instagram @parrilladonvalentin
+              @parrilladonvalentin
             </a>
           </p>
           <p>

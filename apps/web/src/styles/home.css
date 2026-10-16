@@ -309,7 +309,6 @@
   justify-items: start;
   gap: 0.8rem;
   box-shadow: 0 30px 60px -20px rgb(0 0 0 / 0.6);
-  rotate: -1.5deg;
 }
 .gal__tarjeta h2 {
   font-family: var(--f-display);
@@ -420,12 +419,6 @@
   mask:
     radial-gradient(circle var(--r) at 0 50%, #0000 98%, #000) left / 51% 100% no-repeat,
     radial-gradient(circle var(--r) at 100% 50%, #0000 98%, #000) right / 51% 100% no-repeat;
-}
-.comanda:nth-child(odd) {
-  rotate: -0.7deg;
-}
-.comanda:nth-child(even) {
-  rotate: 0.6deg;
 }
 .comanda__cuando {
   font: 500 0.78rem/1.4 var(--f-mono);
