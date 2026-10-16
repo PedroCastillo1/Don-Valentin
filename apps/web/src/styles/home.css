@@ -322,16 +322,33 @@
   line-height: 1.5;
   color: var(--tinta-2);
 }
+/* Celular: una grilla quieta de 2 × 2 fotos y la carta debajo, sin columnas que se desplacen ni tarjeta sobre las fotos. */
 @media (max-width: 700px) {
   .gal {
-    height: 120svh;
-    min-height: 44rem;
+    display: block;
+    height: auto;
+    min-height: 0;
+    padding: clamp(1.25rem, 5vw, 2rem) clamp(1rem, 4vw, 1.5rem) clamp(2rem, 8vw, 3rem);
   }
   .gal__cols {
+    position: static;
+    inset: auto;
     grid-template-columns: repeat(2, minmax(0, 1fr));
+    margin-bottom: 1.25rem;
   }
-  .gal__col:nth-child(3) {
+  .gal__col {
+    display: contents;
+  }
+  .gal__col:nth-child(3),
+  .gal__col:nth-child(2) .gal__m:nth-child(3) {
     display: none;
+  }
+  .gal__m,
+  .gal__m--v {
+    aspect-ratio: 4 / 5;
+  }
+  .gal__tarjeta {
+    width: 100%;
   }
 }
 

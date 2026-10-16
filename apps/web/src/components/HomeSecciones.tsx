@@ -270,7 +270,8 @@ export function Salon() {
 /** Tres columnas de fotos y videos que corren a distinta velocidad con el scroll, con la carta en el centro. */
 export function Galeria() {
   const ref = useEscena<HTMLElement>((el, mm) => {
-    mm.add(MOV, () => {
+    // Las columnas con parallax son solo de pantallas anchas; en celular la grilla queda quieta.
+    mm.add(`${MOV} and (min-width: 701px)`, () => {
       const cols = el.querySelectorAll<HTMLElement>(".gal__col");
       const rangos: [number, number][] = [
         [12, -22],
@@ -289,12 +290,14 @@ export function Galeria() {
           },
         );
       });
+    });
+    mm.add(MOV, () => {
       gsap.from(el.querySelector(".gal__tarjeta"), {
         scale: 0.9,
         opacity: 0,
         duration: 1,
         ease: "back.out(1.6)",
-        scrollTrigger: { trigger: el, start: "top 45%" },
+        scrollTrigger: { trigger: el, start: "top 80%" },
       });
     });
   });
