@@ -21,7 +21,8 @@
     "db:seed": "npm run db:seed -w @dv/api",
     "dev:api": "npm run dev -w @dv/api",
     "dev:web": "npm run dev -w @dv/web",
-    "build": "npm run build -w @dv/web"
+    "build": "npm run build -w @dv/web",
+    "e2e": "npm run build && playwright test"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

@@ -197,6 +197,13 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
     res.status(204).end();
   });
   r.post("/parametros-validar", exigirPermiso(db, "parametros:editar"), async (req, res) => {
+    if (req.sesion!.usuario.rol !== "encargado") {
+      throw new ErrorDeDominio(
+        403,
+        "SOLO_ENCARGADO",
+        "Solo el Encargado de Salón puede validar los valores de la planilla.",
+      );
+    }
     const d = parsear(
       z.object({
         tipo: z.enum(["parametro", "mesa", "franja", "aforo", "tipo_solicitud", "sector_salon"]),

@@ -22,7 +22,7 @@ Convención: ✅ probado con evidencia ejecutada · 🟡 implementado, probado e
 | E2E Playwright, axe, Lighthouse, revisión de seguridad manual documentada | ⏳ |
 
 ## Calidad
-`npm run verify` en verde: typecheck + ESLint + Prettier + 34 tests (11 dominio, 20 API integración + 11 ... ver `npx vitest run`). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
+`npm run verify` en verde: typecheck + ESLint + Prettier + 34 tests (11 de dominio, 20 de API contra MySQL real, 3 de horario web). Pruebas de integración requieren MySQL en marcha (ver `PROJECT_CONTEXT.md`).
 Seguridad: `SECURITY_GUIDANCE_DISABLE=0` fijado en `.claude/settings.json` y verificado ejecutando el hook directamente (con `=1` se saltea; con `=0` dispara con eval/innerHTML). La sesión de Claude Code ya iniciada conserva `=1` en su entorno: el cambio rige para sesiones nuevas.
 
 ## Fuera de N3 (no implementar de verdad; mostrar con hito y fecha)

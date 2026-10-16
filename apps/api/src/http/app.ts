@@ -65,6 +65,10 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
         })
       : pasar;
 
+  app.get("/api/health", (_req, res) => {
+    res.json({ ok: true });
+  });
+
   const api = express.Router();
   api.use(limite(60_000, 300, "Demasiadas peticiones. Esperá un momento."));
   api.use(cargarSesion(db));
