@@ -1,11 +1,13 @@
 import { useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
-import { LOCAL } from "@dv/shared";
+import { LOCAL, PARRILLA_LIBRE } from "@dv/shared";
+import { precio } from "../lib/formato.ts";
 import { api, ApiError } from "../lib/api.ts";
 import { diaLargo, hoyAr, sumarDias } from "../lib/fechas.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
 import { VideoLoop } from "../components/VideoLoop.tsx";
+import "../styles/reservar.css";
 
 interface Franja {
   id: number;
@@ -35,6 +37,8 @@ export function Reservar() {
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
   const [ok, setOk] = useState<Confirmada | null>(null);
+  const franjaElegida = franjas.find((f) => f.id === franjaId);
+  const desde = Math.min(...PARRILLA_LIBRE.formulas.map((f) => f.precioPorPersona));
 
   useEffect(() => {
     api<{ reservaDiasMax: number }>("/public/info")
@@ -122,6 +126,7 @@ export function Reservar() {
     <PaginaPublica titulo="Reservá tu mesa" ojo="Elegí el día y el horario" ancha>
       <div className="reservar">
         <form className="form-pub" onSubmit={enviar} noValidate>
+          <p className="paso__t">Primero, tus datos</p>
           <label>
             Nombre
             <input
@@ -146,6 +151,7 @@ export function Reservar() {
             />
             {errores.telefono && <span className="campo-error">{errores.telefono}</span>}
           </label>
+          <p className="paso__t">Después, cuándo venís</p>
           <div className="fila">
             <label>
               Personas
@@ -192,6 +198,7 @@ export function Reservar() {
               ))}
             </div>
           </fieldset>
+          <p className="paso__t">Por último, confirmá</p>
           <label>
             Comentarios (opcional)
             <input
@@ -224,19 +231,42 @@ export function Reservar() {
             <a href={`tel:${LOCAL.telefonos[1].tel}`}>{LOCAL.telefonos[1].valor}</a>.
           </p>
         </form>
-        <aside className="reservar__lado" aria-label="Datos del local">
-          <VideoLoop src="/media/video/brasas.mp4" poster="/media/video/brasas.webp" />
-          <div className="reservar__datos">
-            <p className="rotulo__mono">Parrilla libre · San Miguel</p>
-            <p>
-              Todos los días de {LOCAL.horario.apertura} a {LOCAL.horario.cierre}.
+        <aside className="reservar__lado" aria-label="Resumen de tu reserva y datos del local">
+          <div className="resumen">
+            <p className="resumen__mono">Tu reserva</p>
+            <dl>
+              <div>
+                <dt>A nombre de</dt>
+                <dd>{nombre.trim() || "—"}</dd>
+              </div>
+              <div>
+                <dt>Día</dt>
+                <dd>{fecha ? diaLargo(fecha) : "—"}</dd>
+              </div>
+              <div>
+                <dt>Horario</dt>
+                <dd>{franjaElegida ? franjaElegida.nombre.replace(" a ", " – ") : "Elegí un horario"}</dd>
+              </div>
+              <div>
+                <dt>Personas</dt>
+                <dd>{personas}</dd>
+              </div>
+            </dl>
+            <p className="resumen__pie">
+              Parrilla libre desde {precio(desde)} por persona. <Link to="/parrilla-libre">Qué incluye</Link>
             </p>
-            <p>
-              {LOCAL.direccion}, {LOCAL.localidad}.
-            </p>
-            <p>
-              ¿Preferís hablar con nosotros? {LOCAL.telefonos[0].etiqueta}: <strong>{LOCAL.telefonos[0].valor}</strong>.
-            </p>
+          </div>
+          <div className="reservar__video">
+            <VideoLoop src="/media/video/brasas.mp4" poster="/media/video/brasas.webp" />
+            <div className="reservar__datos">
+              <p className="rotulo__mono">Parrilla libre · San Miguel</p>
+              <p>
+                Todos los días de {LOCAL.horario.apertura} a {LOCAL.horario.cierre}.
+              </p>
+              <p>
+                {LOCAL.direccion}, {LOCAL.localidad}. <Link to="/como-llegar">Cómo llegar</Link>
+              </p>
+            </div>
           </div>
         </aside>
       </div>

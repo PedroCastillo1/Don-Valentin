@@ -1,6 +1,6 @@
 import { SiteNav } from "../components/SiteNav.tsx";
 import { Hero } from "../components/Hero.tsx";
-import { Cinta, Fuego, Esencial, CierreReserva } from "../components/HomeSecciones.tsx";
+import { Cinta, Fuego, Precios, Ubicacion, CierreReserva } from "../components/HomeSecciones.tsx";
 import { Pie } from "../components/Pie.tsx";
 
 export default function Inicio() {
@@ -11,7 +11,8 @@ export default function Inicio() {
         <Hero />
         <Cinta />
         <Fuego />
-        <Esencial />
+        <Precios />
+        <Ubicacion />
         <CierreReserva />
       </main>
       <Pie />

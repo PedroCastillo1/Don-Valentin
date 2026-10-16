@@ -1,0 +1,214 @@
+/* Mapa propio de Don Valentín: ceniza de base, calles claras, la Av. Illia en tono brasa y el local a pleno. */
+.mapa {
+  position: relative;
+  overflow: hidden;
+  background: var(--ceniza);
+  border: 2px solid var(--carbon);
+  min-height: 22rem;
+  aspect-ratio: 3 / 2;
+  isolation: isolate;
+}
+.mapa__svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  max-width: none;
+}
+.mapa__tierra {
+  fill: var(--ceniza);
+}
+.mapa__parque {
+  fill: var(--marmol-claro);
+}
+.mapa__edificio {
+  fill: var(--ceniza-2);
+}
+.mapa__calle {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 5;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa__terciaria {
+  fill: none;
+  stroke: #fff;
+  stroke-width: 8;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa__riel {
+  fill: none;
+  stroke: var(--humo);
+  stroke-width: 3;
+  stroke-dasharray: 7 5;
+}
+.mapa__principal-borde {
+  fill: none;
+  stroke: var(--ceniza-3);
+  stroke-width: 22;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa__principal {
+  fill: none;
+  stroke: var(--brasa-fondo);
+  stroke-width: 17;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.mapa__casa {
+  fill: var(--brasa);
+  stroke: var(--carbon);
+  stroke-width: 1.5;
+}
+.mapa__via,
+.mapa__poi-t,
+.mapa__dist {
+  font-family: var(--f-mono);
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  fill: var(--carbon);
+  paint-order: stroke;
+  stroke: var(--ceniza);
+  stroke-width: 3.5px;
+  stroke-linejoin: round;
+}
+.mapa__via {
+  fill: var(--humo);
+}
+.mapa__poi circle {
+  fill: var(--carbon);
+  stroke: var(--ceniza);
+  stroke-width: 2px;
+  transition: r 0.25s var(--ease);
+}
+.mapa__poi--on circle {
+  fill: var(--brasa);
+  stroke: var(--carbon);
+}
+.mapa__camino line {
+  stroke: var(--carbon);
+  fill: none;
+}
+.mapa__dist {
+  fill: var(--brasa-oscura);
+  font-weight: 700;
+}
+.mapa__pin-c {
+  fill: var(--brasa);
+  stroke: var(--carbon);
+  stroke-width: 2.5px;
+}
+.mapa__pulso {
+  fill: var(--brasa);
+  opacity: 0.35;
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: mapa-pulso 2.6s ease-out infinite;
+}
+@keyframes mapa-pulso {
+  0% {
+    transform: scale(1);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(3.4);
+    opacity: 0;
+  }
+}
+.mapa__tag {
+  fill: var(--carbon);
+}
+.mapa__tag-t {
+  fill: var(--ceniza);
+  font-family: var(--f-mono);
+  font-weight: 500;
+  letter-spacing: 0.08em;
+}
+.mapa__escala {
+  position: absolute;
+  left: 0.9rem;
+  bottom: 2rem;
+  display: flex;
+  align-items: flex-end;
+  gap: 0.5rem;
+  font: 500 0.7rem/1 var(--f-mono);
+  color: var(--carbon);
+  pointer-events: none;
+}
+.mapa__escala i {
+  display: block;
+  height: 0.5rem;
+  border: 2px solid var(--carbon);
+  border-top: 0;
+}
+.mapa__norte {
+  position: absolute;
+  right: 0.9rem;
+  top: 0.9rem;
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border: 2px solid var(--carbon);
+  border-radius: 50%;
+  background: var(--ceniza);
+  font: 700 0.8rem/1 var(--f-mono);
+  pointer-events: none;
+}
+.mapa__credito {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0.2rem 0.6rem;
+  background: rgb(233 234 236 / 0.92);
+  font: 400 0.75rem/1.4 var(--f-texto);
+  color: var(--humo);
+}
+.mapa__credito a {
+  color: var(--carbon);
+}
+.mapa__zoom {
+  position: absolute;
+  left: 0.9rem;
+  top: 0.9rem;
+  display: flex;
+  border: 2px solid var(--carbon);
+  background: var(--ceniza);
+}
+.mapa__zoom button {
+  min-height: 44px;
+  min-width: 4.5rem;
+  border: 0;
+  background: transparent;
+  font: 600 0.82rem/1 var(--f-mono);
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+.mapa__zoom button + button {
+  border-left: 2px solid var(--carbon);
+}
+.mapa__zoom button[aria-pressed="true"] {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.mapa__zoom button:not([aria-pressed="true"]):hover {
+  background: var(--brasa-fondo);
+}
+@media (max-width: 720px) {
+  .mapa {
+    aspect-ratio: 4 / 5;
+    min-height: 0;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .mapa__pulso {
+    animation: none;
+    opacity: 0.25;
+  }
+}

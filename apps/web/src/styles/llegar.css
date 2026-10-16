@@ -1,0 +1,265 @@
+/* Cómo llegar: mapa propio + comanda con la dirección */
+.llegar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.7fr) minmax(19rem, 1fr);
+  gap: clamp(1rem, 2.4vw, 2rem);
+  align-items: stretch;
+}
+.llegar .mapa {
+  aspect-ratio: auto;
+  min-height: clamp(26rem, 62vh, 40rem);
+}
+.llegar__comanda {
+  display: grid;
+  align-content: start;
+  filter: drop-shadow(0 18px 22px rgb(23 16 12 / 0.22));
+}
+.llegar__cuerpo,
+.llegar__pie {
+  background: #fff;
+  padding: 1.5rem 1.5rem 1.3rem;
+  --r: 0.6rem;
+}
+.llegar__cuerpo {
+  display: grid;
+  gap: 0.3rem;
+  border-radius: 6px 6px 0 0;
+  border-bottom: 2px dashed var(--ceniza-3);
+  mask:
+    radial-gradient(circle var(--r) at 0 100%, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at 100% 100%, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+.llegar__pie {
+  border-radius: 0 0 6px 6px;
+  padding-top: 1.2rem;
+  mask:
+    radial-gradient(circle var(--r) at 0 0, #0000 98%, #000) left / 51% 100% no-repeat,
+    radial-gradient(circle var(--r) at 100% 0, #0000 98%, #000) right / 51% 100% no-repeat;
+}
+.llegar__estado,
+.llegar__mono {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  font-family: var(--f-mono);
+  font-size: 0.76rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: var(--humo);
+}
+.llegar__estado {
+  margin-bottom: 0.9rem;
+}
+.llegar__calle {
+  font-family: var(--f-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(2.6rem, 4.4vw, 3.8rem);
+  line-height: 0.92;
+  text-wrap: balance;
+}
+.llegar__ciudad {
+  font-weight: 600;
+  color: var(--tinta-2);
+}
+.llegar__acciones {
+  display: grid;
+  gap: 0.6rem;
+  margin-top: 1.1rem;
+}
+.llegar__acciones .btn {
+  width: 100%;
+}
+.llegar__refs {
+  list-style: none;
+  margin: 0.6rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 0.4rem;
+}
+.llegar__refs button {
+  width: 100%;
+  min-height: 52px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  grid-template-areas: "n m" "d m";
+  align-items: center;
+  column-gap: 0.8rem;
+  text-align: left;
+  padding: 0.5rem 0.8rem;
+  background: var(--ceniza);
+  border: 2px solid transparent;
+  border-radius: 8px;
+  cursor: pointer;
+  transition:
+    border-color 0.2s,
+    background 0.2s;
+}
+.llegar__refs button:hover {
+  border-color: var(--carbon);
+}
+.llegar__refs button[aria-pressed="true"] {
+  background: var(--brasa-fondo);
+  border-color: var(--carbon);
+}
+.llegar__ref-n {
+  grid-area: n;
+  font-weight: 700;
+}
+.llegar__ref-d {
+  grid-area: d;
+  font-size: 0.82rem;
+  color: var(--humo);
+}
+.llegar__ref-m {
+  grid-area: m;
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}
+.llegar__nota {
+  margin-top: 0.8rem;
+  font-size: 0.78rem;
+  color: var(--humo);
+}
+
+/* ¿Cómo venís? */
+.venir {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.6fr);
+  gap: 1rem clamp(1.5rem, 5vw, 4rem);
+  align-items: start;
+  margin-top: clamp(2rem, 5vw, 4rem);
+}
+.pag .venir h2 {
+  grid-row: span 2;
+  font-size: clamp(2.4rem, 5vw, 4.2rem);
+  line-height: 0.95;
+  margin: 0;
+}
+.venir__tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.venir__tabs button {
+  min-height: 46px;
+  padding: 0 1.2rem;
+  border: 2px solid var(--carbon);
+  border-radius: 999px;
+  background: transparent;
+  font-weight: 600;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    color 0.2s;
+}
+.venir__tabs button:hover {
+  background: var(--brasa-fondo);
+}
+.venir__tabs button[aria-selected="true"] {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.venir__panel {
+  display: grid;
+  gap: 0.8rem;
+  max-width: 38rem;
+  font-size: 1.08rem;
+}
+.venir__panel strong {
+  font-weight: 700;
+}
+
+/* Horario, teléfonos y cierre */
+.datos {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1.3fr;
+  gap: 0;
+  margin-top: clamp(2rem, 5vw, 4rem);
+  border: 2px solid var(--carbon);
+}
+.datos > div {
+  padding: 1.4rem 1.5rem;
+}
+.datos > div + div {
+  border-left: 2px solid var(--carbon);
+}
+.datos__g {
+  font-family: var(--f-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: clamp(1.7rem, 3vw, 2.4rem);
+  line-height: 1;
+  margin-top: 0.6rem;
+}
+.datos__tel {
+  font-size: 1.3rem;
+  font-weight: 700;
+  margin-top: 0.5rem;
+  font-variant-numeric: tabular-nums;
+}
+.datos__tel small {
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--humo);
+}
+.datos__reserva {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  align-items: end;
+  color: var(--ceniza);
+  min-height: 11rem;
+  isolation: isolate;
+}
+.datos__video,
+.datos__velo {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: -2;
+}
+.datos__velo {
+  z-index: -1;
+  background: linear-gradient(to top, rgb(23 16 12 / 0.85), rgb(23 16 12 / 0.25));
+}
+.datos__in {
+  display: grid;
+  gap: 0.7rem;
+  justify-items: start;
+}
+.datos__in p {
+  font-family: var(--f-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+
+@media (max-width: 960px) {
+  .llegar {
+    grid-template-columns: 1fr;
+  }
+  .llegar .mapa {
+    min-height: 0;
+    aspect-ratio: 4 / 5;
+  }
+  .venir {
+    grid-template-columns: 1fr;
+  }
+  .venir h2 {
+    grid-row: auto;
+  }
+  .datos {
+    grid-template-columns: 1fr;
+  }
+  .datos > div + div {
+    border-left: 0;
+    border-top: 2px solid var(--carbon);
+  }
+}

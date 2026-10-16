@@ -7,3 +7,4 @@ media/originals
 test-results
 playwright-report
 .impeccable-cache
+apps/web/dist-preview/

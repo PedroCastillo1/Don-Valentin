@@ -32,6 +32,8 @@ function sinMovimiento() {
  */
 export function Hero() {
   const raiz = useRef<HTMLElement>(null);
+  const control = useRef<{ tl: gsap.core.Timeline; aParada: (i: number) => void; salir: () => void } | null>(null);
+  const quieto = useMemo(() => typeof window !== "undefined" && sinMovimiento(), []);
   const estado = useMemo(() => estadoDelLocal(), []);
   const vertical = useMemo(
     () => typeof window !== "undefined" && window.matchMedia("(max-aspect-ratio: 1/1)").matches,
@@ -46,7 +48,6 @@ export function Hero() {
     const el = raiz.current;
     if (!el) return;
     const q = gsap.utils.selector(el);
-    const quieto = sinMovimiento();
     const va = el.querySelector<HTMLVideoElement>(".hero__v--a")!;
     const vb = el.querySelector<HTMLVideoElement>(".hero__v--b")!;
 
@@ -93,26 +94,60 @@ export function Hero() {
         .from(q(".hero__ticket"), { y: 48, opacity: 0, duration: 1, clearProps: "transform,opacity" }, 0.7)
         .from(q("[data-in]"), { y: 18, opacity: 0, duration: 0.7, stagger: 0.07 }, 0.9);
 
-      // Scroll: las barras se abren, el fuego pasa a pantalla completa, luego la persiana trae al asador.
-      const tl = gsap.timeline({
+      // Scroll: cuatro paradas (inicio · fuego · mesa · asador). Con snap direccional, un gesto rápido siempre
+      // termina en la parada siguiente y nunca "pasa volando" el hero.
+      const paradas = ["inicio", "fuego", "mesa", "asador"] as const;
+      const botones = Array.from(el.querySelectorAll<HTMLButtonElement>("[data-parada]"));
+      const marcar = (progreso: number, duracion: number) => {
+        const t = progreso * duracion;
+        let activa = 0;
+        paradas.forEach((nombre, i) => {
+          if (t >= (tl.labels[nombre] ?? 0) - 0.8) activa = i;
+        });
+        botones.forEach((b, i) => {
+          if (i === activa) b.setAttribute("aria-current", "step");
+          else b.removeAttribute("aria-current");
+        });
+      };
+
+      const tl: gsap.core.Timeline = gsap.timeline({
         defaults: { ease: "none" },
         scrollTrigger: {
           trigger: el,
           start: "top top",
-          end: () => `+=${Math.round(window.innerHeight * (vertical ? 3 : 3.6))}`,
+          end: () => `+=${Math.round(window.innerHeight * (vertical ? 3 : 3.2))}`,
           pin: true,
-          scrub: 0.7,
+          scrub: 0.6,
           anticipatePin: 1,
           invalidateOnRefresh: true,
+          fastScrollEnd: true,
+          snap: {
+            // Parada direccional con tolerancia: si ya estás sobre una parada te quedás; si no, vas a la siguiente
+            // en el sentido en que venías scrolleando (aunque el gesto haya sido fuerte).
+            snapTo: (valor: number, st?: ScrollTrigger) => {
+              const total = tl.duration();
+              const marcas = paradas.map((n) => (tl.labels[n] ?? 0) / total);
+              const cerca = marcas.find((m) => Math.abs(m - valor) < 0.02);
+              if (cerca !== undefined) return cerca;
+              const dir = st?.direction ?? 1;
+              if (dir > 0) return marcas.find((m) => m > valor) ?? 1;
+              return [...marcas].reverse().find((m) => m < valor) ?? 0;
+            },
+            duration: { min: 0.4, max: 0.9 },
+            delay: 0.08,
+            ease: "power2.inOut",
+          },
           onLeave: () => raizHtml.classList.remove("nav-claro"),
           onEnterBack: () => raizHtml.classList.add("nav-claro"),
+          onLeaveBack: () => raizHtml.classList.add("nav-claro"),
           onUpdate: (st) => {
-            if (st.progress > 0.3) {
+            marcar(st.progress, tl.duration());
+            if (st.progress > 0.2) {
               cargar(vb, src.b);
               if (st.progress < 0.9 && vb.paused) void reproducir(vb);
             }
-            if (st.progress > 0.78 && !va.paused) va.pause();
-            if (st.progress <= 0.78 && va.paused && va.getAttribute("src")) void reproducir(va);
+            if (st.progress > 0.72 && !va.paused) va.pause();
+            if (st.progress <= 0.72 && va.paused && va.getAttribute("src")) void reproducir(va);
             if (st.progress > 0.95 && !vb.paused) vb.pause();
           },
           onToggle: (st) => {
@@ -124,52 +159,180 @@ export function Hero() {
         },
       });
 
-      tl.to(q(".hero__ticket"), { y: -80, opacity: 0, duration: 1.4, ease: "power2.in" }, 0)
+      tl.addLabel("inicio", 0)
+        .fromTo(
+          q(".hero__ticket"),
+          { y: 0, autoAlpha: 1 },
+          { y: -70, autoAlpha: 0, duration: 1.2, ease: "power2.in", immediateRender: false },
+          0,
+        )
         .to(
           q(".barra"),
-          { scaleX: 0, duration: 1.8, ease: "power2.inOut", stagger: { each: 0.1, from: "center" } },
-          0.5,
+          { scaleX: 0, duration: 1.7, ease: "power2.inOut", stagger: { each: 0.1, from: "center" } },
+          0.3,
         )
-        .to(q(".hero__v--a"), { scale: 1.12, duration: 6.5 }, 0)
+        .to(q(".hero__v--a"), { scale: 1.1, duration: 7 }, 0)
         .fromTo(
           q(".hero__rotulo--1 > *"),
-          { y: 40, opacity: 0 },
+          { y: 36, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9, stagger: 0.15, ease: "power3.out" },
-          2.2,
+          1.9,
         )
-        .to(q(".hero__rotulo--1"), { y: -40, opacity: 0, duration: 0.8, ease: "power2.in" }, 4.4)
-        .to(q(".hero__v--b"), { opacity: 1, duration: 1.2 }, 4.2)
+        .addLabel("fuego", 3.4)
+        .to(q(".hero__rotulo--1"), { y: -36, opacity: 0, duration: 0.8, ease: "power2.in" }, 4.4)
+        .to(q(".hero__v--b"), { opacity: 1, duration: 1.2 }, 4.3)
         .fromTo(
           q(".hero__rotulo--2 > *"),
-          { y: 40, opacity: 0 },
+          { y: 36, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.9, stagger: 0.15, ease: "power3.out" },
-          5.1,
+          5.3,
         )
-        .to(q(".hero__rotulo--2"), { y: -40, opacity: 0, duration: 0.7, ease: "power2.in" }, 6.5)
+        .addLabel("mesa", 6.9)
+        .to(q(".hero__rotulo--2"), { y: -36, opacity: 0, duration: 0.7, ease: "power2.in" }, 7.9)
         .fromTo(
           q(".tira"),
           { clipPath: "inset(100% 0% 0% 0%)" },
           {
             clipPath: "inset(0% 0% 0% 0%)",
-            duration: 1.5,
+            duration: 1.4,
             ease: "power3.inOut",
-            stagger: { each: 0.14, from: "start" },
+            stagger: { each: 0.12, from: "start" },
           },
-          6.7,
+          8.1,
         )
+        .fromTo(q(".hero__asador-velo"), { opacity: 0 }, { opacity: 1, duration: 1.6, ease: "power2.inOut" }, 8.4)
         .fromTo(
           q(".tira img"),
           { scale: 1.25 },
-          { scale: 1, duration: 2.6, ease: "power2.out", stagger: { each: 0.14, from: "start" } },
-          6.7,
+          { scale: 1, duration: 2.4, ease: "power2.out", stagger: { each: 0.12, from: "start" } },
+          8.1,
         )
+        .fromTo(q(".hero__asador-texto"), { autoAlpha: 0 }, { autoAlpha: 1, duration: 0.1 }, 9.9)
         .fromTo(
           q(".hero__asador-texto > *"),
-          { y: 34, opacity: 0 },
+          { y: 30, opacity: 0 },
           { y: 0, opacity: 1, duration: 0.8, stagger: 0.12, ease: "power3.out" },
-          8.6,
+          9.9,
         )
-        .to({}, { duration: 0.9 }); // pausa final: la foto queda un momento en pantalla antes de soltar el pin
+        .addLabel("asador", 11.2)
+        .to({}, { duration: 0.01 }, 11.2);
+
+      // Control del gesto: cada gesto (rueda, toque o teclado) mueve UNA parada, sin importar la fuerza ni la inercia.
+      // Fuera de las paradas (primera hacia arriba, última hacia abajo) el scroll sigue siendo el normal del navegador.
+      const st = tl.scrollTrigger!;
+      const marcas = () => paradas.map((n) => st.start + ((tl.labels[n] ?? 0) / tl.duration()) * (st.end - st.start));
+      const indice = () => {
+        const y = window.scrollY;
+        let k = 0;
+        let d = Infinity;
+        marcas().forEach((v, i) => {
+          if (Math.abs(v - y) < d) {
+            d = Math.abs(v - y);
+            k = i;
+          }
+        });
+        return k;
+      };
+      const enZona = () => window.scrollY >= st.start - 2 && window.scrollY <= st.end + 2;
+      let animando = false;
+      let bloqueado = false; // el gesto en curso ya movió una parada: se ignora hasta que pare la rueda
+      let ultimoGesto = 0;
+      let girar: gsap.core.Tween | null = null;
+
+      const mover = (destino: number) => {
+        girar?.kill();
+        const prox = { y: window.scrollY };
+        animando = true;
+        girar = gsap.to(prox, {
+          y: destino,
+          duration: 1.05,
+          ease: "power3.inOut",
+          onUpdate: () => window.scrollTo(0, prox.y),
+          onComplete: () => {
+            // enfriamiento: la inercia de la rueda puede seguir un rato más
+            window.setTimeout(() => {
+              animando = false;
+            }, 300);
+          },
+        });
+      };
+      const aParada = (i: number) => mover(marcas()[i] ?? st.start);
+      const salir = () => mover(st.end + Math.round(window.innerHeight * 0.6));
+      control.current = { tl, aParada, salir };
+
+      const siguiente = (dir: 1 | -1) => {
+        const sig = indice() + dir;
+        return sig < 0 || sig >= paradas.length ? null : sig;
+      };
+
+      const alRueda = (e: WheelEvent) => {
+        if (!enZona() || e.ctrlKey) return;
+        const ahora = performance.now();
+        if (ahora - ultimoGesto > 220) bloqueado = false;
+        ultimoGesto = ahora;
+        if (animando || bloqueado) {
+          e.preventDefault();
+          return;
+        }
+        if (Math.abs(e.deltaY) < 1) return;
+        const sig = siguiente(e.deltaY > 0 ? 1 : -1);
+        if (sig === null) return;
+        e.preventDefault();
+        bloqueado = true;
+        aParada(sig);
+      };
+
+      let y0 = 0;
+      let tocado = false;
+      const alTocar = (e: TouchEvent) => {
+        y0 = e.touches[0]?.clientY ?? 0;
+        tocado = false;
+      };
+      const alArrastrar = (e: TouchEvent) => {
+        if (!enZona()) return;
+        const dy = y0 - (e.touches[0]?.clientY ?? y0);
+        if (animando || tocado) {
+          if (e.cancelable) e.preventDefault();
+          return;
+        }
+        if (Math.abs(dy) < 8) return;
+        const sig = siguiente(dy > 0 ? 1 : -1);
+        if (sig === null) return;
+        if (e.cancelable) e.preventDefault();
+        if (Math.abs(dy) >= 28) {
+          tocado = true;
+          aParada(sig);
+        }
+      };
+
+      const alTeclear = (e: KeyboardEvent) => {
+        if (!enZona() || e.altKey || e.ctrlKey || e.metaKey) return;
+        const t = e.target as HTMLElement | null;
+        if (t && (/^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName) || t.isContentEditable)) return;
+        const dir =
+          e.key === "ArrowDown" || e.key === "PageDown" ? 1 : e.key === "ArrowUp" || e.key === "PageUp" ? -1 : 0;
+        if (!dir) return;
+        if (animando) {
+          e.preventDefault();
+          return;
+        }
+        const sig = siguiente(dir);
+        if (sig === null) return;
+        e.preventDefault();
+        aParada(sig);
+      };
+
+      window.addEventListener("wheel", alRueda, { passive: false });
+      window.addEventListener("touchstart", alTocar, { passive: true });
+      window.addEventListener("touchmove", alArrastrar, { passive: false });
+      window.addEventListener("keydown", alTeclear);
+      return () => {
+        window.removeEventListener("wheel", alRueda);
+        window.removeEventListener("touchstart", alTocar);
+        window.removeEventListener("touchmove", alArrastrar);
+        window.removeEventListener("keydown", alTeclear);
+        girar?.kill();
+      };
     });
 
     return () => {
@@ -179,7 +342,15 @@ export function Hero() {
       vb.pause();
       document.documentElement.classList.remove("nav-claro");
     };
-  }, [src.a, src.b, vertical]);
+  }, [src.a, src.b, vertical, quieto]);
+
+  /** Lleva el scroll a una parada del hero (o más allá del hero). */
+  function irA(nombre: string) {
+    const c = control.current;
+    if (!c) return;
+    if (nombre === "salir") c.salir();
+    else c.aParada(["inicio", "fuego", "mesa", "asador"].indexOf(nombre));
+  }
 
   const barras = Array.from({ length: n }, (_, i) => i);
 
@@ -247,6 +418,30 @@ export function Hero() {
         <p className="rotulo__mono">Parrilla libre desde {precio(desde)} por persona</p>
         <p className="rotulo__t">Una mesa larga, el fuego a la vista.</p>
       </div>
+
+      {!quieto && (
+        <nav className="hero__pasos" aria-label="Pasos de la portada">
+          {[
+            ["inicio", "Inicio"],
+            ["fuego", "El fuego"],
+            ["mesa", "La mesa"],
+            ["asador", "El asador"],
+          ].map(([id, t], i) => (
+            <button
+              key={id}
+              type="button"
+              data-parada={id}
+              aria-current={i === 0 ? "step" : undefined}
+              onClick={() => irA(id!)}
+            >
+              <span>{t}</span>
+            </button>
+          ))}
+          <button type="button" className="hero__saltar" onClick={() => irA("salir")}>
+            Saltar portada
+          </button>
+        </nav>
+      )}
 
       <div className="hero__persiana">
         {barras.map((i) => (

@@ -33,3 +33,11 @@ Todo dato operativo viene de la API o de `@dv/shared`/carta real (precio desde $
 
 ## Evidencia
 `docs/evidencias/iteracion-2/`: capturas por etapa, secuencia del hero (desktop y móvil), admin (desktop y móvil), **videos** de la secuencia y del login→dashboard, Lighthouse, detector de Impeccable.
+
+## v3 (15/10/2026, tercera iteración)
+- Consistencia: todo el sitio usa el mismo lenguaje que el hero (ceniza/brasa, sombra dura desplazada, comandas con muesca, barras de parrilla, tipografía Big Shoulders / Instrument Sans / IBM Plex Mono).
+- Hero: 4 paradas (inicio, fuego, mesa, asador); un gesto = una parada; riel de pasos; sin barrido accidental por scroll rápido.
+- "Del fuego a la mesa": capítulos con aire, un video protagonista, fotos fijas y texto; sin collage.
+- Precio: "desde $41.000 por persona" contextualizado junto a la otra fórmula, confirmado por Martín.
+- Cómo llegar: mapa propio (SVG desde OSM), referencias con distancias aproximadas, Google Maps como acceso secundario.
+- Impeccable 4.6.0 sobre las 5 páginas públicas en escritorio y móvil: limpio tras corregir crédito del mapa (<11 px) y dirección en mayúsculas. Evidencia: `docs/evidencias/impeccable-iteracion3-inicial.txt` (hallazgos previos a la corrección).

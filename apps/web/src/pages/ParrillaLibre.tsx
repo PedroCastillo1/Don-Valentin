@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { PARRILLA_LIBRE, SALSAS } from "@dv/shared";
 import { precio } from "../lib/formato.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
+import "../styles/parrilla.css";
 
 export function ParrillaLibre() {
   return (
@@ -10,6 +11,17 @@ export function ParrillaLibre() {
         Pagás un precio por persona y comés a gusto: parrilla, pastas con la salsa que elijas y pizzas. Entra una
         entrada y un postre.
       </p>
+      <figure className="pl__foto">
+        <img
+          src="/media/foto-6-1600.webp"
+          srcSet="/media/foto-6-900.webp 900w, /media/foto-6-1600.webp 1600w"
+          sizes="(max-width: 900px) 100vw, 78rem"
+          width={1600}
+          height={1066}
+          alt="La parrilla del local con cortes, pollo, verduras y papas asadas sobre las chapas"
+          decoding="async"
+        />
+      </figure>
       <div className="tickets">
         {PARRILLA_LIBRE.formulas.map((f) => (
           <article key={f.id} className="ticket">
@@ -23,11 +35,11 @@ export function ParrillaLibre() {
       <div className="dos-col">
         <section>
           <h2>Qué incluye</h2>
-          <ul className="lista">
+          <ol className="pl__pasos">
             {PARRILLA_LIBRE.incluye.map((i) => (
               <li key={i}>{i}</li>
             ))}
-          </ul>
+          </ol>
           <p>{PARRILLA_LIBRE.postreIncluido}.</p>
           <p>{PARRILLA_LIBRE.menores}</p>
         </section>

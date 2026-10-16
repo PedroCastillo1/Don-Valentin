@@ -1,0 +1,13 @@
+{
+  "fecha": "2026-10-17",
+  "personas": 2,
+  "franjas": [
+    { "id": 1, "nombre": "12:00 a 14:00", "desde": "12:00", "hasta": "14:00", "estado": "disponible" },
+    { "id": 2, "nombre": "14:00 a 16:00", "desde": "14:00", "hasta": "16:00", "estado": "disponible" },
+    { "id": 3, "nombre": "16:00 a 18:00", "desde": "16:00", "hasta": "18:00", "estado": "disponible" },
+    { "id": 4, "nombre": "18:00 a 20:00", "desde": "18:00", "hasta": "20:00", "estado": "disponible" },
+    { "id": 5, "nombre": "20:00 a 22:00", "desde": "20:00", "hasta": "22:00", "estado": "disponible" },
+    { "id": 6, "nombre": "22:00 a 00:00", "desde": "22:00", "hasta": "00:00", "estado": "disponible" },
+    { "id": 7, "nombre": "00:00 a 02:00", "desde": "00:00", "hasta": "02:00", "estado": "disponible" }
+  ]
+}

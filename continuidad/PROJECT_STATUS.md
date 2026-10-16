@@ -33,3 +33,7 @@ Estado del salón, modificar/cancelar reservas (H3 30/10) · carta digital con p
 
 ## Siguiente tarea
 Ver `HANDOFF.md` → "Próxima acción exacta".
+
+
+## Actualización 15/10/2026 noche — 3ª iteración de diseño
+Hero con paradas controladas, Del fuego a la mesa, Cómo llegar con mapa OSM propio, precio $41.000 contextualizado (confirmado por Martín), resto del sitio al mismo nivel. Verificado: 43 tests, 31 E2E, axe 0, Impeccable limpio. Abiertos: licencia de videos de banco, derechos de imagen de fotos, Lighthouse móvil, N4, constancia CR-009.

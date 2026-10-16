@@ -22,6 +22,12 @@ export const fijarCsrf = (t: string): void => {
 
 export async function api<T>(ruta: string, opts: { method?: string; body?: unknown } = {}): Promise<T> {
   const method = opts.method ?? "GET";
+  if (import.meta.env.VITE_PREVIEW) {
+    const { respuestaPreview } = await import("./preview.ts");
+    const r = respuestaPreview(ruta, method);
+    if (r.status >= 400) throw new ApiError(r.status, (r.body as { error: ErrorApi }).error);
+    return r.body as T;
+  }
   const res = await fetch(`/api${ruta}`, {
     method,
     credentials: "same-origin",

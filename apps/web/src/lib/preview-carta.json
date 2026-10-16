@@ -1,0 +1,1078 @@
+{
+  "grupos": [
+    {
+      "grupo": "Carnes",
+      "categorias": [
+        {
+          "id": "porciones-individuales",
+          "nombre": "Porciones individuales",
+          "productos": [
+            {
+              "id": 1,
+              "nombre": "Asado",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 14700 },
+                { "etiqueta": "1", "precio": 28900 }
+              ]
+            },
+            {
+              "id": 2,
+              "nombre": "Vacío",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 15500 },
+                { "etiqueta": "1", "precio": 29700 }
+              ]
+            },
+            {
+              "id": 3,
+              "nombre": "Matambre",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 15500 },
+                { "etiqueta": "1", "precio": 29700 }
+              ]
+            },
+            {
+              "id": 4,
+              "nombre": "Bondiola",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 15500 },
+                { "etiqueta": "1", "precio": 29700 }
+              ]
+            },
+            {
+              "id": 5,
+              "nombre": "Molleja",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 19000 },
+                { "etiqueta": "1", "precio": 36000 }
+              ]
+            },
+            {
+              "id": 6,
+              "nombre": "Chinchulín",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 6500 },
+                { "etiqueta": "1", "precio": 11800 }
+              ]
+            },
+            {
+              "id": 7,
+              "nombre": "Riñón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 8500 },
+                { "etiqueta": "1", "precio": 16300 }
+              ]
+            },
+            {
+              "id": 8,
+              "nombre": "Carré",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 14700 },
+                { "etiqueta": "1", "precio": 28900 }
+              ]
+            },
+            {
+              "id": 9,
+              "nombre": "Rabas",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 13200 },
+                { "etiqueta": "1", "precio": 25300 }
+              ]
+            },
+            {
+              "id": 10,
+              "nombre": "¼ de pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 11,
+              "nombre": "Parrillada para 2 personas",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 75200 }]
+            },
+            {
+              "id": 12,
+              "nombre": "Provoleta",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13800 }]
+            },
+            {
+              "id": 13,
+              "nombre": "Tortilla de papa",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13800 }]
+            }
+          ]
+        },
+        {
+          "id": "porciones-con-guarnicion",
+          "nombre": "Porciones con guarnición",
+          "productos": [
+            {
+              "id": 14,
+              "nombre": "Asado",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 31000 }]
+            },
+            {
+              "id": 15,
+              "nombre": "Vacío",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 32600 }]
+            },
+            {
+              "id": 16,
+              "nombre": "Matambre a la pizza",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 32600 }]
+            },
+            {
+              "id": 17,
+              "nombre": "Bondiola",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 32600 }]
+            },
+            {
+              "id": 18,
+              "nombre": "Bife de chorizo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 38900 }]
+            },
+            {
+              "id": 19,
+              "nombre": "Entraña",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 38900 }]
+            },
+            {
+              "id": 20,
+              "nombre": "¼ de pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 21,
+              "nombre": "Milanesa",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 20500 }]
+            },
+            {
+              "id": 22,
+              "nombre": "Milanesa a caballo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 23700 }]
+            },
+            {
+              "id": 23,
+              "nombre": "Milanesa napolitana",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 23700 }]
+            },
+            {
+              "id": 24,
+              "nombre": "Nuggets de pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13800 }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "Sándwiches",
+      "categorias": [
+        {
+          "id": "sandwiches",
+          "nombre": "Sándwiches",
+          "productos": [
+            {
+              "id": 25,
+              "nombre": "Choripán / Morcipán",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 7400 }]
+            },
+            {
+              "id": 26,
+              "nombre": "Choripán pomarola",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 7800 }]
+            },
+            {
+              "id": 27,
+              "nombre": "Hamburguesa L&T",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 9200 }]
+            },
+            {
+              "id": 28,
+              "nombre": "Hamburguesa completa",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10800 }]
+            },
+            {
+              "id": 29,
+              "nombre": "Sándwich de milanesa con lechuga y tomate",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 14700 }]
+            },
+            {
+              "id": 30,
+              "nombre": "Sándwich de milanesa de carne o pollo completo (lechuga, tomate, jamón y queso)",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 14700 }]
+            },
+            {
+              "id": 31,
+              "nombre": "Sándwich de bondiola, matambre o vacío",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 15000 }]
+            },
+            {
+              "id": 32,
+              "nombre": "Bife de chorizo",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18000 }]
+            },
+            {
+              "id": 33,
+              "nombre": "Entraña",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18000 }]
+            },
+            {
+              "id": 34,
+              "nombre": "Lomito completo",
+              "nota": "Todos salen con fritas.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 17500 }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "Papas y guarniciones",
+      "categorias": [
+        {
+          "id": "papas-fritas",
+          "nombre": "Papas fritas",
+          "productos": [
+            {
+              "id": 35,
+              "nombre": "Papas fritas",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 36,
+              "nombre": "Papas con cheddar",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13300 }]
+            }
+          ]
+        },
+        {
+          "id": "guarniciones",
+          "nombre": "Guarniciones",
+          "productos": [
+            {
+              "id": 37,
+              "nombre": "Ensalada mixta",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 38,
+              "nombre": "Ensalada rusa",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 39,
+              "nombre": "Papas al horno",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11200 }]
+            },
+            {
+              "id": 40,
+              "nombre": "½ morrón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 2000 }]
+            },
+            {
+              "id": 41,
+              "nombre": "Adicional huevo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 1500 }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "Pizzas y pastas",
+      "categorias": [
+        {
+          "id": "pizzas",
+          "nombre": "Pizzas",
+          "productos": [
+            {
+              "id": 42,
+              "nombre": "Mozzarella",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18900 }]
+            },
+            {
+              "id": 43,
+              "nombre": "Anchoa con muzzarela",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 25200 }]
+            },
+            {
+              "id": 44,
+              "nombre": "Fugazzeta",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 29800 }]
+            },
+            {
+              "id": 45,
+              "nombre": "Jamón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 29800 }]
+            },
+            {
+              "id": 46,
+              "nombre": "Jamón y morrón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 34700 }]
+            },
+            {
+              "id": 47,
+              "nombre": "Jamón, tomate, morrón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 48300 }]
+            },
+            {
+              "id": 48,
+              "nombre": "Roquefort",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 32000 }]
+            },
+            {
+              "id": 49,
+              "nombre": "Choclo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 29300 }]
+            },
+            {
+              "id": 50,
+              "nombre": "Napolitano",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 30200 }]
+            },
+            {
+              "id": 51,
+              "nombre": "Calabresa",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 30200 }]
+            },
+            {
+              "id": 52,
+              "nombre": "Pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 29800 }]
+            },
+            {
+              "id": 53,
+              "nombre": "Huevo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 25200 }]
+            },
+            {
+              "id": 54,
+              "nombre": "Verdeo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 25200 }]
+            },
+            {
+              "id": 55,
+              "nombre": "Papas pay",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 25200 }]
+            },
+            {
+              "id": 56,
+              "nombre": "Salchichas",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 30900 }]
+            },
+            {
+              "id": 57,
+              "nombre": "Panceta",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 32000 }]
+            },
+            {
+              "id": 58,
+              "nombre": "Panceta y huevo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 35700 }]
+            },
+            {
+              "id": 59,
+              "nombre": "Panceta y rúcula",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 35700 }]
+            },
+            {
+              "id": 60,
+              "nombre": "Rúcula",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 29800 }]
+            },
+            {
+              "id": 61,
+              "nombre": "Salchipapa",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 30800 }]
+            }
+          ]
+        },
+        {
+          "id": "pastas",
+          "nombre": "Pastas caseras",
+          "productos": [
+            {
+              "id": 62,
+              "nombre": "Tallarines",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 63,
+              "nombre": "Ñoquis",
+              "nota": null,
+              "sinTacc": true,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 64,
+              "nombre": "Ñoquis tricolor",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 65,
+              "nombre": "Ravioles de verdura",
+              "nota": null,
+              "sinTacc": true,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 66,
+              "nombre": "Ravioles de ricota",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 67,
+              "nombre": "Malfatti de verdura",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 9500 },
+                { "etiqueta": "1", "precio": 17000 }
+              ]
+            },
+            {
+              "id": 68,
+              "nombre": "Raviolín de pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 69,
+              "nombre": "Raviolón 4 quesos",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 70,
+              "nombre": "Raviolón de calabaza",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 71,
+              "nombre": "Canelón de verdura",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 72,
+              "nombre": "Canelón de pollo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 73,
+              "nombre": "Capellettis",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 74,
+              "nombre": "Agñolotis de ricota y jamón",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 75,
+              "nombre": "Sorrentino de jamón y queso",
+              "nota": null,
+              "sinTacc": true,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 76,
+              "nombre": "Sorrentino de verdura",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 10400 },
+                { "etiqueta": "1", "precio": 19000 }
+              ]
+            },
+            {
+              "id": 77,
+              "nombre": "Lasaña de pollo, jamón y ricota",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "½", "precio": 11200 },
+                { "etiqueta": "1", "precio": 21300 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "Postres",
+      "categorias": [
+        {
+          "id": "postres",
+          "nombre": "Postres",
+          "productos": [
+            {
+              "id": 117,
+              "nombre": "Tiramisú",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 8900 }]
+            },
+            {
+              "id": 118,
+              "nombre": "Flan casero",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 6600 }]
+            },
+            {
+              "id": 119,
+              "nombre": "Budín de pan",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 6600 }]
+            },
+            {
+              "id": 120,
+              "nombre": "2 bochas de helado",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 6600 }]
+            },
+            {
+              "id": 121,
+              "nombre": "Frutilla con crema",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13300 }]
+            },
+            {
+              "id": 122,
+              "nombre": "Durazno con crema",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 8000 }]
+            },
+            {
+              "id": 123,
+              "nombre": "Don Pedro",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18900 }]
+            },
+            {
+              "id": 124,
+              "nombre": "Adicional crema",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 3000 }]
+            },
+            {
+              "id": 125,
+              "nombre": "Adicional dulce de leche",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 3000 }]
+            },
+            {
+              "id": 126,
+              "nombre": "Ensalada de frutas",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [
+                { "etiqueta": "sola", "precio": 7400 },
+                { "etiqueta": "con 1 bocha de helado", "precio": 9500 }
+              ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "grupo": "Bebidas",
+      "categorias": [
+        {
+          "id": "vinos-blancos",
+          "nombre": "Vinos blancos",
+          "productos": [
+            {
+              "id": 78,
+              "nombre": "Vasco Viejo ¾",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10200 }]
+            },
+            {
+              "id": 79,
+              "nombre": "Vasco Viejo ⅜",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 7700 }]
+            },
+            {
+              "id": 80,
+              "nombre": "López",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16600 }]
+            },
+            {
+              "id": 81,
+              "nombre": "López ⅜",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10900 }]
+            },
+            {
+              "id": 82,
+              "nombre": "Cosecha Tardía",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18900 }]
+            },
+            {
+              "id": 83,
+              "nombre": "Estancia Mendoza dulce",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16400 }]
+            }
+          ]
+        },
+        {
+          "id": "vinos-tintos",
+          "nombre": "Vinos tintos",
+          "productos": [
+            {
+              "id": 84,
+              "nombre": "Vasco Viejo ¾",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10200 }]
+            },
+            {
+              "id": 85,
+              "nombre": "Vasco Viejo ⅜",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 7700 }]
+            },
+            {
+              "id": 86,
+              "nombre": "Norton dulce",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18900 }]
+            },
+            {
+              "id": 87,
+              "nombre": "López",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16600 }]
+            },
+            {
+              "id": 88,
+              "nombre": "López ⅜",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10900 }]
+            },
+            {
+              "id": 89,
+              "nombre": "Don Valentín",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 14700 }]
+            },
+            {
+              "id": 90,
+              "nombre": "Novecento",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16000 }]
+            },
+            {
+              "id": 91,
+              "nombre": "Estancia Mendoza",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16400 }]
+            },
+            {
+              "id": 92,
+              "nombre": "Alma Mora",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 19600 }]
+            },
+            {
+              "id": 93,
+              "nombre": "Dadá",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 19600 }]
+            },
+            {
+              "id": 94,
+              "nombre": "San Telmo",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16300 }]
+            },
+            {
+              "id": 95,
+              "nombre": "Finca Las Moras",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16300 }]
+            },
+            {
+              "id": 96,
+              "nombre": "Vaso de vino",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 4600 }]
+            }
+          ]
+        },
+        {
+          "id": "cervezas",
+          "nombre": "Cervezas",
+          "productos": [
+            {
+              "id": 97,
+              "nombre": "Quilmes / Brahma",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 12400 }]
+            },
+            {
+              "id": 98,
+              "nombre": "Quilmes Bock",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 12400 }]
+            },
+            {
+              "id": 99,
+              "nombre": "Brahma lata",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 8000 }]
+            },
+            {
+              "id": 100,
+              "nombre": "Stella Artois",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18000 }]
+            },
+            {
+              "id": 101,
+              "nombre": "Corona 710 cc",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18000 }]
+            },
+            {
+              "id": 102,
+              "nombre": "Patagonia",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 18000 }]
+            },
+            {
+              "id": 103,
+              "nombre": "Speed",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 5800 }]
+            }
+          ]
+        },
+        {
+          "id": "sin-alcohol",
+          "nombre": "Bebidas sin alcohol",
+          "productos": [
+            {
+              "id": 104,
+              "nombre": "Gaseosa 1 ½",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 9900 }]
+            },
+            {
+              "id": 105,
+              "nombre": "Gaseosa 500 cc",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 4600 }]
+            },
+            {
+              "id": 106,
+              "nombre": "Agua o soda",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 4000 }]
+            },
+            {
+              "id": 107,
+              "nombre": "Agua saborizada 1 ½",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 9900 }]
+            },
+            {
+              "id": 108,
+              "nombre": "Agua saborizada 500 cc",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 4600 }]
+            },
+            {
+              "id": 109,
+              "nombre": "Coca-Cola o Sprite 1,75 L",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 11600 }]
+            },
+            {
+              "id": 110,
+              "nombre": "Coca-Cola 600",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 5500 }]
+            }
+          ]
+        },
+        {
+          "id": "aperitivos",
+          "nombre": "Aperitivos",
+          "productos": [
+            {
+              "id": 111,
+              "nombre": "Gancia",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 9000 }]
+            },
+            {
+              "id": 112,
+              "nombre": "Fernet",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 9000 }]
+            },
+            {
+              "id": 113,
+              "nombre": "Fernet con Coca",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 13000 }]
+            }
+          ]
+        },
+        {
+          "id": "espumantes",
+          "nombre": "Espumantes",
+          "productos": [
+            {
+              "id": 114,
+              "nombre": "Sidra",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 10700 }]
+            },
+            {
+              "id": 115,
+              "nombre": "F. de Alvear",
+              "nota": null,
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": 16800 }]
+            },
+            {
+              "id": 116,
+              "nombre": "Chandon",
+              "nota": "La carta del 05/08/2026 imprime «$48.00»; el importe real debe confirmarlo el local.",
+              "sinTacc": false,
+              "variantes": [{ "etiqueta": "única", "precio": null }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

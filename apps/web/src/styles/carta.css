@@ -1,0 +1,213 @@
+/* Carta: índice a la izquierda que acompaña la lectura, lista con puntos guía */
+.cartapag {
+  display: grid;
+  grid-template-columns: 16rem minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 4rem);
+  align-items: start;
+}
+.cartapag__indice {
+  position: sticky;
+  top: 5.4rem;
+  display: grid;
+  gap: 1rem;
+  max-height: calc(100svh - 6.5rem);
+  overflow: auto;
+  padding-right: 0.5rem;
+  scrollbar-width: thin;
+}
+.cartapag .carta__buscar input {
+  width: 100%;
+  max-width: none;
+  min-height: 48px;
+  border: 2px solid var(--carbon);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 1rem;
+}
+.cartapag .carta__buscar input:focus {
+  box-shadow: 4px 4px 0 var(--brasa);
+  border-color: var(--carbon);
+  outline: none;
+}
+.cartapag__nav {
+  display: grid;
+  gap: 1.2rem;
+}
+.cartapag__g {
+  font: 500 0.72rem/1 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--brasa-oscura);
+  padding-bottom: 0.4rem;
+  border-bottom: 2px solid var(--carbon);
+  margin-bottom: 0.3rem;
+}
+.cartapag__grupo ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.cartapag__grupo button {
+  width: 100%;
+  min-height: 38px;
+  text-align: left;
+  padding: 0.35rem 0.6rem 0.35rem 0.8rem;
+  border: 0;
+  border-left: 4px solid transparent;
+  background: transparent;
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    border-color 0.2s;
+}
+.cartapag__grupo button:hover {
+  background: var(--ceniza-2);
+}
+.cartapag__grupo button[aria-current="true"] {
+  border-left-color: var(--brasa);
+  background: var(--brasa-fondo);
+}
+.cartapag__total {
+  font: 400 0.78rem/1.4 var(--f-mono);
+  color: var(--humo);
+}
+
+.carta__libre {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem 2rem;
+  padding: 1.2rem 1.4rem;
+  background: var(--brasa-fondo);
+  border: 2px solid var(--carbon);
+  box-shadow: 6px 6px 0 var(--carbon);
+}
+.carta__libre-k {
+  font-family: var(--f-display);
+  font-weight: 800;
+  text-transform: uppercase;
+  font-size: 1.6rem;
+  line-height: 1;
+}
+.carta__libre-p {
+  margin-top: 0.3rem;
+  max-width: 30rem;
+}
+
+.cartapag .carta__grupo {
+  margin-top: clamp(2.5rem, 5vw, 4rem);
+}
+.cartapag .carta__grupo > h2 {
+  position: relative;
+  font-family: var(--f-display);
+  font-weight: 900;
+  font-size: clamp(2.8rem, 6vw, 5rem);
+  line-height: 0.9;
+  color: var(--carbon);
+  border-bottom: 2px solid var(--carbon);
+  padding-bottom: 0.5rem;
+  margin: 0;
+}
+.cartapag .carta__grupo > h2::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -2px;
+  width: 5rem;
+  height: 7px;
+  background: var(--brasa);
+}
+.cartapag .carta__cat {
+  margin-top: 2rem;
+  scroll-margin-top: 6rem;
+}
+.cartapag .carta__cat h3 {
+  font-family: var(--f-mono);
+  font-weight: 500;
+  font-size: 0.8rem;
+  color: var(--humo);
+  margin-bottom: 0.4rem;
+}
+.cartapag .carta__cat ul {
+  grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr));
+  gap: 0 clamp(1.5rem, 4vw, 3.5rem);
+}
+.cartapag .carta__fila {
+  padding: 0.55rem 0.5rem;
+  margin-inline: -0.5rem;
+  border-radius: 6px;
+  transition: background 0.2s;
+}
+.cartapag .carta__fila:hover {
+  background: rgb(251 217 204 / 0.55);
+}
+.cartapag .carta__puntos {
+  border-bottom-color: var(--ceniza-3);
+}
+.cartapag .carta__precios small {
+  font-family: var(--f-mono);
+  font-size: 0.8rem;
+}
+.carta__vacio {
+  display: grid;
+  gap: 0.8rem;
+  justify-items: start;
+  padding: 2.5rem 0;
+  font-size: 1.1rem;
+  max-width: 32rem;
+}
+
+@media (max-width: 960px) {
+  .cartapag {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+  .cartapag__indice {
+    position: sticky;
+    top: 3.9rem;
+    z-index: 6;
+    max-height: none;
+    overflow: visible;
+    margin-inline: calc(-1 * clamp(1.25rem, 5vw, 4.5rem));
+    padding: 0.6rem clamp(1.25rem, 5vw, 4.5rem);
+    background: var(--ceniza);
+    border-bottom: 2px solid var(--carbon);
+    gap: 0.5rem;
+  }
+  .cartapag__nav {
+    display: flex;
+    gap: 0.4rem;
+    overflow-x: auto;
+    scrollbar-width: none;
+    padding-bottom: 0.2rem;
+  }
+  .cartapag__grupo {
+    display: contents;
+  }
+  .cartapag__g,
+  .cartapag__total {
+    display: none;
+  }
+  .cartapag__grupo ul {
+    display: contents;
+  }
+  .cartapag__grupo button {
+    width: auto;
+    white-space: nowrap;
+    min-height: 44px;
+    border: 2px solid var(--carbon);
+    border-radius: 999px;
+    padding: 0 1rem;
+  }
+  .cartapag__grupo button[aria-current="true"] {
+    background: var(--carbon);
+    color: var(--ceniza);
+    border-color: var(--carbon);
+  }
+  .cartapag .carta__cat {
+    scroll-margin-top: 9.5rem;
+  }
+}

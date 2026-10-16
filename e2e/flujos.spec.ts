@@ -8,50 +8,104 @@ test.describe("sitio público", () => {
     page.on("pageerror", (e) => errores.push(String(e)));
     await page.goto("/");
     await expect(page.getByRole("heading", { level: 1 })).toContainText("La parrilla de siempre");
-    await expect(page.getByText(/Abierto ahora|Cerrado/)).toBeVisible();
+    await expect(page.getByText(/Abierto ahora|Cerrado/).first()).toBeVisible();
     await expect(
       page.getByRole("region", { name: /Don Valentín, parrilla/ }).getByRole("link", { name: "Reservar mesa" }),
     ).toBeVisible();
     expect(errores.filter((e) => !e.includes("401"))).toEqual([]);
   });
 
-  test("la secuencia del hero avanza con el scroll: barras, video, persiana y menú", async ({ page, isMobile }) => {
+  test("la secuencia del hero avanza por paradas: fuego, mesa y asador, y al salir el menú cambia", async ({
+    page,
+  }) => {
     await page.goto("/");
     await page.waitForLoadState("load");
     await expect(page.locator("html")).toHaveClass(/nav-claro/);
-    const alto = await page.evaluate(() => window.innerHeight);
-    const total = Math.round(alto * (isMobile ? 3 : 3.6));
-    const mover = async (y: number) => {
-      await page.evaluate((py) => window.scrollTo(0, py), y);
-      await page.waitForTimeout(1300);
-    };
-    // 1) El primer video está cargado y reproduciéndose
     await expect(page.locator(".hero__v--a")).toHaveAttribute("src", /hero-a/);
     await expect
       .poll(() => page.locator(".hero__v--a").evaluate((v: HTMLVideoElement) => v.currentTime))
       .toBeGreaterThan(0);
-    // 2) A mitad del recorrido las barras ya se abrieron y el segundo video carga
-    await mover(Math.round(total * 0.5));
+    const parada = (id: string) => page.locator(`[data-parada=${id}]`);
+    await expect(parada("inicio")).toHaveAttribute("aria-current", "step");
+
+    await parada("fuego").click();
+    await expect(parada("fuego")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
+    await page.waitForTimeout(1500);
     const barra = await page
       .locator(".barra")
       .first()
       .evaluate((el) => getComputedStyle(el).transform);
     expect(barra === "none" || /matrix\(0(\.0+)?, /.test(barra) || barra.startsWith("matrix(0,")).toBe(true);
+    await expect(page.locator(".hero__ticket")).toHaveCSS("visibility", "hidden");
+
+    await parada("mesa").click();
+    await expect(parada("mesa")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
     await expect(page.locator(".hero__v--b")).toHaveAttribute("src", /hero-b/);
-    // 3) Al final la persiana cubrió el video con la foto del asador y el texto es visible
-    await mover(Math.round(total * 0.95));
+
+    await parada("asador").click();
+    await expect(parada("asador")).toHaveAttribute("aria-current", "step", { timeout: 6000 });
+    await page.waitForTimeout(1800);
     const clip = await page
       .locator(".tira")
       .last()
       .evaluate((el) => getComputedStyle(el).clipPath);
     expect(clip).toMatch(/inset\(0(px|%)?( 0(px|%)?){0,3}\)|none/);
     await expect(page.getByRole("heading", { name: /Costillares a la estaca/ })).toBeVisible();
-    // 4) Después del hero el menú deja de ser transparente
-    await mover(total + alto);
-    await expect(page.locator("html")).not.toHaveClass(/nav-claro/);
-    // 5) Al volver arriba, todo se reinicia
-    await mover(0);
-    await expect(page.locator("html")).toHaveClass(/nav-claro/);
+
+    await page.getByRole("button", { name: "Saltar portada" }).click();
+    await expect(page.locator("html")).not.toHaveClass(/nav-claro/, { timeout: 6000 });
+    await page.waitForTimeout(1800);
+    await page.evaluate(() => window.scrollTo(0, 0));
+    await expect(page.locator("html")).toHaveClass(/nav-claro/, { timeout: 6000 });
+  });
+
+  test("un gesto fuerte de rueda mueve una sola parada del hero, no la pasa volando", async ({ page, isMobile }) => {
+    test.skip(isMobile, "la rueda es de escritorio; en móvil se prueba con las paradas");
+    await page.goto("/");
+    await page.waitForLoadState("load");
+    await page.waitForTimeout(1500);
+    const activa = () => page.locator("[data-parada][aria-current=step]").getAttribute("data-parada");
+    await page.mouse.move(600, 400);
+    for (let i = 0; i < 50; i++) {
+      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
+      await page.waitForTimeout(30);
+    }
+    await page.waitForTimeout(1800);
+    expect(await activa()).toBe("fuego");
+    for (let i = 0; i < 50; i++) {
+      await page.mouse.wheel(0, Math.max(4, 260 * Math.pow(0.9, i)));
+      await page.waitForTimeout(30);
+    }
+    await page.waitForTimeout(1800);
+    expect(await activa()).toBe("mesa");
+  });
+
+  test("el inicio cuenta del fuego a la mesa, muestra el precio con su contexto y el mapa", async ({ page }) => {
+    await page.goto("/");
+    await page.locator(".precios").scrollIntoViewIfNeeded();
+    await expect(page.getByRole("heading", { name: /Parrilla libre desde \$ 41\.000 por persona/ })).toBeVisible();
+    await expect(page.getByText("Lunes a viernes al mediodía")).toBeVisible();
+    await expect(page.getByText("$ 48.500")).toBeVisible();
+    await page.locator(".ubic").scrollIntoViewIfNeeded();
+    await expect(page.getByRole("img", { name: /Mapa de los alrededores de Don Valentín/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: "Cómo llegar" }).last()).toBeVisible();
+  });
+
+  test("cómo llegar: mapa propio, referencias con distancia, y accesos a Google Maps", async ({ page }) => {
+    await page.goto("/como-llegar");
+    await expect(page.getByRole("img", { name: /Mapa de los alrededores de Don Valentín/ })).toBeVisible();
+    await expect(page.getByText("Av. Illia 3873")).toBeVisible();
+    const ruta = page.getByRole("link", { name: "Cómo llegar en Google Maps" });
+    await expect(ruta).toHaveAttribute("href", /google\.com\/maps\/dir\/.*destination=-34\.5319/);
+    await expect(page.getByRole("link", { name: "Ver en Google Maps" })).toHaveAttribute(
+      "href",
+      /google\.com\/maps\/search/,
+    );
+    await page.getByRole("button", { name: /Estación General Lemos/ }).click();
+    await expect(page.getByRole("button", { name: /Estación General Lemos/ })).toHaveAttribute("aria-pressed", "true");
+    await page.getByRole("tab", { name: "En colectivo" }).click();
+    await expect(page.getByRole("tabpanel")).toContainText("Lemos / Ruta 8");
+    await expect(page.getByRole("link", { name: /colaboradores de OpenStreetMap/ })).toBeVisible();
   });
 
   test("con movimiento reducido el hero queda legible, sin video ni pin", async ({ browser }) => {
@@ -72,7 +126,7 @@ test.describe("sitio público", () => {
     await page.goto("/carta");
     await expect(page.getByText("Asado", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("$ 14.700").first()).toBeVisible();
-    await page.getByPlaceholder("Buscar un plato o una bebida").fill("vacío");
+    await page.getByPlaceholder("Buscar en la carta").fill("vacío");
     await expect(page.getByText("Vacío", { exact: true }).first()).toBeVisible();
     await expect(page.getByText("Asado", { exact: true })).toHaveCount(0);
   });

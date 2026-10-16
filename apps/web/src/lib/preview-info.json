@@ -1,0 +1,15 @@
+{
+  "nombre": "Don Valentín",
+  "descriptor": "Parrilla Libre & Restó",
+  "desde": 1994,
+  "direccion": "Av. Pres. Arturo Umberto Illia 3873",
+  "localidad": "San Miguel",
+  "provincia": "Buenos Aires",
+  "horario": { "apertura": "12:00", "cierre": "02:00" },
+  "telefonos": [
+    { "etiqueta": "WhatsApp y celular", "valor": "11-3303-9516", "tel": "+5491133039516" },
+    { "etiqueta": "Teléfono fijo", "valor": "4664-1720", "tel": "+541146641720" }
+  ],
+  "instagram": "https://www.instagram.com/parrilladonvalentin",
+  "reservaDiasMax": 30
+}
