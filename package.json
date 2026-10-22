@@ -22,7 +22,10 @@
     "dev:api": "npm run dev -w @dv/api",
     "dev:web": "npm run dev -w @dv/web",
     "build": "npm run build -w @dv/web",
-    "e2e": "npm run build && playwright test"
+    "e2e": "npm run build && playwright test",
+    "db:respaldo": "npm run db:respaldo -w @dv/api --",
+    "db:restaurar": "npm run db:restaurar -w @dv/api --",
+    "carga": "node --experimental-strip-types scripts/carga-turno.ts"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",
