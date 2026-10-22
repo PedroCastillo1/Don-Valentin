@@ -89,3 +89,15 @@ Lo que existe y está probado (45 tests de API/dominio contra MySQL real + 36 pr
 | Lighthouse (RNF-1/2) | H5 | Medido: inicio celular 93–98, escritorio 100; a11y/BP/SEO 100 |
 
 Adelantar una función no la da por aceptada: la conformidad del Sponsor sigue siendo la del hito correspondiente.
+
+## 8. Estado del producto al 22/10/2026 (todo el alcance construido y probado)
+
+Reemplaza la columna «Impl./Prob.» de la tabla del §3. Detalle por requisito, con su evidencia, en `docs/cierre/informe-final.md`; casos de aceptación para el Sponsor en `docs/pruebas/plan-aceptacion.md`.
+
+| Hito | Requisitos | Implementado | Probado | Aceptación |
+| --- | --- | --- | --- | --- |
+| H3 (30/10) | RF-R1, RF-R2, RF-R3, RF-R4, RNF-4 | Sí | Sí (`reservas-h3`, `api.integration`, `hito3.spec`) | Pendiente: conformidad del Sponsor (CA-01 a CA-12) |
+| H4 (06/11) | RF-Q1, RF-Q2, RF-Q3, RF-Q4 | Sí | Sí (`pedidos-h4`, `hito4.spec`) | Pendiente (CA-13 a CA-20) |
+| H5 (13/11) | RF-W1, RF-W2, RF-W3, RNF-1, RNF-2, RNF-5 | Sí (GA4 y Search Console listos para las cuentas del local) | Sí (`hito5.spec`, `medicion-h5`, Lighthouse) | Pendiente (CA-21 a CA-26); RNF-1 en celular, observación media |
+| H6 (20/11) | RNF-3, RNF-6, RNF-7, Plan de Implantación, manuales | Sí | Sí (`respaldo-h6`, `npm run carga`) | Pendiente: ejecución de la prueba de aceptación (CA-27 a CA-32) |
+| H7 (27/11) | Aceptación y entrega | Actas redactadas | — | Firmas |

@@ -1,8 +1,10 @@
 # HANDOFF.md — traspaso entre agentes
 
-**Último agente:** Claude Code (Sonnet 5.5) · **Fecha:** 15/10/2026 · **EN CURSO:** ninguno (si ves una marca "EN CURSO" de otro agente, no toques esos archivos).
+**Último agente:** Claude Code (Sonnet 5.5) · **Fecha:** 22/10/2026 · **EN CURSO:** ninguno (si ves una marca "EN CURSO" de otro agente, no toques esos archivos).
 
 ## Tarea que estaba haciendo
+**22/10 — todo el alcance construido (H3 a H6) y documentos de cierre.** Ver `docs/decisiones.md` (entradas del 22/10), `docs/trazabilidad.md` §8 y `docs/cierre/informe-final.md`. Migraciones nuevas 0002 (reservas H3), 0003 (pedidos H4) y 0004 (medición H5), todas aditivas: **aplicarlas en Supabase antes de publicar** (el código nuevo las necesita). Pruebas: `npm run verify` (integración), `npm run e2e`, `npm run carga` (turno simulado). Respaldo: `npm run db:respaldo|db:restaurar` y `.github/workflows/respaldo.yml` (secretos DATABASE_URL y RESPALDO_CLAVE). Pendiente humano: conformidades del Sponsor, validación de la planilla, cuentas de GA4/Search Console, decisión sobre la carga diferida de GSAP (rendimiento en celular).
+
 **16/10 ~13:00 — presentación de avance por hitos** (15 diapositivas HTML animadas + guion PDF) entregada en `D:\don valentin\presentacion` (fuera del repo: usa grabaciones del sitio y del panel). Corrección: al confirmar una reserva la página sube al ticket (antes quedaba fuera de la vista). Siguiente: Supabase + Vercel.
 
 **16/10 ~03:30 — revisión del panel aplicada** (ver decisiones y trazabilidad §7): carteles de obra por hito (`components/EnConstruccion.tsx`, `pages/AdminProximos.tsx`), jerarquía de roles (`ROLES_GESTIONABLES` en shared), código vigente del QR (`codigoQr` en mesas.ts), calendario en Reservas, días de atención/cierres. 45 tests + 36 E2E verdes. Pendiente para H3: búsqueda/modificación/cancelación de reservas, estado del salón; H4: pedidos QR, paneles, mozo, edición de carta y precios.
