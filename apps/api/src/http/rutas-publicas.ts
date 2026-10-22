@@ -1,12 +1,13 @@
 import { Router } from "express";
 import type { RequestHandler } from "express";
-import { LOCAL, disponibilidadQuerySchema, pedidoSchema, reservaPublicaSchema } from "@dv/shared";
+import { LOCAL, disponibilidadQuerySchema, eventoSitioSchema, pedidoSchema, reservaPublicaSchema } from "@dv/shared";
 import type { Db } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
 import { cartaPublica } from "../services/carta.ts";
 import { mesaPorToken } from "../services/mesas.ts";
 import { crearReserva, disponibilidad, leerConfigLocal } from "../services/reservas.ts";
 import { crearPedido, ingresoComensal, pedidosDeSesion, sesionDelComensal } from "../services/pedidos.ts";
+import { registrarEvento } from "../services/medicion.ts";
 import { leerCookie, parsear } from "./middleware.ts";
 
 const COOKIE_MESA = "dv_mesa";
@@ -17,8 +18,16 @@ export function rutasPublicas(
   limitarReservas: RequestHandler,
   limitarPedidos: RequestHandler,
   cookieSegura: boolean,
+  limitarEventos: RequestHandler,
 ): Router {
   const r = Router();
+
+  // RF-W3: medición propia, anónima (sin cookies ni datos personales). Llega con sendBeacon, sin esperar respuesta.
+  r.post("/eventos", limitarEventos, async (req, res) => {
+    const d = parsear(eventoSitioSchema, req.body);
+    await registrarEvento(db, d.evento, d.ruta, ahora());
+    res.status(204).end();
+  });
 
   r.get("/info", async (_req, res) => {
     const cfg = await leerConfigLocal(db);

@@ -5,7 +5,7 @@ import type { ErrorRequestHandler } from "express";
 import helmet from "helmet";
 import compression from "compression";
 import { rateLimit } from "express-rate-limit";
-import { PERMISOS_POR_ROL, loginSchema } from "@dv/shared";
+import { PAGINAS_PUBLICAS, PERMISOS_POR_ROL, loginSchema } from "@dv/shared";
 import type { Config } from "../config.ts";
 import type { Db } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
@@ -85,6 +85,7 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
       limite(10 * 60_000, 8, "Hiciste muchos intentos de reserva. Probá en unos minutos o llamanos."),
       limite(5 * 60_000, 20, "Enviaste muchos pedidos seguidos. Esperá un momento o avisale al mozo."),
       cfg.cookieSecure,
+      limite(60_000, 120, "Demasiados eventos."),
     ),
   );
 
@@ -150,9 +151,21 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
       }
       return paginas;
     };
+    // Rutas que la aplicación conoce; cualquier otra devuelve 404 (con la misma página, que dice «no encontrada»).
+    const publicas = new Set(Object.keys(PAGINAS_PUBLICAS));
+    const conocida = (ruta: string) => publicas.has(ruta) || /^\/(m\/[^/]+|admin(\/.*)?)$/.test(ruta);
     app.get(/^\/(?!api\/).*/, (req, res) => {
       const p = leer();
-      res.type("html").send(req.path === "/" ? p.inicio : p.resto);
+      const ruta = req.path.replace(/\/+$/, "") || "/";
+      const propia = path.join(dist, "paginas", `${ruta.slice(1)}.html`);
+      if (ruta !== "/" && /^\/[a-z-]+$/.test(ruta) && existsSync(propia)) {
+        res.type("html").send(readFileSync(propia, "utf8"));
+        return;
+      }
+      res
+        .status(conocida(ruta) ? 200 : 404)
+        .type("html")
+        .send(ruta === "/" ? p.inicio : p.resto);
     });
   }
 

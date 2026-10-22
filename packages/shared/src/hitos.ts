@@ -137,9 +137,9 @@ export const MODULOS: readonly Modulo[] = [
   {
     id: "medicion-sitio",
     nombre: "Medición del sitio",
-    descripcion: "Google Analytics 4 y Search Console con sitemap.",
+    descripcion: "Medición propia anónima, Google Analytics 4 con consentimiento y Search Console con sitemap.",
     hito: "H5",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-W3"],
   },
 ];

@@ -28,6 +28,7 @@ export const PERMISOS = [
   "pedidos:ver",
   "pedidos:tomar",
   "carta:editar",
+  "medicion:ver",
 ] as const;
 export type Permiso = (typeof PERMISOS)[number];
 
@@ -55,6 +56,7 @@ export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
     "pedidos:ver",
     "pedidos:tomar",
     "carta:editar",
+    "medicion:ver",
   ],
   mozo: [
     "reservas:ver",

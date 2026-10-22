@@ -69,3 +69,29 @@ export function parsearFechas(valor: string): string[] {
 export function localAbre(fecha: string, diasAtencion: string, diasCerrados: string): boolean {
   return parsearDias(diasAtencion).includes(diaDeSemana(fecha)) && !parsearFechas(diasCerrados).includes(fecha);
 }
+
+/**
+ * RF-W3: eventos que mide el sitio (anónimos y agregados: sin cookies ni datos personales).
+ * Embudo principal: visita → carta → reserva iniciada → enviada → confirmada.
+ */
+export const EVENTOS_SITIO = [
+  "pagina_vista",
+  "carta_vista",
+  "reserva_iniciada",
+  "reserva_enviada",
+  "reserva_confirmada",
+  "reserva_error",
+  "clic_telefono",
+  "clic_whatsapp",
+  "clic_como_llegar",
+  "pedido_qr_enviado",
+] as const;
+export type EventoSitio = (typeof EVENTOS_SITIO)[number];
+
+/** Páginas públicas que se miden; la mesa del QR se cuenta como "/m" (nunca se guarda el código de la mesa). */
+export const RUTAS_MEDIDAS = ["/", "/carta", "/parrilla-libre", "/reservar", "/como-llegar", "/m"] as const;
+export function rutaMedida(ruta: string): string {
+  const limpia = (ruta.split(/[?#]/)[0] ?? "/").replace(/\/+$/, "") || "/";
+  if (limpia.startsWith("/m/")) return "/m";
+  return (RUTAS_MEDIDAS as readonly string[]).includes(limpia) ? limpia : "otra";
+}

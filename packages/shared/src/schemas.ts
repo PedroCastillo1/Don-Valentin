@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { EVENTOS_SITIO } from "./dominio.ts";
 
 /** Normaliza un teléfono argentino a dígitos (sin espacios, guiones ni paréntesis). */
 export function normalizarTelefono(raw: string): string {
@@ -135,3 +136,8 @@ export const varianteEdicionSchema = z.object({
   precio: z.number().min(0).max(10_000_000).multipleOf(0.01).nullable(),
 });
 export const productoEdicionSchema = z.object({ disponible: z.boolean() });
+
+export const eventoSitioSchema = z.object({
+  evento: z.enum(EVENTOS_SITIO),
+  ruta: z.string().max(200).default("/"),
+});

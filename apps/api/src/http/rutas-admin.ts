@@ -55,6 +55,7 @@ import {
   resumenDia,
 } from "../services/reservas.ts";
 import { cambiarActivo, crearUsuario, listarUsuarios } from "../services/usuarios.ts";
+import { resumenMedicion } from "../services/medicion.ts";
 import {
   cambiarEstadoItem,
   cartaAdmin,
@@ -417,6 +418,12 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
       ip: req.ip,
     });
     res.status(204).end();
+  });
+
+  // RF-W3: medición del sitio (anónima y agregada)
+  r.get("/medicion", exigirPermiso(db, "medicion:ver"), async (req, res) => {
+    const { dias } = parsear(z.object({ dias: z.coerce.number().int().min(1).max(90).default(30) }), req.query);
+    res.json(await resumenMedicion(db, dias, ahora()));
   });
 
   r.get("/auditoria", exigirPermiso(db, "auditoria:ver"), async (req, res) => {
