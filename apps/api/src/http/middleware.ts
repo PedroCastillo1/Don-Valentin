@@ -70,15 +70,16 @@ export function exigirCsrf(origenesPermitidos: string[]): RequestHandler {
   };
 }
 
-/** RNF-3: sin permiso, 403 y el intento queda registrado en la auditoría. */
-export function exigirPermiso(db: Db, permiso: Permiso): RequestHandler {
+/** RNF-3: sin permiso, 403 y el intento queda registrado en la auditoría. Con una lista, alcanza con uno. */
+export function exigirPermiso(db: Db, permiso: Permiso | Permiso[]): RequestHandler {
+  const lista = Array.isArray(permiso) ? permiso : [permiso];
   return async (req, _res, next) => {
     const s = req.sesion;
     if (!s) throw new ErrorDeDominio(401, "SIN_SESION", "Iniciá sesión para continuar.");
-    if (puede(s.usuario.rol, permiso)) return next();
+    if (lista.some((p) => puede(s.usuario.rol, p))) return next();
     await registrarAuditoria(db, {
       usuarioId: s.usuario.id,
-      accion: `acceso:${permiso}`,
+      accion: `acceso:${lista.join("|")}`,
       recurso: `${req.method} ${req.originalUrl.split("?")[0]}`,
       resultado: "denegado",
       detalle: { rol: s.usuario.rol },

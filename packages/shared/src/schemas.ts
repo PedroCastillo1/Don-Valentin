@@ -111,3 +111,27 @@ export const aforoEdicionSchema = z.object({
 export const tipoSolicitudEdicionSchema = z.object({
   tiempoMaximoMin: z.number().int().min(1).max(240),
 });
+
+/** RF-Q2/Q4: un pedido son líneas de la carta (variante + cantidad + aclaración opcional). */
+export const pedidoSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        varianteId: z.number().int().positive(),
+        cantidad: z.number().int().min(1, "Mínimo 1").max(20, "Hasta 20 por línea"),
+        nota: z.string().trim().max(140, "La aclaración admite hasta 140 caracteres").optional(),
+      }),
+    )
+    .min(1, "Agregá al menos un plato o bebida")
+    .max(30, "Hasta 30 líneas por pedido"),
+});
+export type PedidoInput = z.infer<typeof pedidoSchema>;
+
+export const ESTADOS_ITEM = ["recibido", "en_preparacion", "listo", "entregado", "cancelado"] as const;
+export const estadoItemSchema = z.object({ estado: z.enum(ESTADOS_ITEM) });
+
+/** Carta y precios (H4): el precio puede quedar vacío si el local todavía no lo confirmó. */
+export const varianteEdicionSchema = z.object({
+  precio: z.number().min(0).max(10_000_000).multipleOf(0.01).nullable(),
+});
+export const productoEdicionSchema = z.object({ disponible: z.boolean() });

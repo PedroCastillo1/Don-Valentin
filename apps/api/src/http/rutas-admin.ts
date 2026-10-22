@@ -4,6 +4,11 @@ import {
   PERMISOS_POR_ROL,
   aforoEdicionSchema,
   busquedaReservasSchema,
+  estadoItemSchema,
+  pedidoSchema,
+  productoEdicionSchema,
+  SECTOR_DE_ROL,
+  varianteEdicionSchema,
   mesaEdicionSchema,
   mesaNuevaSchema,
   parametroEdicionSchema,
@@ -50,6 +55,16 @@ import {
   resumenDia,
 } from "../services/reservas.ts";
 import { cambiarActivo, crearUsuario, listarUsuarios } from "../services/usuarios.ts";
+import {
+  cambiarEstadoItem,
+  cartaAdmin,
+  crearPedido,
+  editarDisponible,
+  editarPrecio,
+  itemsActivos,
+  mesasAbiertas,
+  sesionAbiertaDeMesa,
+} from "../services/pedidos.ts";
 import { fechaServicioActual } from "../domain/tiempo.ts";
 import { exigirPermiso, idParam, parsear } from "./middleware.ts";
 
@@ -336,6 +351,68 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
       usuarioId: actor(req),
       accion: activo ? "usuario:activar" : "usuario:desactivar",
       recurso: `usuario ${req.params.id}`,
+      resultado: "permitido",
+      ip: req.ip,
+    });
+    res.status(204).end();
+  });
+
+  // Hito 4: paneles de cocina, parrilla y barra (RF-Q2, RF-Q3)
+  r.get("/sectores/items", exigirPermiso(db, ["panel_sector:ver", "pedidos:ver"]), async (req, res) => {
+    const q = parsear(z.object({ sector: z.enum(["cocina", "parrilla", "barra"]).optional() }), req.query);
+    // Cada puesto ve solo su sector, aunque pida otro.
+    const fijo = SECTOR_DE_ROL[req.sesion!.usuario.rol];
+    const sector = fijo ?? q.sector ?? null;
+    res.set("Cache-Control", "no-store");
+    res.json({ sector, fijo: Boolean(fijo), items: await itemsActivos(db, sector, ahora()) });
+  });
+  r.post("/items/:id/estado", exigirPermiso(db, ["panel_sector:ver", "pedidos:tomar"]), async (req, res) => {
+    const { estado } = parsear(estadoItemSchema, req.body);
+    const item = await cambiarEstadoItem(db, idParam(req.params.id), estado, req.sesion!.usuario.rol);
+    if (estado === "cancelado")
+      await registrarAuditoria(db, {
+        usuarioId: actor(req),
+        accion: "pedido_item:cancelar",
+        recurso: `ítem ${item.id}`,
+        resultado: "permitido",
+        ip: req.ip,
+      });
+    res.json(item);
+  });
+  // RF-Q4: el mozo carga el pedido de una mesa con sesión abierta; sigue el mismo circuito que el del QR.
+  r.get("/pedidos/mesas", exigirPermiso(db, "pedidos:tomar"), async (_req, res) => {
+    res.json({ mesas: await mesasAbiertas(db) });
+  });
+  r.post("/mesas/:id/pedidos", exigirPermiso(db, "pedidos:tomar"), async (req, res) => {
+    const d = parsear(pedidoSchema, req.body);
+    const sesion = await sesionAbiertaDeMesa(db, idParam(req.params.id));
+    res.status(201).json(await crearPedido(db, sesion, d.items, "mozo", actor(req)));
+  });
+
+  // Carta y precios (H4): lo que se edita acá se ve en el sitio y en el QR
+  r.get("/carta", exigirPermiso(db, ["carta:editar", "parametros:ver"]), async (_req, res) => {
+    res.json({ productos: await cartaAdmin(db) });
+  });
+  r.put("/carta/variantes/:id", exigirPermiso(db, "carta:editar"), async (req, res) => {
+    const { precio } = parsear(varianteEdicionSchema, req.body);
+    const c = await editarPrecio(db, idParam(req.params.id), precio);
+    await registrarAuditoria(db, {
+      usuarioId: actor(req),
+      accion: "carta:precio",
+      recurso: `${c.producto}${c.etiqueta !== "única" && c.etiqueta !== "único" ? ` (${c.etiqueta})` : ""}`,
+      resultado: "permitido",
+      detalle: { antes: c.antes, despues: c.despues },
+      ip: req.ip,
+    });
+    res.json(c);
+  });
+  r.put("/carta/productos/:id", exigirPermiso(db, "carta:editar"), async (req, res) => {
+    const { disponible } = parsear(productoEdicionSchema, req.body);
+    const nombre = await editarDisponible(db, idParam(req.params.id), disponible);
+    await registrarAuditoria(db, {
+      usuarioId: actor(req),
+      accion: disponible ? "carta:disponible" : "carta:agotado",
+      recurso: nombre,
       resultado: "permitido",
       ip: req.ip,
     });

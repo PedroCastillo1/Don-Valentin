@@ -72,7 +72,9 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
   });
 
   const api = express.Router();
-  api.use(limite(60_000, 300, "Demasiadas peticiones. Esperá un momento."));
+  // Holgado: en el local, los paneles de cocina, parrilla, barra y los mozos comparten la misma IP pública
+  // y consultan cada pocos segundos.
+  api.use(limite(60_000, 1500, "Demasiadas peticiones. Esperá un momento."));
   api.use(cargarSesion(db, ahora));
 
   api.use(
@@ -81,6 +83,8 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
       db,
       ahora,
       limite(10 * 60_000, 8, "Hiciste muchos intentos de reserva. Probá en unos minutos o llamanos."),
+      limite(5 * 60_000, 20, "Enviaste muchos pedidos seguidos. Esperá un momento o avisale al mozo."),
+      cfg.cookieSecure,
     ),
   );
 

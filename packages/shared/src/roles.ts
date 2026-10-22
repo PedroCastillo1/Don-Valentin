@@ -25,6 +25,9 @@ export const PERMISOS = [
   "usuarios:administrar",
   "auditoria:ver",
   "panel_sector:ver",
+  "pedidos:ver",
+  "pedidos:tomar",
+  "carta:editar",
 ] as const;
 export type Permiso = (typeof PERMISOS)[number];
 
@@ -48,11 +51,30 @@ export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
     "parametros:editar",
     "usuarios:administrar",
     "auditoria:ver",
+    "panel_sector:ver",
+    "pedidos:ver",
+    "pedidos:tomar",
+    "carta:editar",
   ],
-  mozo: ["reservas:ver", "reservas:crear", "salon:operar", "sesion_mesa:abrir", "sesion_mesa:cerrar"],
+  mozo: [
+    "reservas:ver",
+    "reservas:crear",
+    "salon:operar",
+    "sesion_mesa:abrir",
+    "sesion_mesa:cerrar",
+    "pedidos:ver",
+    "pedidos:tomar",
+  ],
   parrillero: ["panel_sector:ver"],
   cocinero: ["panel_sector:ver"],
   barra: ["panel_sector:ver"],
+};
+
+/** RF-Q2: cada puesto prepara lo de su sector; Administración y el Encargado ven y operan los tres. */
+export const SECTOR_DE_ROL: Partial<Record<Rol, "cocina" | "parrilla" | "barra">> = {
+  cocinero: "cocina",
+  parrillero: "parrilla",
+  barra: "barra",
 };
 
 export function puede(rol: Rol, permiso: Permiso): boolean {

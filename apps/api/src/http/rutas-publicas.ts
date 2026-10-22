@@ -1,14 +1,23 @@
 import { Router } from "express";
 import type { RequestHandler } from "express";
-import { LOCAL, disponibilidadQuerySchema, reservaPublicaSchema } from "@dv/shared";
+import { LOCAL, disponibilidadQuerySchema, pedidoSchema, reservaPublicaSchema } from "@dv/shared";
 import type { Db } from "../db/pool.ts";
 import { ErrorDeDominio } from "../errors.ts";
 import { cartaPublica } from "../services/carta.ts";
 import { mesaPorToken } from "../services/mesas.ts";
 import { crearReserva, disponibilidad, leerConfigLocal } from "../services/reservas.ts";
-import { parsear } from "./middleware.ts";
+import { crearPedido, ingresoComensal, pedidosDeSesion, sesionDelComensal } from "../services/pedidos.ts";
+import { leerCookie, parsear } from "./middleware.ts";
 
-export function rutasPublicas(db: Db, ahora: () => Date, limitarReservas: RequestHandler): Router {
+const COOKIE_MESA = "dv_mesa";
+
+export function rutasPublicas(
+  db: Db,
+  ahora: () => Date,
+  limitarReservas: RequestHandler,
+  limitarPedidos: RequestHandler,
+  cookieSegura: boolean,
+): Router {
   const r = Router();
 
   r.get("/info", async (_req, res) => {
@@ -23,7 +32,8 @@ export function rutasPublicas(db: Db, ahora: () => Date, limitarReservas: Reques
   });
 
   r.get("/carta", async (_req, res) => {
-    res.set("Cache-Control", "public, max-age=300");
+    // Un minuto: un cambio de precio desde el panel llega rápido al sitio y al QR.
+    res.set("Cache-Control", "public, max-age=60");
     res.json(await cartaPublica(db));
   });
 
@@ -61,6 +71,29 @@ export function rutasPublicas(db: Db, ahora: () => Date, limitarReservas: Reques
     const m = await mesaPorToken(db, String(req.params.token));
     if (!m) throw new ErrorDeDominio(404, "QR_NO_VALIDO", "Este código no corresponde a ninguna mesa.");
     res.json(m);
+  });
+
+  // RF-Q1/Q2: el celular del comensal recibe un permiso atado a la sesión abierta de esa mesa.
+  r.post("/mesa/:token/ingreso", async (req, res) => {
+    const i = await ingresoComensal(db, String(req.params.token));
+    res.cookie(COOKIE_MESA, i.credencial, {
+      httpOnly: true,
+      sameSite: "strict",
+      secure: cookieSegura,
+      path: "/api/public/mesa",
+      maxAge: 8 * 3_600_000,
+    });
+    res.json({ numero: i.numero });
+  });
+  r.get("/mesa/:token/pedidos", async (req, res) => {
+    const sesion = await sesionDelComensal(db, String(req.params.token), leerCookie(req, COOKIE_MESA));
+    res.set("Cache-Control", "no-store");
+    res.json({ pedidos: await pedidosDeSesion(db, sesion) });
+  });
+  r.post("/mesa/:token/pedidos", limitarPedidos, async (req, res) => {
+    const sesion = await sesionDelComensal(db, String(req.params.token), leerCookie(req, COOKIE_MESA));
+    const d = parsear(pedidoSchema, req.body);
+    res.status(201).json(await crearPedido(db, sesion, d.items, "qr"));
   });
 
   return r;

@@ -12,7 +12,7 @@ export interface CartaPublica {
         nombre: string;
         nota: string | null;
         sinTacc: boolean;
-        variantes: { etiqueta: string; precio: number | null }[];
+        variantes: { id: number; etiqueta: string; precio: number | null }[];
       }[];
     }[];
   }[];
@@ -26,12 +26,12 @@ export async function cartaPublica(db: Db): Promise<CartaPublica> {
   );
   const vars = await rows(
     db,
-    "SELECT producto_id, etiqueta, precio FROM variantes_producto ORDER BY producto_id, orden",
+    "SELECT id, producto_id, etiqueta, precio FROM variantes_producto ORDER BY producto_id, orden",
   );
-  const variantesPorProducto = new Map<number, { etiqueta: string; precio: number | null }[]>();
+  const variantesPorProducto = new Map<number, { id: number; etiqueta: string; precio: number | null }[]>();
   for (const v of vars) {
     const l = variantesPorProducto.get(v.producto_id) ?? [];
-    l.push({ etiqueta: v.etiqueta, precio: v.precio === null ? null : Number(v.precio) });
+    l.push({ id: v.id, etiqueta: v.etiqueta, precio: v.precio === null ? null : Number(v.precio) });
     variantesPorProducto.set(v.producto_id, l);
   }
   const grupos: CartaPublica["grupos"] = [];

@@ -115,7 +115,7 @@ export const MODULOS: readonly Modulo[] = [
     nombre: "Carta digital y pedidos",
     descripcion: "El comensal pide desde la mesa y el pedido llega al sector que lo prepara.",
     hito: "H4",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-Q2", "RF-Q3", "RF-Q4"],
   },
   {
@@ -123,7 +123,7 @@ export const MODULOS: readonly Modulo[] = [
     nombre: "Edición de carta y precios",
     descripcion: "Cambiar precios y productos desde el panel, con impacto en el sitio y en el pedido por QR.",
     hito: "H4",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-Q1"],
   },
   {
@@ -131,7 +131,7 @@ export const MODULOS: readonly Modulo[] = [
     nombre: "Paneles de cocina, parrilla y barra",
     descripcion: "Pedidos por sector con estados y alerta por demora.",
     hito: "H4",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-Q2", "RF-Q3"],
   },
   {
