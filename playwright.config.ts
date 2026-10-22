@@ -33,6 +33,7 @@ export default defineConfig({
       DB_PASSWORD: "postgres",
       WEB_DIST: "apps/web/dist",
       COOKIE_SECURE: "false",
+      LIMITE_INGRESOS: "200",
     },
   },
 });

@@ -91,7 +91,7 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
 
   api.post(
     "/auth/login",
-    limite(15 * 60_000, 20, "Demasiados intentos de ingreso. Probá en unos minutos."),
+    limite(15 * 60_000, cfg.LIMITE_INGRESOS, "Demasiados intentos de ingreso. Probá en unos minutos."),
     async (req, res) => {
       const d = parsear(loginSchema, req.body);
       const s = await iniciarSesion(db, {

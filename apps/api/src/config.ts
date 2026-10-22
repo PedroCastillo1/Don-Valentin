@@ -25,6 +25,8 @@ const envSchema = z.object({
   /** URL pública del sitio: es la base de los códigos QR. Obligatoria en producción. */
   PUBLIC_BASE_URL: z.string().url().optional(),
   TRUST_PROXY: z.enum(["true", "false"]).default("false"),
+  /** Ingresos permitidos por IP cada 15 minutos (las pruebas de punta a punta entran muchas veces seguidas). */
+  LIMITE_INGRESOS: z.coerce.number().int().min(5).max(1000).default(20),
 });
 
 export type Config = ReturnType<typeof loadConfig>;
