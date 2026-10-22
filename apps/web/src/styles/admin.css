@@ -526,6 +526,7 @@
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr);
   gap: 1rem;
+  align-items: start;
 }
 
 /* Pulso del día */
@@ -590,6 +591,7 @@
   inset: 0 0 0 0;
   height: 100%;
   pointer-events: none;
+  overflow: hidden;
 }
 .pulso__botones button {
   position: absolute;
@@ -726,11 +728,37 @@
 }
 .reservas li {
   display: grid;
-  grid-template-columns: 3.6rem auto 1fr auto auto;
+  /* minmax(0, …): un nombre largo se corta en renglones y nunca empuja la fila fuera del panel */
+  grid-template-columns: 3.6rem auto minmax(0, 1fr) auto auto;
   gap: 0.8rem;
   align-items: center;
   padding: 0.7rem 0;
   border-bottom: 1px solid var(--ceniza-2);
+}
+.panel:has(> .reservas) {
+  container: reservas / inline-size;
+}
+/* Panel angosto (dos columnas en pantallas medianas): el estado baja debajo del nombre */
+@container reservas (max-width: 36rem) {
+  .reservas li {
+    grid-template-columns: 3.4rem minmax(0, 1fr) auto;
+    row-gap: 0.35rem;
+  }
+  .reservas li .avatar {
+    display: none;
+  }
+  .reservas li time {
+    grid-row: 1 / span 2;
+  }
+  .reservas li .etq {
+    grid-column: 2;
+    grid-row: 2;
+    justify-self: start;
+  }
+  .reservas li code {
+    grid-column: 3;
+    grid-row: 1;
+  }
 }
 .reservas li:last-child {
   border-bottom: 0;
@@ -740,6 +768,11 @@
   font-weight: 800;
   font-size: 1.3rem;
   color: var(--carbon);
+}
+.reservas strong,
+.tabla strong,
+.tabla td {
+  overflow-wrap: anywhere;
 }
 .reservas small {
   display: block;
@@ -927,7 +960,7 @@
     padding: 1rem;
   }
   .reservas li {
-    grid-template-columns: 3.2rem 1fr auto;
+    grid-template-columns: 3.2rem minmax(0, 1fr) auto;
   }
   .reservas li .avatar,
   .reservas li .etq {
@@ -1179,6 +1212,8 @@
 }
 .form input,
 .form select {
+  min-width: 0;
+  width: 100%;
   min-height: 46px;
   padding: 0 0.9rem;
   border: 2px solid var(--papel-3);
@@ -1193,7 +1228,7 @@
 }
 .form .fila {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1.4fr);
   gap: 0.8rem;
 }
 .form--linea {
@@ -1237,9 +1272,10 @@
   gap: 0.5rem;
   justify-content: center;
 }
-@media (max-width: 1000px) {
+/* Con el menú lateral, debajo de 1180 px la lista y el formulario no entran lado a lado */
+@media (max-width: 1180px) {
   .dos {
-    grid-template-columns: 1fr;
+    grid-template-columns: minmax(0, 1fr);
   }
 }
 

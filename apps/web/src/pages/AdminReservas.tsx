@@ -96,7 +96,7 @@ export function AdminReservas() {
             <p className="vacio">No hay reservas para este día.</p>
           ) : (
             <div className="tabla-wrap">
-              <table className="tabla">
+              <table className="tabla tabla--tarjetas">
                 <thead>
                   <tr>
                     <th>Hora</th>
@@ -110,15 +110,17 @@ export function AdminReservas() {
                 <tbody>
                   {reservas.map((r) => (
                     <tr key={r.id}>
-                      <td className="hora">{r.franja.desde}</td>
-                      <td>
+                      <td className="hora" data-etiqueta="Hora">
+                        {r.franja.desde}
+                      </td>
+                      <td data-etiqueta="A nombre de">
                         <strong>{r.aNombreDe}</strong>
                         <small>{r.telefono}</small>
                       </td>
-                      <td>{r.personas}</td>
-                      <td>{r.mesa}</td>
-                      <td>{ORIGEN[r.origen] ?? r.origen}</td>
-                      <td>
+                      <td data-etiqueta="Personas">{r.personas}</td>
+                      <td data-etiqueta="Mesa">{r.mesa}</td>
+                      <td data-etiqueta="Origen">{ORIGEN[r.origen] ?? r.origen}</td>
+                      <td data-etiqueta="Código">
                         <code>{r.codigo}</code>
                       </td>
                     </tr>
