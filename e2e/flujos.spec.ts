@@ -284,10 +284,10 @@ test.describe("administración", () => {
     await expect(page.getByRole("heading", { level: 1, name: `Mesa ${n}` })).toBeVisible();
   });
 
-  test("módulos futuros muestran hito y fecha exactos", async ({ page }) => {
+  test("módulos futuros muestran hito y fecha exactos (el Hito 3 ya no figura como pendiente)", async ({ page }) => {
     await ingresar(page, "admin");
     const riel = page.locator("#contenido");
-    await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026").first()).toBeVisible();
+    await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026")).toHaveCount(0);
     await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026").first()).toBeVisible();
     await expect(riel.getByText("Programado para el Hito 5 — 13/11/2026")).toBeVisible();
   });
@@ -297,13 +297,11 @@ test.describe("administración", () => {
   }) => {
     await ingresar(page, "encargado");
     const casos: [string, string][] = [
-      ["/admin/salon", "Hito 3 — 30/10/2026"],
       ["/admin/pedidos", "Hito 4 — 06/11/2026"],
       ["/admin/sectores", "Hito 4 — 06/11/2026"],
       ["/admin/mozo", "Hito 4 — 06/11/2026"],
       ["/admin/carta", "Hito 4 — 06/11/2026"],
       ["/admin/medicion", "Hito 5 — 13/11/2026"],
-      ["/admin/reservas", "Hito 3 — 30/10/2026"],
       ["/admin/mesas", "Hito 4 — 06/11/2026"],
     ];
     for (const [ruta, hito] of casos) {
@@ -313,7 +311,7 @@ test.describe("administración", () => {
       await expect(obra).toContainText(hito);
     }
     await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toHaveCount(0);
-    await page.goto("/admin/salon");
+    await page.goto("/admin/pedidos");
     await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toBeVisible();
     // la carta del panel muestra los precios reales
     await page.goto("/admin/carta");

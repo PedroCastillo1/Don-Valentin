@@ -7,7 +7,8 @@ import { AdminReservas } from "./AdminReservas.tsx";
 import { AdminMesas } from "./AdminMesas.tsx";
 import { AdminParametros } from "./AdminParametros.tsx";
 import { AdminUsuarios } from "./AdminUsuarios.tsx";
-import { AdminCarta, AdminMedicion, AdminMozo, AdminPedidosQr, AdminSalon, AdminSectores } from "./AdminProximos.tsx";
+import { AdminSalon } from "./AdminSalon.tsx";
+import { AdminCarta, AdminMedicion, AdminMozo, AdminPedidosQr, AdminSectores } from "./AdminProximos.tsx";
 
 /** Todo el administrador (y su sesión) en un solo bloque: el sitio público no lo descarga ni consulta /auth/me. */
 export default function AdminRoutes() {

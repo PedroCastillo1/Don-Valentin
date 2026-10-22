@@ -1758,3 +1758,241 @@
   margin: 0;
   grid-row: span 2;
 }
+
+/* ───────── Hito 3: búsqueda y detalle de reservas, estado del salón ───────── */
+.buscador {
+  display: grid;
+  gap: 0.35rem;
+  margin: 0 0 1.4rem;
+  max-width: 44rem;
+}
+.buscador label {
+  font-weight: 600;
+}
+.buscador__fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.buscador input {
+  flex: 1 1 16rem;
+  min-width: 0;
+  min-height: 44px;
+  padding: 0 0.9rem;
+  border: 2px solid var(--papel-3);
+  border-radius: 10px;
+  background: var(--superficie);
+  color: var(--tinta);
+}
+.buscador input:focus {
+  border-color: var(--brasa);
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(121, 31, 31, 0.25);
+}
+.enlace-fila {
+  all: unset;
+  cursor: pointer;
+  display: block;
+  text-decoration: underline;
+  text-decoration-color: var(--ceniza-3);
+  text-underline-offset: 3px;
+  overflow-wrap: anywhere;
+}
+.enlace-fila:hover {
+  text-decoration-color: var(--brasa);
+}
+.enlace-fila:focus-visible {
+  outline: 3px solid var(--brasa);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+.tabla td.hora small {
+  display: block;
+  font: 500 0.72rem/1.2 var(--f-mono);
+  color: var(--tinta-3);
+  text-transform: uppercase;
+}
+.fila--elegida td {
+  background: var(--tinte-rosa);
+}
+.estado-r {
+  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+.estado-r--confirmada {
+  background: var(--marmol-claro);
+  color: #1d3a29;
+}
+.estado-r--cumplida {
+  background: var(--brasa);
+  color: var(--sobre-brasa);
+}
+.estado-r--cancelada {
+  background: var(--ceniza-2);
+  color: var(--tinta-2);
+  text-decoration: line-through;
+}
+.estado-r--no-show {
+  background: var(--tinte-ambar);
+  color: #5c3d00;
+}
+.detalle {
+  background: var(--superficie);
+  border: 1px solid var(--ceniza-3);
+  border-radius: 14px;
+  padding: 1.2rem 1.3rem;
+  display: grid;
+  gap: 0.8rem;
+  align-content: start;
+  min-width: 0;
+}
+.detalle__cab {
+  display: flex;
+  align-items: start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+.detalle__cab h2 {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.detalle p {
+  margin: 0;
+}
+.datos {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(9rem, 1fr));
+  gap: 0.7rem 1.2rem;
+  margin: 0;
+}
+.datos div {
+  min-width: 0;
+}
+.datos dt {
+  font: 500 0.68rem/1.2 var(--f-mono);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--tinta-3);
+}
+.datos dd {
+  margin: 0.15rem 0 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+}
+.datos__ancho {
+  grid-column: 1 / -1;
+}
+.acciones-fila {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.btn--peligro {
+  border-color: var(--error);
+  color: var(--error);
+}
+.confirmar {
+  display: grid;
+  gap: 0.7rem;
+  padding: 1rem;
+  border-radius: 10px;
+  background: var(--brasa-fondo);
+  color: var(--brasa-texto);
+}
+.franjas {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin: 0 0 1rem;
+}
+.franjas button {
+  font: 600 0.9rem/1 var(--f-mono);
+  min-height: 40px;
+  padding: 0 0.85rem;
+  border-radius: 999px;
+  border: 2px solid var(--carbon);
+  background: transparent;
+  color: var(--carbon);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+.franjas button[aria-pressed="true"] {
+  background: var(--carbon);
+  color: var(--ceniza);
+}
+.franjas__ahora {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  background: var(--brasa);
+  color: var(--sobre-brasa);
+  padding: 0.15rem 0.35rem;
+  border-radius: 4px;
+}
+.conteo {
+  list-style: none;
+  margin: 0 0 1rem;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem 1.4rem;
+}
+.conteo b {
+  font-family: var(--f-display);
+  font-size: 1.5rem;
+  font-weight: 800;
+}
+.salon {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 1180px) {
+  .salon {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.mapa--salon {
+  grid-template-columns: repeat(auto-fill, minmax(4.2rem, 1fr));
+  gap: 0.55rem;
+}
+.mapa--salon li {
+  display: grid;
+}
+button.mesa {
+  font: inherit;
+  width: 100%;
+  cursor: pointer;
+}
+button.mesa:focus-visible {
+  outline: 3px solid var(--carbon);
+  outline-offset: 2px;
+}
+button.mesa[aria-pressed="true"] {
+  box-shadow:
+    0 0 0 3px var(--superficie),
+    0 0 0 6px var(--carbon);
+}
+.mesa--reservada {
+  background: var(--tinte-ambar);
+  border: 2px dashed #8a5a00;
+  color: #3d2800;
+}
+.mesa--reservada small {
+  color: #5c3d00;
+}
+.detalle__volver {
+  margin-top: 0.8rem;
+  justify-self: start;
+}
+.panel h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}

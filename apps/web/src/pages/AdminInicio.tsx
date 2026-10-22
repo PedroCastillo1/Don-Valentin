@@ -1,13 +1,12 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
+import { ORIGEN } from "../lib/fechas.ts";
 import { useSesion } from "../lib/sesion.tsx";
 import { Link } from "react-router";
 import { MODULOS, textoProgramado } from "@dv/shared";
 
 /** Pantalla de cada módulo en construcción (con su cartel de obra y el prototipo). */
 const RUTA_MODULO: Record<string, string> = {
-  "estado-salon": "/admin/salon",
-  "modificar-reserva": "/admin/reservas",
   "carta-digital": "/admin/pedidos",
   "carta-precios": "/admin/carta",
   "paneles-sector": "/admin/sectores",
@@ -39,6 +38,7 @@ interface Reserva {
   aNombreDe: string;
   mesa: number;
   origen: string;
+  estado: string;
   comentarios: string | null;
 }
 interface Mesa {
@@ -60,12 +60,6 @@ const sumar = (iso: string, n: number): string => {
   const [a, m, d] = iso.split("-").map(Number);
   return new Date(Date.UTC(a ?? 2026, (m ?? 1) - 1, (d ?? 1) + n)).toISOString().slice(0, 10);
 };
-const ORIGEN: Record<string, string> = {
-  web: "Web",
-  telefono: "Teléfono",
-  presencial: "En persona",
-  whatsapp: "WhatsApp",
-};
 
 export function AdminInicio() {
   const { usuario, puede } = useSesion();
@@ -81,7 +75,9 @@ export function AdminInicio() {
       try {
         const r = await api<Resumen>(`/admin/resumen${fecha ? `?fecha=${fecha}` : ""}`);
         setResumen(r);
-        setReservas((await api<{ reservas: Reserva[] }>(`/admin/reservas?fecha=${r.fecha}`)).reservas);
+        // Las canceladas y los no-show no ocupan lugar: no se listan en el día.
+        const dia = (await api<{ reservas: Reserva[] }>(`/admin/reservas?fecha=${r.fecha}`)).reservas;
+        setReservas(dia.filter((x) => x.estado === "confirmada" || x.estado === "cumplida"));
         if (puede("mesas:ver")) setMesas((await api<{ mesas: Mesa[] }>("/admin/mesas")).mesas);
         else if (puede("sesion_mesa:abrir"))
           setMesas((await api<{ mesas: Mesa[] }>("/admin/sesiones/mesas")).mesas as unknown as Mesa[]);
@@ -246,7 +242,11 @@ export function AdminInicio() {
             <span className="mesa mesa--abierta" aria-hidden="true" /> Sesión abierta
             <span className="mesa" aria-hidden="true" /> Sin sesión
           </p>
-          <p className="nota">Estado libre / reservada / ocupada por franja: {textoProgramado("H3")}.</p>
+          {puede("salon:operar") && (
+            <p className="nota">
+              <Link to="/admin/salon">Ver el estado del salón por franja</Link>: mesas libres, reservadas y ocupadas.
+            </p>
+          )}
         </section>
       </div>
 

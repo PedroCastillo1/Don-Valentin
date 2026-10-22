@@ -19,6 +19,7 @@ const ACTIVOS: {
 }[] = [
   { to: "/admin", nombre: "Inicio", permiso: "reservas:ver", grupo: "Operación", icono: "inicio", end: true },
   { to: "/admin/reservas", nombre: "Reservas", permiso: "reservas:ver", grupo: "Operación", icono: "reservas" },
+  { to: "/admin/salon", nombre: "Estado del salón", permiso: "salon:operar", grupo: "Operación", icono: "mesas" },
   { to: "/admin/mesas", nombre: "Mesas y QR", permiso: "sesion_mesa:abrir", grupo: "Operación", icono: "mesas" },
   {
     to: "/admin/parametros",
@@ -35,14 +36,6 @@ const ACTIVOS: {
     icono: "usuarios",
   },
   { to: "/admin/carta", nombre: "Carta y precios", permiso: "parametros:ver", grupo: "Configuración", icono: "fuego" },
-  {
-    to: "/admin/salon",
-    nombre: "Estado del salón",
-    permiso: "reservas:ver",
-    grupo: "Próximos hitos",
-    icono: "mesas",
-    hito: "H3",
-  },
   {
     to: "/admin/pedidos",
     nombre: "Pedidos por QR",

@@ -20,4 +20,5 @@ export const ORIGEN: Record<string, string> = {
   telefono: "Teléfono",
   presencial: "En persona",
   whatsapp: "WhatsApp",
+  walk_in: "Sin reserva",
 };

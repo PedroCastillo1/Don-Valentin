@@ -11,45 +11,6 @@ import { EnConstruccion } from "../components/EnConstruccion.tsx";
  * UX/UI) rotulado como tal. Lo que ya existe de verdad (la carta con sus precios reales) se muestra como real.
  */
 
-/** H3 — Estado del salón por franja (RF-R3). */
-export function AdminSalon() {
-  const estados = ["libre", "reservada", "ocupada"] as const;
-  return (
-    <>
-      <Cabecera titulo="Estado del salón" bajada="Mesas libres, reservadas y ocupadas en cada franja horaria." />
-      <EnConstruccion
-        hito="H3"
-        titulo="Estado del salón por franja"
-        descripcion="Vista de las 30 mesas por franja: libre, reservada u ocupada, con alta de clientes sin reserva (walk-in) y liberación por no-show según la tolerancia de la planilla."
-        requisitos={["RF-R3"]}
-        prototipo={
-          <div className="proto-salon">
-            <div className="proto-salon__franjas">
-              {["12:00", "14:00", "16:00", "18:00", "20:00", "22:00", "00:00"].map((f, i) => (
-                <span key={f} className={i === 4 ? "on" : ""}>
-                  {f}
-                </span>
-              ))}
-            </div>
-            <ul className="proto-salon__mesas">
-              {Array.from({ length: 30 }, (_, i) => (
-                <li key={i} className={`m-${estados[(i * 7) % 3]}`}>
-                  <b>{i + 1}</b>
-                  <small>{estados[(i * 7) % 3]}</small>
-                </li>
-              ))}
-            </ul>
-            <p className="proto-acciones">
-              <span className="btn btn--brasa">Sentar sin reserva</span>
-              <span className="btn">Marcar no-show</span>
-            </p>
-          </div>
-        }
-      />
-    </>
-  );
-}
-
 /** H4 — Pedido del comensal desde el QR (RF-Q1/Q2). */
 export function AdminPedidosQr() {
   return (
