@@ -1,7 +1,7 @@
 // Arma la salida para Vercel (Build Output API v3): sitio estático + una función Node para /api.
 // Vercel lo ejecuta como "Build Command" (ver vercel.json). También se puede correr local: `node scripts/vercel-build.mjs`.
 import { execSync } from "node:child_process";
-import { cpSync, existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { cpSync, existsSync, mkdirSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { build } from "esbuild";
@@ -19,6 +19,11 @@ cpSync(path.join(raiz, "apps", "web", "dist"), estatico, { recursive: true });
 // El esqueleto del hero va solo en "/": el resto de las rutas usa una copia sin él (igual que hacía Express).
 const html = readFileSync(path.join(estatico, "index.html"), "utf8");
 writeFileSync(path.join(estatico, "resto.html"), html.replace(/<!--esqueleto-->[\s\S]*?<!--\/esqueleto-->/, ""));
+
+// Páginas públicas con sus metadatos en el HTML (las genera el armado del sitio en dist/paginas).
+const paginas = readdirSync(path.join(estatico, "paginas"))
+  .filter((f) => f.endsWith(".html"))
+  .map((f) => f.replace(/\.html$/, ""));
 
 // 2. API
 mkdirSync(funcion, { recursive: true });
@@ -49,14 +54,21 @@ writeFileSync(
 );
 
 // 3. Rutas y cabeceras
+// Google Analytics solo si el local cargó su ID (VITE_GA4_ID): recién ahí se habilitan sus dominios.
+const ga = process.env.VITE_GA4_ID
+  ? {
+      script: " https://www.googletagmanager.com",
+      connect: " https://*.google-analytics.com https://*.analytics.google.com https://www.googletagmanager.com",
+      img: " https://*.google-analytics.com https://www.googletagmanager.com",
+    }
+  : { script: "", connect: "", img: "" };
 const seguridad = {
   "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
   "X-Content-Type-Options": "nosniff",
   "Referrer-Policy": "no-referrer",
   "X-Frame-Options": "DENY",
   "Cross-Origin-Opener-Policy": "same-origin",
-  "Content-Security-Policy":
-    "default-src 'self'; script-src 'self'; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:; media-src 'self'; font-src 'self'; connect-src 'self'; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'",
+  "Content-Security-Policy": `default-src 'self'; script-src 'self'${ga.script}; style-src 'self'; style-src-attr 'unsafe-inline'; img-src 'self' data:${ga.img}; media-src 'self'; font-src 'self'; connect-src 'self'${ga.connect}; frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'`,
 };
 writeFileSync(
   path.join(salida, "config.json"),
@@ -70,7 +82,10 @@ writeFileSync(
         { src: "/api/(.*)", dest: "/api" },
         { handle: "filesystem" },
         { src: "/", dest: "/index.html" },
-        { src: "/(.*)", dest: "/resto.html" },
+        ...paginas.map((p) => ({ src: `/${p}/?`, dest: `/paginas/${p}.html` })),
+        { src: "/(m/[^/]+|admin(/.*)?)", dest: "/resto.html" },
+        // Cualquier otra ruta: la misma aplicación (dice «Página no encontrada») con código 404.
+        { src: "/(.*)", dest: "/resto.html", status: 404 },
       ],
     },
     null,

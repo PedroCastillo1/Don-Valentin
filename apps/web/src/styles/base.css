@@ -197,3 +197,19 @@ html.lenis body {
   height: 40px;
   border-width: 1.5px;
 }
+
+/* Portada mientras carga una página interior (igual que el esqueleto del HTML inicial) */
+.espera-portada {
+  position: relative;
+  height: min(82svh, 52rem);
+  overflow: hidden;
+  background: #17100c;
+}
+.espera-portada img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.62;
+}

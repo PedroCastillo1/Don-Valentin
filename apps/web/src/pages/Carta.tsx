@@ -5,6 +5,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
 import { precio, UNICA } from "../lib/formato.ts";
+import { medir } from "../lib/medicion.ts";
 import { scrollA } from "../lib/scroll.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
 import "../styles/carta.css";
@@ -124,7 +125,10 @@ export function Carta() {
   const desde = Math.min(...PARRILLA_LIBRE.formulas.map((f) => f.precioPorPersona));
   useEffect(() => {
     api<CartaPublica>("/public/carta")
-      .then(setCarta)
+      .then((c) => {
+        setCarta(c);
+        medir("carta_vista");
+      })
       .catch(() => setError("No pudimos cargar la carta. Probá de nuevo en un momento."));
   }, []);
   const grupos = useMemo(

@@ -8,7 +8,7 @@ import { AdminMesas } from "./AdminMesas.tsx";
 import { AdminParametros } from "./AdminParametros.tsx";
 import { AdminUsuarios } from "./AdminUsuarios.tsx";
 import { AdminSalon } from "./AdminSalon.tsx";
-import { AdminMedicion } from "./AdminProximos.tsx";
+import { AdminMedicion } from "./AdminMedicion.tsx";
 import { AdminMozo, AdminPedidosQr, AdminSectores } from "./AdminPedidos.tsx";
 import { AdminCarta } from "./AdminCarta.tsx";
 import { AdminQrImprimir } from "./AdminQrImprimir.tsx";

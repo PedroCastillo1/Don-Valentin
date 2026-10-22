@@ -54,10 +54,9 @@ const ACTIVOS: {
   {
     to: "/admin/medicion",
     nombre: "Medición del sitio",
-    permiso: "parametros:ver",
-    grupo: "Próximos hitos",
+    permiso: "medicion:ver",
+    grupo: "Configuración",
     icono: "parametros",
-    hito: "H5",
   },
 ];
 

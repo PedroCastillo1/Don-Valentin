@@ -284,26 +284,30 @@ test.describe("administración", () => {
     await expect(page.getByRole("heading", { level: 1, name: `Mesa ${n}` })).toBeVisible();
   });
 
-  test("módulos futuros muestran hito y fecha exactos (los hitos 3 y 4 ya no figuran como pendientes)", async ({
-    page,
-  }) => {
+  test("todos los módulos del alcance están disponibles: ninguno queda «En construcción»", async ({ page }) => {
     await ingresar(page, "admin");
     const riel = page.locator("#contenido");
-    await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026")).toHaveCount(0);
-    await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026")).toHaveCount(0);
-    await expect(riel.getByText("Programado para el Hito 5 — 13/11/2026")).toBeVisible();
+    await expect(riel.getByText(/Programado para el Hito/)).toHaveCount(0);
+    await expect(page.locator(".adm__badge")).toHaveCount(0);
   });
 
-  test("los módulos de hitos futuros dicen «En construcción» con hito y fecha, y el encargado no gestiona administradores", async ({
+  test("las pantallas del panel no muestran carteles de obra, la carta tiene precios reales y el encargado no gestiona administradores", async ({
     page,
   }) => {
     await ingresar(page, "encargado");
-    const casos: [string, string][] = [["/admin/medicion", "Hito 5 — 13/11/2026"]];
-    for (const [ruta, hito] of casos) {
+    for (const ruta of [
+      "/admin/salon",
+      "/admin/pedidos",
+      "/admin/sectores",
+      "/admin/mozo",
+      "/admin/carta",
+      "/admin/medicion",
+      "/admin/reservas",
+      "/admin/mesas",
+    ]) {
       await page.goto(ruta);
-      const obra = page.locator(".obra").first();
-      await expect(obra).toContainText(/En construcción/i);
-      await expect(obra).toContainText(hito);
+      await expect(page.locator("h1")).toBeVisible();
+      await expect(page.locator(".obra")).toHaveCount(0);
     }
     // la carta del panel muestra los precios reales
     await page.goto("/admin/carta");

@@ -878,3 +878,28 @@
 .carrito__enviar {
   width: 100%;
 }
+
+/* Aviso de Google Analytics (solo si el local lo configuró) */
+.aviso-analitica {
+  position: fixed;
+  left: 1rem;
+  right: 1rem;
+  bottom: 1rem;
+  z-index: 50;
+  max-width: 36rem;
+  margin-inline: auto;
+  background: var(--superficie);
+  color: var(--tinta);
+  border: 2px solid var(--carbon);
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+  box-shadow: 0 18px 40px -18px rgba(0, 0, 0, 0.55);
+}
+.aviso-analitica p {
+  margin: 0 0 0.8rem;
+}
+.aviso-analitica__botones {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}

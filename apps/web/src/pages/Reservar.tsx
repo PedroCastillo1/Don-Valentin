@@ -1,9 +1,10 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { FormEvent } from "react";
 import { Link } from "react-router";
 import { DIA_NOMBRE, LOCAL, PARRILLA_LIBRE, localAbre, parsearDias } from "@dv/shared";
 import { precio } from "../lib/formato.ts";
 import { api, ApiError } from "../lib/api.ts";
+import { medir } from "../lib/medicion.ts";
 import { diaLargo, hoyAr, sumarDias } from "../lib/fechas.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
 import { VideoLoop } from "../components/VideoLoop.tsx";
@@ -96,8 +97,17 @@ export function Reservar() {
     if (ok) void import("../lib/scroll.ts").then((m) => m.scrollA(0, { inmediato: true }));
   }, [ok]);
 
+  // Embudo: la reserva cuenta como iniciada la primera vez que se toca el formulario.
+  const yaIniciada = useRef(false);
+  const iniciada = () => {
+    if (yaIniciada.current) return;
+    yaIniciada.current = true;
+    medir("reserva_iniciada");
+  };
+
   async function enviar(e: FormEvent) {
     e.preventDefault();
+    medir("reserva_enviada");
     setErrores({});
     setError("");
     setEnviando(true);
@@ -116,7 +126,9 @@ export function Reservar() {
           },
         }),
       );
+      medir("reserva_confirmada");
     } catch (err) {
+      medir("reserva_error");
       if (err instanceof ApiError) {
         setErrores(err.campos ?? {});
         setError(err.message);
@@ -166,7 +178,7 @@ export function Reservar() {
       medio={{ tipo: "video", src: "/media/video/reel-3.mp4", poster: "/media/video/reel-3.webp", posicion: "50% 60%" }}
     >
       <div className="reservar">
-        <form className="form-pub" onSubmit={enviar} noValidate>
+        <form className="form-pub" onSubmit={enviar} onFocus={iniciada} noValidate>
           <p className="paso__t">Primero, tus datos</p>
           <label>
             Nombre

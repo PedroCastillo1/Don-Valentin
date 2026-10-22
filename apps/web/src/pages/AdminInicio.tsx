@@ -254,23 +254,25 @@ function InicioTablero() {
         </section>
       </div>
 
-      <section className="panel" aria-labelledby="t-prox">
-        <div className="panel__cab">
-          <h2 id="t-prox">Próximos módulos</h2>
-          <p>Lo que se suma al panel en los próximos hitos del proyecto.</p>
-        </div>
-        <ul className="proximos">
-          {MODULOS.filter((m) => !m.disponible).map((m) => (
-            <li key={m.id}>
-              <Link to={RUTA_MODULO[m.id] ?? "/admin"}>
-                <span className="adm__badge">{m.hito}</span>
-                <span>{m.nombre}</span>
-                <small>En construcción · {textoProgramado(m.hito)}</small>
-              </Link>
-            </li>
-          ))}
-        </ul>
-      </section>
+      {MODULOS.some((m) => !m.disponible) && (
+        <section className="panel" aria-labelledby="t-prox">
+          <div className="panel__cab">
+            <h2 id="t-prox">Próximos módulos</h2>
+            <p>Lo que se suma al panel en los próximos hitos del proyecto.</p>
+          </div>
+          <ul className="proximos">
+            {MODULOS.filter((m) => !m.disponible).map((m) => (
+              <li key={m.id}>
+                <Link to={RUTA_MODULO[m.id] ?? "/admin"}>
+                  <span className="adm__badge">{m.hito}</span>
+                  <span>{m.nombre}</span>
+                  <small>En construcción · {textoProgramado(m.hito)}</small>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
     </div>
   );
 }

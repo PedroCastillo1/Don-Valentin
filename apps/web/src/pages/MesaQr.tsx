@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
 import { precio } from "../lib/formato.ts";
+import { medir } from "../lib/medicion.ts";
 import { CartaVista } from "./Carta.tsx";
 import type { CartaPublica } from "./Carta.tsx";
 import { SiteNav } from "../components/SiteNav.tsx";
@@ -81,6 +82,7 @@ export function MesaQr() {
           }
         }
         setCarta(await api<CartaPublica>("/public/carta"));
+        medir("carta_vista", "/m");
       })
       .catch((e) =>
         setError(
@@ -136,6 +138,7 @@ export function MesaQr() {
         },
       });
       setLineas([]);
+      medir("pedido_qr_enviado", "/m");
       setAviso({ tipo: "ok", texto: "¡Pedido enviado! Ya lo están preparando. Abajo ves cómo va." });
       await verPedidos();
     } catch (e) {
