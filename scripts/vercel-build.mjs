@@ -13,6 +13,16 @@ const funcion = path.join(salida, "functions", "api.func");
 
 rmSync(salida, { recursive: true, force: true });
 
+// 0. Base de datos: aplica las migraciones pendientes antes de publicar (todas son aditivas y van en transacción).
+// Si una falla, el armado se corta y Vercel mantiene la publicación anterior, que sigue funcionando.
+if (process.env.DATABASE_URL) {
+  execSync("node --experimental-strip-types apps/api/src/db/migrate-cli.ts", {
+    cwd: raiz,
+    stdio: "inherit",
+    env: { ...process.env, DB_SSL: process.env.DB_SSL ?? "true" },
+  });
+} else console.log("Sin DATABASE_URL en el armado: no se aplican migraciones.");
+
 // 1. Sitio
 execSync("npm run build -w @dv/web", { cwd: raiz, stdio: "inherit" });
 cpSync(path.join(raiz, "apps", "web", "dist"), estatico, { recursive: true });
