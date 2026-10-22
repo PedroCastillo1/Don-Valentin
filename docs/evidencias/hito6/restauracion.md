@@ -9,7 +9,7 @@ RESPALDO_CLAVE=… DB_NAME=dv_restaurada npm run db:restaurar -- respaldo.dvr
 
 ```
 ## Respaldo
-Respaldo listo: /tmp/claude-0/resp/respaldo.dvr (459 filas, 20 tablas, 2026-10-22T22:27:24.110Z).
+Respaldo listo: respaldo.dvr (459 filas, 20 tablas, 2026-10-22T22:27:24.110Z).
 tiempo: .662 s
 tamaño: 9615 bytes
 
