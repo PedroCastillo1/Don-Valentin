@@ -1,5 +1,4 @@
 import { z } from "zod";
-import { ORIGENES_RESERVA } from "./dominio.ts";
 
 /** Normaliza un teléfono argentino a dígitos (sin espacios, guiones ni paréntesis). */
 export function normalizarTelefono(raw: string): string {
@@ -38,8 +37,33 @@ export type ReservaPublicaInput = z.infer<typeof reservaPublicaSchema>;
 
 export const reservaInternaSchema = reservaPublicaSchema
   .omit({ aceptaAviso: true })
-  .extend({ origen: z.enum(ORIGENES_RESERVA.filter((o) => o !== "web") as ["telefono", "presencial"]) });
+  .extend({ origen: z.enum(["telefono", "whatsapp", "presencial"]) });
 export type ReservaInternaInput = z.infer<typeof reservaInternaSchema>;
+
+/** RF-R4: cambiar día, horario, personas o datos de contacto de una reserva confirmada. */
+export const reservaEdicionSchema = z
+  .object({
+    nombre: reservaPublicaSchema.shape.nombre.optional(),
+    telefono: telefonoSchema.optional(),
+    personas: reservaPublicaSchema.shape.personas.optional(),
+    fecha: fechaIso.optional(),
+    franjaId: reservaPublicaSchema.shape.franjaId.optional(),
+    comentarios: z.string().trim().max(300, "Los comentarios admiten hasta 300 caracteres").nullable().optional(),
+  })
+  .refine((d) => Object.values(d).some((v) => v !== undefined), "No hay nada para cambiar");
+export type ReservaEdicionInput = z.infer<typeof reservaEdicionSchema>;
+
+/** RF-R3: grupo que llega sin reserva; solo se pide la cantidad (nombre opcional, sin teléfono). */
+export const walkInSchema = z.object({
+  personas: reservaPublicaSchema.shape.personas,
+  nombre: z.string().trim().max(80, "El nombre admite hasta 80 caracteres").optional(),
+  mesaId: z.number().int().positive().optional(),
+});
+export type WalkInInput = z.infer<typeof walkInSchema>;
+
+export const busquedaReservasSchema = z.object({
+  q: z.string().trim().min(2, "Escribí al menos 2 letras o números").max(80),
+});
 
 export const disponibilidadQuerySchema = z.object({
   fecha: fechaIso,

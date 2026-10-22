@@ -13,6 +13,8 @@ export const ROL_NOMBRE: Record<Rol, string> = {
 export const PERMISOS = [
   "reservas:ver",
   "reservas:crear",
+  "reservas:editar",
+  "salon:operar",
   "mesas:ver",
   "mesas:administrar",
   "qr:generar",
@@ -35,6 +37,8 @@ export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
   encargado: [
     "reservas:ver",
     "reservas:crear",
+    "reservas:editar",
+    "salon:operar",
     "mesas:ver",
     "mesas:administrar",
     "qr:generar",
@@ -45,7 +49,7 @@ export const PERMISOS_POR_ROL: Record<Rol, readonly Permiso[]> = {
     "usuarios:administrar",
     "auditoria:ver",
   ],
-  mozo: ["reservas:ver", "reservas:crear", "sesion_mesa:abrir", "sesion_mesa:cerrar"],
+  mozo: ["reservas:ver", "reservas:crear", "salon:operar", "sesion_mesa:abrir", "sesion_mesa:cerrar"],
   parrillero: ["panel_sector:ver"],
   cocinero: ["panel_sector:ver"],
   barra: ["panel_sector:ver"],

@@ -99,7 +99,7 @@ export const MODULOS: readonly Modulo[] = [
     nombre: "Estado del salón",
     descripcion: "Mesas libres, reservadas y ocupadas por franja; walk-in y no-show.",
     hito: "H3",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-R3"],
   },
   {
@@ -107,7 +107,7 @@ export const MODULOS: readonly Modulo[] = [
     nombre: "Modificar y cancelar reservas",
     descripcion: "Liberar o reasignar el cupo al modificar o cancelar.",
     hito: "H3",
-    disponible: false,
+    disponible: true,
     requisitos: ["RF-R4"],
   },
   {

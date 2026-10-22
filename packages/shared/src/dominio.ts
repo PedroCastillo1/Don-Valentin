@@ -1,7 +1,8 @@
 export const ESTADOS_RESERVA = ["confirmada", "cancelada", "no_show", "cumplida"] as const;
 export type EstadoReserva = (typeof ESTADOS_RESERVA)[number];
 
-export const ORIGENES_RESERVA = ["web", "telefono", "presencial"] as const;
+/** walk_in: el grupo llega sin reserva (Hito 3, RF-R3). */
+export const ORIGENES_RESERVA = ["web", "telefono", "whatsapp", "presencial", "walk_in"] as const;
 export type OrigenReserva = (typeof ORIGENES_RESERVA)[number];
 
 export const SECTORES_PREPARACION = ["cocina", "parrilla", "barra"] as const;

@@ -3,12 +3,15 @@ import type { Request } from "express";
 import {
   PERMISOS_POR_ROL,
   aforoEdicionSchema,
+  busquedaReservasSchema,
   mesaEdicionSchema,
   mesaNuevaSchema,
   parametroEdicionSchema,
+  reservaEdicionSchema,
   reservaInternaSchema,
   tipoSolicitudEdicionSchema,
   usuarioNuevoSchema,
+  walkInSchema,
 } from "@dv/shared";
 import { z } from "zod";
 import type { Config } from "../config.ts";
@@ -32,7 +35,20 @@ import {
   planilla,
   validarElemento,
 } from "../services/parametros.ts";
-import { crearReserva, leerConfigLocal, reservasDelDia, resumenDia } from "../services/reservas.ts";
+import {
+  buscarReservas,
+  cancelarReserva,
+  crearReserva,
+  estadoSalon,
+  leerConfigLocal,
+  leerReserva,
+  marcarNoShow,
+  modificarReserva,
+  registrarLlegada,
+  registrarWalkIn,
+  reservasDelDia,
+  resumenDia,
+} from "../services/reservas.ts";
 import { cambiarActivo, crearUsuario, listarUsuarios } from "../services/usuarios.ts";
 import { fechaServicioActual } from "../domain/tiempo.ts";
 import { exigirPermiso, idParam, parsear } from "./middleware.ts";
@@ -71,7 +87,67 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   r.get("/reservas", exigirPermiso(db, "reservas:ver"), async (req, res) => {
     const q = parsear(fechaQuery, req.query);
     const fecha = q.fecha ?? (await diaActual());
-    res.json({ fecha, reservas: await reservasDelDia(db, fecha) });
+    res.json({ fecha, reservas: await reservasDelDia(db, fecha, ahora()) });
+  });
+  // RF-R4: buscar en todas las fechas, ver, modificar, cancelar y no-show
+  r.get("/reservas/buscar", exigirPermiso(db, "reservas:ver"), async (req, res) => {
+    const { q } = parsear(busquedaReservasSchema, req.query);
+    res.json({ q, reservas: await buscarReservas(db, q, ahora()) });
+  });
+  r.get("/reservas/:id", exigirPermiso(db, "reservas:ver"), async (req, res) => {
+    res.json(await leerReserva(db, idParam(req.params.id), ahora()));
+  });
+  r.patch("/reservas/:id", exigirPermiso(db, "reservas:editar"), async (req, res) => {
+    const cambios = parsear(reservaEdicionSchema, req.body);
+    const reserva = await modificarReserva(db, idParam(req.params.id), cambios, ahora());
+    await registrarAuditoria(db, {
+      usuarioId: actor(req),
+      accion: "reserva:modificar",
+      recurso: reserva.codigo,
+      resultado: "permitido",
+      detalle: cambios as Record<string, unknown>,
+      ip: req.ip,
+    });
+    res.json(reserva);
+  });
+  const transicion = (
+    ruta: string,
+    permiso: "reservas:editar" | "salon:operar",
+    accion: string,
+    f: (id: number, req: Request) => ReturnType<typeof leerReserva>,
+  ) =>
+    r.post(`/reservas/:id/${ruta}`, exigirPermiso(db, permiso), async (req, res) => {
+      const reserva = await f(idParam(req.params.id), req);
+      await registrarAuditoria(db, {
+        usuarioId: actor(req),
+        accion,
+        recurso: reserva.codigo,
+        resultado: "permitido",
+        ip: req.ip,
+      });
+      res.json(reserva);
+    });
+  transicion("cancelar", "reservas:editar", "reserva:cancelar", (id) => cancelarReserva(db, id, ahora()));
+  transicion("no-show", "reservas:editar", "reserva:no_show", (id) => marcarNoShow(db, id, ahora()));
+  transicion("llegada", "salon:operar", "reserva:llegada", (id, req) => registrarLlegada(db, id, actor(req), ahora()));
+
+  // RF-R3: estado del salón por franja y walk-in
+  r.get("/salon", exigirPermiso(db, "salon:operar"), async (req, res) => {
+    const q = parsear(fechaQuery.extend({ franjaId: z.coerce.number().int().positive().optional() }), req.query);
+    res.json(await estadoSalon(db, q.fecha ?? (await diaActual()), q.franjaId, ahora()));
+  });
+  r.post("/salon/walk-in", exigirPermiso(db, "salon:operar"), async (req, res) => {
+    const d = parsear(walkInSchema, req.body);
+    const reserva = await registrarWalkIn(db, d, actor(req), ahora());
+    await registrarAuditoria(db, {
+      usuarioId: actor(req),
+      accion: "reserva:walk_in",
+      recurso: reserva.codigo,
+      resultado: "permitido",
+      detalle: { personas: d.personas, mesa: reserva.mesa },
+      ip: req.ip,
+    });
+    res.status(201).json(reserva);
   });
   r.post("/reservas", exigirPermiso(db, "reservas:crear"), async (req, res) => {
     const d = parsear(reservaInternaSchema, req.body);
