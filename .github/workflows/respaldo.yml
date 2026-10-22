@@ -1,0 +1,36 @@
+# RNF-6: respaldo automático de la base (Supabase) todas las noches, después del cierre del local (02:00).
+# Necesita dos secretos del repositorio: DATABASE_URL (conexión de Supabase) y RESPALDO_CLAVE (16+ caracteres).
+# El archivo sale cifrado (AES-256-GCM) y queda 30 días como artefacto de la ejecución.
+name: Respaldo nocturno
+
+on:
+  schedule:
+    - cron: "15 6 * * *" # 03:15 en Argentina
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  respaldo:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci --include=dev
+      - name: Respaldar
+        env:
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          DB_SSL: "true"
+          RESPALDO_CLAVE: ${{ secrets.RESPALDO_CLAVE }}
+        run: npm run db:respaldo -- "$GITHUB_WORKSPACE/respaldo-$(date -u +%Y-%m-%d).dvr"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: respaldo-${{ github.run_id }}
+          path: respaldo-*.dvr
+          retention-days: 30
+          if-no-files-found: error
