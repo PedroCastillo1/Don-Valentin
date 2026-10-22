@@ -73,7 +73,7 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
 
   const api = express.Router();
   api.use(limite(60_000, 300, "Demasiadas peticiones. Esperá un momento."));
-  api.use(cargarSesion(db));
+  api.use(cargarSesion(db, ahora));
 
   api.use(
     "/public",
@@ -102,7 +102,8 @@ export function createApp({ db, cfg, ahora = () => new Date(), limitarTasa = tru
         sameSite: "strict",
         secure: cfg.cookieSecure,
         path: "/",
-        expires: s.expiraEn,
+        // Duración relativa (Max-Age) y no fecha absoluta: el vencimiento real lo controla la base con el mismo reloj.
+        maxAge: cfg.SESSION_TTL_HOURS * 3_600_000,
       });
       res.json({ usuario: s.usuario, csrfToken: s.csrfToken, permisos: PERMISOS_POR_ROL[s.usuario.rol] });
     },

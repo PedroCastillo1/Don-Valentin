@@ -38,10 +38,11 @@ export function parsear<T>(schema: ZodType<T>, datos: unknown): T {
   throw new ErrorDeDominio(400, "DATOS_INVALIDOS", Object.values(campos)[0] ?? "Datos inválidos.", campos);
 }
 
-export function cargarSesion(db: Db): RequestHandler {
+/** `ahora` es el mismo reloj que usa el resto de la API (en pruebas, uno fijo o movible). */
+export function cargarSesion(db: Db, ahora: () => Date = () => new Date()): RequestHandler {
   return async (req, _res, next) => {
     const token = leerCookie(req, COOKIE_SESION);
-    if (token) req.sesion = (await sesionPorToken(db, token)) ?? undefined;
+    if (token) req.sesion = (await sesionPorToken(db, token, ahora())) ?? undefined;
     next();
   };
 }
