@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
-import { precio } from "../lib/formato.ts";
+import { precio, UNICA } from "../lib/formato.ts";
 import { scrollA } from "../lib/scroll.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
 import "../styles/carta.css";
@@ -20,7 +20,7 @@ export interface CartaPublica {
         nombre: string;
         nota: string | null;
         sinTacc: boolean;
-        variantes: { etiqueta: string; precio: number | null }[];
+        variantes: { id: number; etiqueta: string; precio: number | null }[];
       }[];
     }[];
   }[];
@@ -40,7 +40,18 @@ function desplazamientoSuperior(): number {
   return Math.round(max + 16);
 }
 
-export function CartaVista({ carta, filtro }: { carta: CartaPublica; filtro: string }) {
+type ProductoCarta = CartaPublica["grupos"][number]["categorias"][number]["productos"][number];
+
+/** `agregar`: en la mesa (QR) cada precio lleva su botón para sumarlo al pedido. */
+export function CartaVista({
+  carta,
+  filtro,
+  agregar,
+}: {
+  carta: CartaPublica;
+  filtro: string;
+  agregar?: (p: ProductoCarta, v: ProductoCarta["variantes"][number]) => void;
+}) {
   const q = filtro.trim().toLowerCase();
   return (
     <div className="carta">
@@ -80,6 +91,19 @@ export function CartaVista({ carta, filtro }: { carta: CartaPublica; filtro: str
                         </span>
                       </div>
                       {p.nota && <p className="carta__nota">{p.nota}</p>}
+                      {agregar && (
+                        <div className="carta__agregar">
+                          {p.variantes
+                            .filter((v) => v.precio !== null)
+                            .map((v) => (
+                              <button key={v.id} type="button" className="btn btn--chico" onClick={() => agregar(p, v)}>
+                                <span aria-hidden="true">+</span> Agregar
+                                {v.etiqueta && !UNICA.has(v.etiqueta) ? ` ${v.etiqueta}` : ""}
+                                <span className="sr-only"> {p.nombre}</span>
+                              </button>
+                            ))}
+                        </div>
+                      )}
                     </li>
                   ))}
                 </ul>

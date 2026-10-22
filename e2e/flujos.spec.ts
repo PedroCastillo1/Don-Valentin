@@ -284,11 +284,13 @@ test.describe("administración", () => {
     await expect(page.getByRole("heading", { level: 1, name: `Mesa ${n}` })).toBeVisible();
   });
 
-  test("módulos futuros muestran hito y fecha exactos (el Hito 3 ya no figura como pendiente)", async ({ page }) => {
+  test("módulos futuros muestran hito y fecha exactos (los hitos 3 y 4 ya no figuran como pendientes)", async ({
+    page,
+  }) => {
     await ingresar(page, "admin");
     const riel = page.locator("#contenido");
     await expect(riel.getByText("Programado para el Hito 3 — 30/10/2026")).toHaveCount(0);
-    await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026").first()).toBeVisible();
+    await expect(riel.getByText("Programado para el Hito 4 — 06/11/2026")).toHaveCount(0);
     await expect(riel.getByText("Programado para el Hito 5 — 13/11/2026")).toBeVisible();
   });
 
@@ -296,23 +298,13 @@ test.describe("administración", () => {
     page,
   }) => {
     await ingresar(page, "encargado");
-    const casos: [string, string][] = [
-      ["/admin/pedidos", "Hito 4 — 06/11/2026"],
-      ["/admin/sectores", "Hito 4 — 06/11/2026"],
-      ["/admin/mozo", "Hito 4 — 06/11/2026"],
-      ["/admin/carta", "Hito 4 — 06/11/2026"],
-      ["/admin/medicion", "Hito 5 — 13/11/2026"],
-      ["/admin/mesas", "Hito 4 — 06/11/2026"],
-    ];
+    const casos: [string, string][] = [["/admin/medicion", "Hito 5 — 13/11/2026"]];
     for (const [ruta, hito] of casos) {
       await page.goto(ruta);
       const obra = page.locator(".obra").first();
       await expect(obra).toContainText(/En construcción/i);
       await expect(obra).toContainText(hito);
     }
-    await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toHaveCount(0);
-    await page.goto("/admin/pedidos");
-    await expect(page.getByText("Prototipo de pantalla · datos de ejemplo · todavía no funciona")).toBeVisible();
     // la carta del panel muestra los precios reales
     await page.goto("/admin/carta");
     await expect(page.getByRole("heading", { name: "Carta vigente" })).toBeVisible();

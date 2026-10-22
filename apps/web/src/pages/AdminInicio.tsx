@@ -2,14 +2,11 @@ import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
 import { ORIGEN } from "../lib/fechas.ts";
 import { useSesion } from "../lib/sesion.tsx";
-import { Link } from "react-router";
+import { Link, Navigate } from "react-router";
 import { MODULOS, textoProgramado } from "@dv/shared";
 
 /** Pantalla de cada módulo en construcción (con su cartel de obra y el prototipo). */
 const RUTA_MODULO: Record<string, string> = {
-  "carta-digital": "/admin/pedidos",
-  "carta-precios": "/admin/carta",
-  "paneles-sector": "/admin/sectores",
   "medicion-sitio": "/admin/medicion",
 };
 import { Icono } from "../components/Iconos.tsx";
@@ -61,7 +58,14 @@ const sumar = (iso: string, n: number): string => {
   return new Date(Date.UTC(a ?? 2026, (m ?? 1) - 1, (d ?? 1) + n)).toISOString().slice(0, 10);
 };
 
+/** Los puestos de cocina, parrilla y barra no ven reservas: entran directo a su panel. */
 export function AdminInicio() {
+  const { puede } = useSesion();
+  if (!puede("reservas:ver")) return <Navigate to="/admin/sectores" replace />;
+  return <InicioTablero />;
+}
+
+function InicioTablero() {
   const { usuario, puede } = useSesion();
   const [resumen, setResumen] = useState<Resumen | null>(null);
   const [reservas, setReservas] = useState<Reserva[]>([]);

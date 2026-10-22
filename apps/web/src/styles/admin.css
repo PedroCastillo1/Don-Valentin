@@ -1996,3 +1996,290 @@ button.mesa[aria-pressed="true"] {
   margin: 0;
   font-size: 1.1rem;
 }
+
+/* ───────── Hito 4: paneles de sector, pedido del mozo, resumen de pedidos, carta y hoja de QR ───────── */
+.alerta-demora {
+  margin: 0 0 1rem;
+  padding: 0.7rem 1rem;
+  border-radius: 8px;
+  font-weight: 700;
+  background: var(--brasa);
+  color: var(--sobre-brasa);
+}
+.cocina {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+@media (max-width: 900px) {
+  .cocina {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+.cocina__col {
+  background: var(--ceniza-2);
+  border-radius: 14px;
+  padding: 0.9rem;
+  min-width: 0;
+}
+.cocina__col h2 {
+  margin: 0 0 0.7rem;
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+}
+.cocina__col h2 span {
+  font-family: var(--f-mono);
+  font-size: 1rem;
+}
+.tickets {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.6rem;
+}
+.ticket-s {
+  background: var(--superficie);
+  border: 1px solid var(--ceniza-3);
+  border-left: 6px solid var(--carbon);
+  border-radius: 10px;
+  padding: 0.75rem 0.85rem;
+  display: grid;
+  gap: 0.35rem;
+  min-width: 0;
+}
+.ticket-s--demorado {
+  border-left-color: var(--brasa);
+  background: var(--tinte-rosa);
+}
+.ticket-s__cab {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.5rem;
+  align-items: baseline;
+}
+.ticket-s__cab b {
+  font-family: var(--f-display);
+  font-size: 1.35rem;
+  font-weight: 800;
+}
+.ticket-s__min {
+  font: 600 0.85rem/1 var(--f-mono);
+}
+.ticket-s--demorado .ticket-s__min {
+  color: var(--brasa-texto);
+}
+.ticket-s p {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+.ticket-s__plato {
+  font-size: 1.1rem;
+  font-weight: 600;
+}
+.ticket-s__cant {
+  font-family: var(--f-mono);
+}
+.ticket-s__nota {
+  font-style: italic;
+  background: var(--tinte-ambar);
+  color: #3d2800;
+  border-radius: 6px;
+  padding: 0.2rem 0.45rem;
+  justify-self: start;
+}
+.ticket-s__pie {
+  font-size: 0.8rem;
+  color: var(--tinta-3);
+}
+.ticket-s__error {
+  color: var(--error);
+  font-weight: 600;
+}
+.ticket-s .btn {
+  justify-self: start;
+}
+.opciones {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+}
+.opciones li {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  padding: 0.45rem 0.6rem;
+  border-radius: 8px;
+  background: var(--superficie);
+}
+.opciones li > span {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.opciones small {
+  color: var(--tinta-3);
+  margin-left: 0.3rem;
+}
+.opciones--pedido input {
+  flex: 1 1 8rem;
+  min-height: 38px !important;
+}
+.conteo__alerta b {
+  color: var(--brasa-texto);
+}
+.mesas-pedidos {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr));
+  gap: 1rem;
+  align-items: start;
+}
+.lista-items {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+.lista-items li {
+  display: flex;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--ceniza-2);
+}
+.lista-items li > span:first-child {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+.lista-items small {
+  display: block;
+  color: var(--tinta-3);
+}
+.lista-items--demorado small {
+  color: var(--brasa-texto);
+  font-weight: 700;
+}
+.seg-estado {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: 999px;
+  white-space: nowrap;
+  align-self: start;
+  background: var(--ceniza-2);
+  color: var(--tinta);
+}
+.seg-estado--en_preparacion {
+  background: var(--tinte-ambar);
+  color: #3d2800;
+}
+.seg-estado--listo {
+  background: var(--brasa);
+  color: var(--sobre-brasa);
+}
+.seg-estado--entregado {
+  background: var(--marmol-claro);
+  color: #1d3a29;
+}
+.tabla--carta td {
+  vertical-align: middle;
+}
+.precios-edit {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem 0.8rem;
+}
+.precios-edit label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.85rem;
+}
+.precios-edit input {
+  width: 7.5rem;
+  min-height: 38px;
+  padding: 0 0.6rem;
+  border: 2px solid var(--papel-3);
+  border-radius: 8px;
+  background: var(--superficie);
+  color: var(--tinta);
+  font: 600 0.95rem var(--f-mono);
+}
+.precios-edit input:focus {
+  border-color: var(--brasa);
+  outline: none;
+}
+.fila--agotada td:first-child {
+  text-decoration: line-through;
+  color: var(--tinta-3);
+}
+.interruptor {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  cursor: pointer;
+}
+.interruptor input {
+  width: 1.25rem;
+  height: 1.25rem;
+  accent-color: var(--brasa);
+}
+.hoja-qr__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.6rem;
+  margin-bottom: 1.2rem;
+}
+.hoja-qr__grilla {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(11rem, 1fr));
+  gap: 1rem;
+}
+.hoja-qr__grilla li {
+  background: #fff;
+  color: #000;
+  border: 1px dashed #999;
+  border-radius: 8px;
+  padding: 0.8rem;
+  text-align: center;
+  break-inside: avoid;
+}
+.hoja-qr__grilla img {
+  width: 100%;
+  height: auto;
+}
+.hoja-qr__grilla p {
+  margin: 0.3rem 0 0;
+  font-size: 1.1rem;
+}
+.hoja-qr__grilla small {
+  color: #333;
+}
+@media print {
+  .adm__riel,
+  .adm__tope,
+  .adm__nav,
+  .no-imprimir,
+  .skip {
+    display: none !important;
+  }
+  .adm,
+  .adm__main {
+    display: block !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    background: #fff !important;
+  }
+  .hoja-qr__grilla {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 0.6cm;
+  }
+}

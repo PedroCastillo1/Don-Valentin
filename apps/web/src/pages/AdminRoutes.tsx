@@ -8,7 +8,10 @@ import { AdminMesas } from "./AdminMesas.tsx";
 import { AdminParametros } from "./AdminParametros.tsx";
 import { AdminUsuarios } from "./AdminUsuarios.tsx";
 import { AdminSalon } from "./AdminSalon.tsx";
-import { AdminCarta, AdminMedicion, AdminMozo, AdminPedidosQr, AdminSectores } from "./AdminProximos.tsx";
+import { AdminMedicion } from "./AdminProximos.tsx";
+import { AdminMozo, AdminPedidosQr, AdminSectores } from "./AdminPedidos.tsx";
+import { AdminCarta } from "./AdminCarta.tsx";
+import { AdminQrImprimir } from "./AdminQrImprimir.tsx";
 
 /** Todo el administrador (y su sesión) en un solo bloque: el sitio público no lo descarga ni consulta /auth/me. */
 export default function AdminRoutes() {
@@ -20,6 +23,7 @@ export default function AdminRoutes() {
           <Route index element={<AdminInicio />} />
           <Route path="reservas" element={<AdminReservas />} />
           <Route path="mesas" element={<AdminMesas />} />
+          <Route path="mesas/imprimir" element={<AdminQrImprimir />} />
           <Route path="parametros" element={<AdminParametros />} />
           <Route path="usuarios" element={<AdminUsuarios />} />
           <Route path="carta" element={<AdminCarta />} />

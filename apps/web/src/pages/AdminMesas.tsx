@@ -2,7 +2,7 @@ import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
-import { EnConstruccion } from "../components/EnConstruccion.tsx";
+import { Link } from "react-router";
 import { Cabecera, Estado, Mensaje } from "../components/ui.tsx";
 
 interface Mesa {
@@ -69,12 +69,13 @@ export function AdminMesas() {
         bajada="Abrí la sesión cuando se sientan los comensales y liberá la mesa cuando se van: el QR queda fijo y el próximo grupo empieza con la cuenta en cero."
       />
       {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
-      <EnConstruccion
-        compacto
-        hito="H4"
-        titulo="Pedidos desde el QR"
-        descripcion="Hoy cada QR abre la mesa correcta y muestra la carta. El pedido desde la mesa y su envío a cocina, parrilla o barra se completan en el Hito 4."
-      />
+      {puede("qr:generar") && (
+        <p className="acciones-fila">
+          <Link className="btn btn--chico" to="/admin/mesas/imprimir">
+            Imprimir los QR de todas las mesas
+          </Link>
+        </p>
+      )}
       <div className="tabla-wrap">
         <table className="tabla tabla--tarjetas">
           <thead>
