@@ -400,6 +400,10 @@ export function AdminMozo() {
   const [carta, setCarta] = useState<CartaPublica | null>(null);
   const [filtro, setFiltro] = useState("");
   const [lineas, setLineas] = useState<LineaMozo[]>([]);
+  const [listaAbierta, setListaAbierta] = useState(true);
+  const [modoCompacto, setModoCompacto] = useState(true);
+  const [notasAbiertas, setNotasAbiertas] = useState<number[]>([]);
+  const [confirmarVaciar, setConfirmarVaciar] = useState(false);
   const [confirmarEnvio, setConfirmarEnvio] = useState(false);
   const [quitarConfirmId, setQuitarConfirmId] = useState<number | null>(null);
   const [aviso, setAviso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
@@ -466,6 +470,8 @@ export function AdminMozo() {
       const n = mesas.find((m) => m.mesaId === mesaId)?.numero;
       setAviso({ tipo: "ok", texto: `Pedido de la mesa ${n} enviado a los sectores.` });
       setLineas([]);
+      setNotasAbiertas([]);
+      setConfirmarVaciar(false);
       setConfirmarEnvio(false);
       void cargar();
     } catch (e) {
@@ -500,6 +506,7 @@ export function AdminMozo() {
     [items, mesaElegida],
   );
   const totalLineas = lineas.reduce((acc, l) => acc + l.cantidad * l.precio, 0);
+  const totalUnidades = lineas.reduce((acc, l) => acc + l.cantidad, 0);
 
   return (
     <>
@@ -578,87 +585,165 @@ export function AdminMozo() {
               </ul>
             )}
             {lineas.length > 0 && (
-              <>
-                <ul className="opciones opciones--pedido" aria-label="Pedido">
-                  {lineas.map((l) => (
-                    <li key={l.varianteId}>
-                      <div className="pedido-linea__cab">
-                        <span>
-                          <b>{l.cantidad} ×</b> {l.nombre} <small>{precio(l.precio * l.cantidad)}</small>
-                        </span>
-                        <div className="pedido-linea__controles">
-                          <span className="pedido-cant" role="group" aria-label={`Cantidad de ${l.nombre}`}>
-                            <button
-                              type="button"
-                              className="pedido-cant__btn"
-                              onClick={() => {
-                                setConfirmarEnvio(false);
-                                cambiarCantidad(l.varianteId, -1);
-                              }}
-                              aria-label={`Restar uno de ${l.nombre}`}
-                            >
-                              −
-                            </button>
-                            <b aria-live="polite">{l.cantidad}</b>
-                            <button
-                              type="button"
-                              className="pedido-cant__btn"
-                              disabled={l.cantidad >= 20}
-                              onClick={() => {
-                                setConfirmarEnvio(false);
-                                cambiarCantidad(l.varianteId, 1);
-                              }}
-                              aria-label={`Sumar uno de ${l.nombre}`}
-                            >
-                              +
-                            </button>
-                          </span>
-                          {quitarConfirmId === l.varianteId ? (
-                            <span className="acciones-fila">
-                              <button
-                                type="button"
-                                className="btn btn--brasa btn--chico"
-                                onClick={() => {
-                                  setLineas((ls) => ls.filter((x) => x.varianteId !== l.varianteId));
-                                  setQuitarConfirmId(null);
-                                  setConfirmarEnvio(false);
-                                }}
-                              >
-                                Sí, quitar
-                              </button>
-                              <button type="button" className="btn btn--chico" onClick={() => setQuitarConfirmId(null)}>
-                                No
-                              </button>
+              <div className="pedido-bloque">
+                <div className="pedido-bloque__cab">
+                  <span className="pedido-bloque__titulo">
+                    Pedido actual: <b>{totalUnidades} u.</b> ({lineas.length}{" "}
+                    {lineas.length === 1 ? "producto" : "productos"})
+                  </span>
+                  <div className="acciones-fila">
+                    <button
+                      type="button"
+                      className="btn btn--chico"
+                      aria-expanded={listaAbierta}
+                      onClick={() => setListaAbierta((v) => !v)}
+                    >
+                      {listaAbierta ? "Ocultar lista" : `Ver lista (${lineas.length})`}
+                    </button>
+                    {listaAbierta && (
+                      <button
+                        type="button"
+                        className="btn btn--chico"
+                        aria-pressed={!modoCompacto}
+                        onClick={() => setModoCompacto((v) => !v)}
+                      >
+                        {modoCompacto ? "Mostrar aclaraciones" : "Compactar"}
+                      </button>
+                    )}
+                    {confirmarVaciar ? (
+                      <span className="acciones-fila">
+                        <button
+                          type="button"
+                          className="btn btn--brasa btn--chico"
+                          onClick={() => {
+                            setLineas([]);
+                            setNotasAbiertas([]);
+                            setConfirmarVaciar(false);
+                            setConfirmarEnvio(false);
+                          }}
+                        >
+                          Sí, vaciar
+                        </button>
+                        <button type="button" className="btn btn--chico" onClick={() => setConfirmarVaciar(false)}>
+                          No
+                        </button>
+                      </span>
+                    ) : (
+                      <button type="button" className="btn btn--chico" onClick={() => setConfirmarVaciar(true)}>
+                        Vaciar
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {!listaAbierta ? (
+                  <p className="pedido-bloque__resumen">
+                    {lineas.map((l) => `${l.cantidad}× ${l.nombre}`).join(" · ")}
+                  </p>
+                ) : (
+                  <ul className="opciones opciones--pedido" aria-label="Pedido">
+                    {lineas.map((l) => {
+                      const mostrarNota = !modoCompacto || Boolean(l.nota) || notasAbiertas.includes(l.varianteId);
+                      return (
+                        <li key={l.varianteId}>
+                          <div className="pedido-linea__cab">
+                            <span>
+                              <b>{l.cantidad} ×</b> {l.nombre} <small>{precio(l.precio * l.cantidad)}</small>
                             </span>
-                          ) : (
-                            <button
-                              type="button"
-                              className="btn btn--chico"
-                              onClick={() => setQuitarConfirmId(l.varianteId)}
-                            >
-                              Quitar<span className="sr-only"> {l.nombre}</span>
-                            </button>
+                            <div className="pedido-linea__controles">
+                              {modoCompacto && !mostrarNota && (
+                                <button
+                                  type="button"
+                                  className="btn btn--chico"
+                                  onClick={() =>
+                                    setNotasAbiertas((ids) =>
+                                      ids.includes(l.varianteId) ? ids : [...ids, l.varianteId],
+                                    )
+                                  }
+                                >
+                                  + Nota
+                                </button>
+                              )}
+                              <span className="pedido-cant" role="group" aria-label={`Cantidad de ${l.nombre}`}>
+                                <button
+                                  type="button"
+                                  className="pedido-cant__btn"
+                                  onClick={() => {
+                                    setConfirmarEnvio(false);
+                                    cambiarCantidad(l.varianteId, -1);
+                                  }}
+                                  aria-label={`Restar uno de ${l.nombre}`}
+                                >
+                                  −
+                                </button>
+                                <b aria-live="polite">{l.cantidad}</b>
+                                <button
+                                  type="button"
+                                  className="pedido-cant__btn"
+                                  disabled={l.cantidad >= 20}
+                                  onClick={() => {
+                                    setConfirmarEnvio(false);
+                                    cambiarCantidad(l.varianteId, 1);
+                                  }}
+                                  aria-label={`Sumar uno de ${l.nombre}`}
+                                >
+                                  +
+                                </button>
+                              </span>
+                              {quitarConfirmId === l.varianteId ? (
+                                <span className="acciones-fila">
+                                  <button
+                                    type="button"
+                                    className="btn btn--brasa btn--chico"
+                                    onClick={() => {
+                                      setLineas((ls) => ls.filter((x) => x.varianteId !== l.varianteId));
+                                      setQuitarConfirmId(null);
+                                      setConfirmarEnvio(false);
+                                    }}
+                                  >
+                                    Sí, quitar
+                                  </button>
+                                  <button
+                                    type="button"
+                                    className="btn btn--chico"
+                                    onClick={() => setQuitarConfirmId(null)}
+                                  >
+                                    No
+                                  </button>
+                                </span>
+                              ) : (
+                                <button
+                                  type="button"
+                                  className="btn btn--chico"
+                                  onClick={() => setQuitarConfirmId(l.varianteId)}
+                                >
+                                  Quitar<span className="sr-only"> {l.nombre}</span>
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                          {mostrarNota && (
+                            <input
+                              aria-label={`Aclaración para ${l.nombre}`}
+                              placeholder="Aclaración (opcional): punto de cocción, sin sal…"
+                              value={l.nota}
+                              maxLength={140}
+                              onChange={(e) =>
+                                setLineas((ls) =>
+                                  ls.map((x) => (x.varianteId === l.varianteId ? { ...x, nota: e.target.value } : x)),
+                                )
+                              }
+                            />
                           )}
-                        </div>
-                      </div>
-                      <input
-                        aria-label={`Aclaración para ${l.nombre}`}
-                        placeholder="Aclaración (opcional): punto de cocción, sin sal…"
-                        value={l.nota}
-                        maxLength={140}
-                        onChange={(e) =>
-                          setLineas((ls) =>
-                            ls.map((x) => (x.varianteId === l.varianteId ? { ...x, nota: e.target.value } : x)),
-                          )
-                        }
-                      />
-                    </li>
-                  ))}
-                </ul>
+                        </li>
+                      );
+                    })}
+                  </ul>
+                )}
                 <p className="pedido-total">
                   Total a enviar <b>{precio(totalLineas)}</b>
                 </p>
-              </>
+              </div>
             )}
             {confirmarEnvio ? (
               <div className="confirmar" role="group" aria-label="Confirmar envío de pedido">
