@@ -239,19 +239,6 @@
   gap: 0.45rem;
   padding-inline: 0.4rem;
 }
-.adm__ambiente {
-  align-self: start;
-  justify-self: start;
-  font-family: var(--f-mono);
-  font-size: 0.64rem;
-  font-weight: 500;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: var(--brasa);
-  color: var(--sobre-brasa);
-  padding: 0.18rem 0.5rem;
-  border-radius: 4px;
-}
 .adm__nav {
   display: grid;
   gap: 0.12rem;

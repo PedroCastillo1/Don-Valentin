@@ -74,7 +74,6 @@ export function AdminLayout() {
       </a>
       <header className="adm__tope">
         <p className="adm__marca">Don Valentín</p>
-        <span className="adm__ambiente">Ambiente de prueba</span>
         <BotonTema className="tema--adm" />
         <button className="adm__salir" onClick={() => void salir()} aria-label="Salir">
           <Icono nombre="salir" />
@@ -86,7 +85,6 @@ export function AdminLayout() {
             Don Valentín
             <small>Administración</small>
           </p>
-          <p className="adm__ambiente">Ambiente de prueba</p>
         </div>
         <nav aria-label="Administración" className="adm__nav">
           {grupos.map((g) => {
