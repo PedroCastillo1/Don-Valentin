@@ -1036,6 +1036,7 @@ export function AdminPedidosQr() {
   const [sectorFiltro, setSectorFiltro] = useState<Sector | "todos">("todos");
   const [busqueda, setBusqueda] = useState("");
   const [estadoFiltro, setEstadoFiltro] = useState<EstadoItem | "activos" | "todos" | "demorados">("activos");
+  const [mesasPlegadas, setMesasPlegadas] = useState<number[]>([]);
 
   useEffect(() => {
     void api<{ mesas: MesaAbierta[] }>("/admin/pedidos/mesas")
@@ -1184,6 +1185,20 @@ export function AdminPedidosQr() {
               {etq}
             </button>
           ))}
+          {porMesaFiltradas.length > 1 && (
+            <button
+              type="button"
+              onClick={() => {
+                const todas = porMesaFiltradas.map(([m]) => m);
+                const estanTodasPlegadas = todas.every((m) => mesasPlegadas.includes(m));
+                setMesasPlegadas(estanTodasPlegadas ? [] : todas);
+              }}
+            >
+              {porMesaFiltradas.every(([m]) => mesasPlegadas.includes(m))
+                ? "Expandir todas las mesas"
+                : "Compactar todas las mesas"}
+            </button>
+          )}
         </div>
       </div>
 
@@ -1196,6 +1211,7 @@ export function AdminPedidosQr() {
           {porMesaFiltradas.map(([mesa, its]) => {
             const info = infoPorMesa.get(mesa);
             const pedidosIds = [...new Set(its.map((i) => i.pedidoId))];
+            const plegada = mesasPlegadas.includes(mesa);
             return (
               <section key={mesa} className="panel" aria-labelledby={`m-${mesa}`}>
                 <div className="panel__cab panel__cab--fila">
@@ -1216,12 +1232,32 @@ export function AdminPedidosQr() {
                       </small>
                     )}
                   </div>
-                  <Link className="btn btn--chico" to={`/admin/mozo?mesa=${mesa}`}>
-                    + Cargar pedido
-                  </Link>
+                  <div className="acciones-fila">
+                    {its.length > 0 && (
+                      <button
+                        type="button"
+                        className="btn btn--chico"
+                        aria-expanded={!plegada}
+                        onClick={() =>
+                          setMesasPlegadas((prev) =>
+                            prev.includes(mesa) ? prev.filter((x) => x !== mesa) : [...prev, mesa],
+                          )
+                        }
+                      >
+                        {plegada ? `Ver (${its.length})` : "Ocultar"}
+                      </button>
+                    )}
+                    <Link className="btn btn--chico" to={`/admin/mozo?mesa=${mesa}`}>
+                      + Cargar pedido
+                    </Link>
+                  </div>
                 </div>
                 {its.length === 0 ? (
                   <p className="vacio">Esta mesa no tiene platos en el estado seleccionado.</p>
+                ) : plegada ? (
+                  <p className="pedido-bloque__resumen">
+                    {its.map((i) => `${i.cantidad}× ${i.producto}${i.variante ? ` (${i.variante})` : ""}`).join(" · ")}
+                  </p>
                 ) : (
                   <ul className="lista-items lista-items--scroll">
                     {its.map((i) => (
