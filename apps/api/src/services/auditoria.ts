@@ -24,6 +24,8 @@ export async function registrarAuditoria(db: Db | Tx, e: EventoAuditoria): Promi
 export interface FilaAuditoria {
   id: number;
   usuario: string | null;
+  usuarioNombre: string | null;
+  rol: string | null;
   accion: string;
   recurso: string;
   resultado: string;
@@ -31,22 +33,40 @@ export interface FilaAuditoria {
   creadaEn: string;
 }
 
-export async function listarAuditoria(db: Db, limite = 100, soloDenegados = false): Promise<FilaAuditoria[]> {
+export async function listarAuditoria(db: Db, limite = 200, soloDenegados = false): Promise<FilaAuditoria[]> {
   const r = await rows(
     db,
-    `SELECT a.id, u.usuario, a.accion, a.recurso, a.resultado, a.detalle, a.creada_en
-       FROM auditoria a LEFT JOIN usuarios u ON u.id = a.usuario_id
+    `SELECT a.id,
+            u.usuario,
+            u.nombre AS usuario_nombre,
+            COALESCE(r.codigo, r2.codigo) AS rol,
+            a.accion,
+            a.recurso,
+            a.resultado,
+            a.detalle,
+            a.creada_en
+       FROM auditoria a
+       LEFT JOIN usuarios u ON u.id = a.usuario_id
+       LEFT JOIN roles r ON r.id = u.rol_id
+       LEFT JOIN usuarios u2 ON a.usuario_id IS NULL AND a.accion = 'login' AND LOWER(u2.usuario) = LOWER(a.recurso)
+       LEFT JOIN roles r2 ON r2.id = u2.rol_id
       ${soloDenegados ? "WHERE a.resultado = 'denegado'" : ""}
-      ORDER BY a.id DESC LIMIT ?`,
+      ORDER BY a.creada_en DESC, a.id DESC LIMIT ?`,
     [Math.min(limite, 500)],
   );
-  return r.map((x) => ({
-    id: Number(x.id),
-    usuario: x.usuario ?? null,
-    accion: x.accion,
-    recurso: x.recurso,
-    resultado: x.resultado,
-    detalle: x.detalle,
-    creadaEn: `${String(x.creada_en).replace(" ", "T")}Z`,
-  }));
+  return r.map((x) => {
+    const det = x.detalle && typeof x.detalle === "object" ? (x.detalle as Record<string, unknown>) : null;
+    const rolDet = typeof det?.rol === "string" ? det.rol : null;
+    return {
+      id: Number(x.id),
+      usuario: x.usuario ?? null,
+      usuarioNombre: x.usuario_nombre ?? null,
+      rol: x.rol ?? rolDet ?? null,
+      accion: x.accion,
+      recurso: x.recurso,
+      resultado: x.resultado,
+      detalle: x.detalle,
+      creadaEn: `${String(x.creada_en).replace(" ", "T")}Z`,
+    };
+  });
 }

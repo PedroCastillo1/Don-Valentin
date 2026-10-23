@@ -437,7 +437,8 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   });
 
   r.get("/auditoria", exigirPermiso(db, "auditoria:ver"), async (req, res) => {
-    res.json({ eventos: await listarAuditoria(db, 100, req.query.denegados === "1") });
+    const limite = Math.min(Math.max(Number(req.query.limite) || 200, 1), 500);
+    res.json({ eventos: await listarAuditoria(db, limite, req.query.denegados === "1") });
   });
 
   r.use((_req, _res) => {
