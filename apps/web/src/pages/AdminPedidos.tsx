@@ -233,6 +233,81 @@ function Ticket({ i, acciones, onHecho }: { i: ItemSector; acciones: AccionEstad
   );
 }
 
+function AlertaDemorados({
+  items,
+  mostrarSector,
+  mesaFiltro,
+  onFiltrarMesa,
+}: {
+  items: ItemSector[];
+  mostrarSector?: boolean;
+  mesaFiltro: number | "todas";
+  onFiltrarMesa: (mesa: number | "todas") => void;
+}) {
+  const [abierto, setAbierto] = useState(true);
+  if (items.length === 0) return null;
+  const mesas = [...new Set(items.map((i) => i.mesa))].sort((a, b) => a - b);
+  const ordenados = [...items].sort((a, b) => b.minutos - a.minutos || a.mesa - b.mesa);
+
+  return (
+    <div className="alerta-demora" role="alert">
+      <div className="alerta-demora__cab">
+        <p className="alerta-demora__titulo">
+          <strong>
+            {items.length} {items.length === 1 ? "plato superó" : "platos superaron"} el tiempo máximo
+          </strong>{" "}
+          <span>· {mesas.length === 1 ? `Mesa ${mesas[0]}` : `Mesas ${mesas.join(", ")}`}</span>
+        </p>
+        <button
+          type="button"
+          className="alerta-demora__btn"
+          aria-expanded={abierto}
+          onClick={() => setAbierto((v) => !v)}
+        >
+          {abierto ? "Ocultar detalle" : `Ver detalle (${items.length})`}
+        </button>
+      </div>
+      {abierto && (
+        <ul className="alerta-demora__lista">
+          {ordenados.map((i) => {
+            const exceso = Math.max(1, i.minutos - i.tiempoMaximo);
+            const filtrada = mesaFiltro === i.mesa;
+            return (
+              <li key={i.id} className="alerta-demora__item">
+                <div className="alerta-demora__info">
+                  <span className="alerta-demora__mesa">
+                    Mesa {i.mesa}
+                    {i.reservaNombre ? ` · ${i.reservaNombre}` : ""}
+                  </span>
+                  <strong>
+                    {i.cantidad} × {i.producto}
+                    {i.variante ? ` (${i.variante})` : ""}
+                  </strong>
+                  <small>
+                    Pedido #{i.pedidoId} ({i.origen === "mozo" ? "mozo" : "QR"})
+                    {mostrarSector ? ` · ${SECTOR[i.sector]}` : ""} · {ETQ_ESTADO[i.estado]} ·{" "}
+                    <b>
+                      {i.minutos} min (máx. {i.tiempoMaximo} min, +{exceso} min)
+                    </b>
+                    {i.nota ? ` · Nota: ${i.nota}` : ""}
+                  </small>
+                </div>
+                <button
+                  type="button"
+                  className="alerta-demora__btn"
+                  onClick={() => onFiltrarMesa(filtrada ? "todas" : i.mesa)}
+                >
+                  {filtrada ? "Ver todas" : `Filtrar Mesa ${i.mesa}`}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 /** RF-Q2/Q3: panel de un sector, en tres columnas: nuevos, en preparación y listos para entregar (más historial de sesión opcional). */
 export function AdminSectores() {
   const { usuario, puede } = useSesion();
@@ -265,9 +340,10 @@ export function AdminSectores() {
     () => delSector.filter((i) => i.estado === "entregado" || i.estado === "cancelado"),
     [delSector],
   );
-  const demorados = delSector.filter(
-    (i) => i.demorado && (i.estado === "recibido" || i.estado === "en_preparacion"),
-  ).length;
+  const itemsDemorados = useMemo(
+    () => delSectorBase.filter((i) => i.demorado && (i.estado === "recibido" || i.estado === "en_preparacion")),
+    [delSectorBase],
+  );
 
   return (
     <>
@@ -286,11 +362,7 @@ export function AdminSectores() {
         )}
       </Cabecera>
       {error && <Mensaje tipo="error">{error}</Mensaje>}
-      {demorados > 0 && (
-        <p className="alerta-demora" role="alert">
-          {demorados} {demorados === 1 ? "plato superó" : "platos superaron"} el tiempo máximo
-        </p>
-      )}
+      <AlertaDemorados items={itemsDemorados} mesaFiltro={mesaFiltro} onFiltrarMesa={setMesaFiltro} />
       <div className="filtros-pedidos filtros-pedidos--compacto" role="region" aria-label="Filtrar sector">
         <label>
           Mesa
@@ -1105,7 +1177,11 @@ export function AdminPedidosQr() {
   const mesasActivasCount = new Set(
     items.filter((i) => ["recibido", "en_preparacion", "listo"].includes(i.estado)).map((i) => i.mesa),
   ).size;
-  const demorados = items.filter((i) => i.demorado).length;
+  const itemsDemorados = useMemo(
+    () => items.filter((i) => i.demorado && (i.estado === "recibido" || i.estado === "en_preparacion")),
+    [items],
+  );
+  const demorados = itemsDemorados.length;
 
   return (
     <>
@@ -1114,6 +1190,7 @@ export function AdminPedidosQr() {
         bajada="Buscá por mesa, reserva o número de pedido; avanzá o volvé atrás cualquier estado con confirmación."
       />
       {error && <Mensaje tipo="error">{error}</Mensaje>}
+      <AlertaDemorados items={itemsDemorados} mostrarSector mesaFiltro={mesaFiltro} onFiltrarMesa={setMesaFiltro} />
       <ul className="conteo">
         <li>
           <b>{mesasActivasCount}</b> mesas con pedidos en curso

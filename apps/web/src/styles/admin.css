@@ -2085,11 +2085,86 @@ button.mesa[aria-pressed="true"] {
 /* ───────── Hito 4: paneles de sector, pedido del mozo, resumen de pedidos, carta y hoja de QR ───────── */
 .alerta-demora {
   margin: 0 0 1rem;
-  padding: 0.7rem 1rem;
-  border-radius: 8px;
-  font-weight: 700;
+  padding: 0.75rem 1rem;
+  border-radius: 12px;
   background: var(--brasa);
   color: var(--sobre-brasa);
+  display: grid;
+  gap: 0.55rem;
+}
+.alerta-demora__cab {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem 1rem;
+}
+.alerta-demora__titulo {
+  margin: 0;
+  font-size: 0.98rem;
+}
+.alerta-demora__titulo span {
+  font-weight: 600;
+  opacity: 0.92;
+}
+.alerta-demora__btn {
+  min-height: 32px;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1.5px solid rgba(255, 255, 255, 0.75);
+  background: rgba(0, 0, 0, 0.18);
+  color: var(--sobre-brasa);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.alerta-demora__btn:hover {
+  background: rgba(0, 0, 0, 0.32);
+}
+.alerta-demora__lista {
+  position: relative;
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0.35rem;
+  max-height: 11rem;
+  overflow-y: auto;
+}
+.alerta-demora__item {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.45rem 0.8rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.22);
+}
+.alerta-demora__info {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0.25rem 0.6rem;
+  min-width: 0;
+  flex: 1 1 16rem;
+}
+.alerta-demora__mesa {
+  display: inline-block;
+  font-family: var(--f-mono);
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: var(--sobre-brasa);
+  color: var(--brasa);
+  white-space: nowrap;
+}
+.alerta-demora__info small {
+  color: rgba(255, 255, 255, 0.92);
+  font-size: 0.82rem;
 }
 .cocina {
   display: grid;
