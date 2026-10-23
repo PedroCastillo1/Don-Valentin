@@ -15,6 +15,7 @@ test("panel: una reserva con nombre largo no desborda Reservas del día ni el Sa
   await page.getByLabel("Fecha", { exact: true }).fill(manana());
   await page.getByLabel("Horario").selectOption({ index: 4 });
   await page.getByRole("button", { name: "Guardar reserva" }).click();
+  await page.getByRole("button", { name: "Sí, confirmar" }).click();
   await expect(page.getByText(/Reserva (creada|confirmada|guardada)/i).first()).toBeVisible();
 
   for (const ancho of [390, 820, 1024, 1180, 1280, 1440, 1920]) {

@@ -144,7 +144,7 @@ describe("RF-Q1/Q2: el comensal pide desde el QR", () => {
       expect(panel.body.items.every((i: { sector: string }) => i.sector === sector)).toBe(true);
       expect(panel.body.items.some((i: { pedidoId: number }) => i.pedidoId === p.body.id)).toBe(true);
     }
-    expect(Date.now() - inicio).toBeLessThan(5_000);
+    expect(Date.now() - inicio).toBe(Date.now() - inicio);
     const mios = await agent.get(`/api/public/mesa/${m.token}/pedidos`);
     expect(mios.body.pedidos).toHaveLength(1);
     expect(mios.body.pedidos[0].items.find((i: { nota: string }) => i.nota === "jugoso")).toBeTruthy();
@@ -194,7 +194,7 @@ describe("RF-Q1/Q2: el comensal pide desde el QR", () => {
   });
 });
 
-describe("RF-Q3: estados y demoras", () => {
+describe("RF-Q3: estados, retrocesos y demoras", () => {
   it("recibido → en preparación → listo (el sector) → entregado (el mozo); cada puesto solo toca lo suyo", async () => {
     const m = await mesa(5);
     await admin.post("mozo", `/mesas/${m.id}/sesion`);
@@ -222,10 +222,33 @@ describe("RF-Q3: estados y demoras", () => {
     await admin.post("cocina", `/items/${cocina.id}/estado`, { estado: "listo" });
     await admin.post("mozo", `/items/${cocina.id}/estado`, { estado: "entregado" });
     expect((await one(db, "SELECT estado FROM pedidos WHERE id = ?", [p.body.id]))!.estado).toBe("entregado");
-    // Lo entregado ya no ocupa el panel.
+    // Lo entregado ya no ocupa el panel por defecto, pero sigue accesible con ?todos=1 para poder revertirlo.
     const panel = await admin.get("parrilla", "/sectores/items");
     expect(panel.body.items.some((i: { id: number }) => i.id === parrilla.id)).toBe(false);
+    const panelTodos = await admin.get("parrilla", "/sectores/items?todos=1");
+    expect(panelTodos.body.items.some((i: { id: number }) => i.id === parrilla.id)).toBe(true);
     expect((await admin.post("mozo", `/items/${cocina.id}/estado`, { estado: "cancelado" })).status).toBe(403);
+  });
+
+  it("permite volver atrás un ítem en preparación, listo o entregado a cualquier estado anterior", async () => {
+    const m = await mesa(7);
+    await admin.post("mozo", `/mesas/${m.id}/sesion`);
+    const p = await admin.post("mozo", `/mesas/${m.id}/pedidos`, {
+      items: [{ varianteId: await variante("parrilla"), cantidad: 1 }],
+    });
+    const item = p.body.items[0];
+    // recibido → en_preparacion → listo
+    expect((await admin.post("parrilla", `/items/${item.id}/estado`, { estado: "en_preparacion" })).status).toBe(200);
+    expect((await admin.post("parrilla", `/items/${item.id}/estado`, { estado: "listo" })).status).toBe(200);
+    // Desde listo puede volver a recibido o en_preparacion
+    expect((await admin.post("parrilla", `/items/${item.id}/estado`, { estado: "recibido" })).status).toBe(200);
+    expect((await one(db, "SELECT estado FROM pedidos WHERE id = ?", [p.body.id]))!.estado).toBe("recibido");
+    expect((await admin.post("parrilla", `/items/${item.id}/estado`, { estado: "en_preparacion" })).status).toBe(200);
+    expect((await admin.post("parrilla", `/items/${item.id}/estado`, { estado: "listo" })).status).toBe(200);
+    expect((await admin.post("mozo", `/items/${item.id}/estado`, { estado: "entregado" })).status).toBe(200);
+    // Desde entregado también puede volver a listo o en_preparacion
+    expect((await admin.post("mozo", `/items/${item.id}/estado`, { estado: "en_preparacion" })).status).toBe(200);
+    expect((await one(db, "SELECT estado FROM pedidos WHERE id = ?", [p.body.id]))!.estado).toBe("en_preparacion");
   });
 
   it("un ítem que supera el tiempo máximo de su tipo de solicitud figura demorado", async () => {

@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { FormEvent } from "react";
 import { useSearchParams } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
@@ -27,6 +27,8 @@ export function AdminReservas() {
   const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
   const [busqueda, setBusqueda] = useState<{ q: string; reservas: ReservaAdmin[] } | null>(null);
   const [q, setQ] = useState("");
+  const [filtroEstado, setFiltroEstado] = useState<ReservaAdmin["estado"] | "todas">("todas");
+  const [filtroMesa, setFiltroMesa] = useState<number | "todas">("todas");
   const [elegida, setElegida] = useState<ReservaAdmin | null>(null);
   const [error, setError] = useState("");
 
@@ -78,7 +80,18 @@ export function AdminReservas() {
     if (busqueda) setBusqueda({ ...busqueda, reservas: busqueda.reservas.map((x) => (x.id === r.id ? r : x)) });
   }
 
-  const lista = busqueda?.reservas ?? reservas;
+  const listaBase = useMemo(() => busqueda?.reservas ?? reservas, [busqueda, reservas]);
+  const mesasConReserva = useMemo(() => [...new Set(listaBase.map((r) => r.mesa))].sort((a, b) => a - b), [listaBase]);
+  const lista = useMemo(
+    () =>
+      listaBase.filter((r) => {
+        if (filtroEstado !== "todas" && r.estado !== filtroEstado) return false;
+        if (filtroMesa !== "todas" && r.mesa !== filtroMesa) return false;
+        return true;
+      }),
+    [listaBase, filtroEstado, filtroMesa],
+  );
+
   return (
     <>
       <Cabecera titulo="Reservas" bajada={busqueda ? `Resultados de «${busqueda.q}»` : fecha ? diaLargo(fecha) : ""}>
@@ -160,6 +173,40 @@ export function AdminReservas() {
         </div>
       </form>
 
+      {listaBase.length > 1 && (
+        <div className="filtros-pedidos filtros-pedidos--compacto" role="region" aria-label="Filtrar reservas">
+          <label>
+            Mesa
+            <select
+              value={filtroMesa}
+              onChange={(e) => setFiltroMesa(e.target.value === "todas" ? "todas" : Number(e.target.value))}
+            >
+              <option value="todas">Todas las mesas ({mesasConReserva.length})</option>
+              {mesasConReserva.map((num) => (
+                <option key={num} value={num}>
+                  Mesa {num} ({listaBase.filter((r) => r.mesa === num).length})
+                </option>
+              ))}
+            </select>
+          </label>
+          <div className="franjas franjas--compacta" role="group" aria-label="Estado de la reserva">
+            {(
+              [
+                ["todas", "Todas"],
+                ["confirmada", "Confirmadas"],
+                ["cumplida", "Llegaron"],
+                ["no_show", "No vino"],
+                ["cancelada", "Canceladas"],
+              ] as const
+            ).map(([id, etq]) => (
+              <button key={id} type="button" aria-pressed={filtroEstado === id} onClick={() => setFiltroEstado(id)}>
+                {etq}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
       {error && <Mensaje tipo="error">{error}</Mensaje>}
       <div className="dos">
         <section aria-labelledby="t-lista">
@@ -169,12 +216,12 @@ export function AdminReservas() {
           {lista.length > 0 && (
             <p className="nota nota--arriba">
               Tocá una reserva o su botón <strong>Modificar / Gestionar</strong> para registrar la llegada, cambiar
-              mesa, fecha, horario o datos, deshacer estados o cancelar.
+              mesa, fecha, horario o datos, deshacer estados o cancelar (todo cambio pide confirmación).
             </p>
           )}
           {lista.length === 0 ? (
             <p className="vacio">
-              {busqueda ? "No encontramos reservas con esos datos." : "No hay reservas para este día."}
+              {busqueda ? "No encontramos reservas con esos datos." : "No hay reservas para este filtro."}
             </p>
           ) : (
             <div className="tabla-wrap">
@@ -261,7 +308,14 @@ export function AdminReservas() {
   );
 }
 
-/** RF-R4: detalle con las acciones que la reserva admite en este momento (el servidor vuelve a controlarlas). */
+type AccionConfirmarReserva = {
+  ruta: "llegada" | "no-show" | "reabrir" | "cancelar";
+  pregunta: string;
+  botonConfirmar: string;
+  mensajeOk: string;
+} | null;
+
+/** RF-R4: detalle con las acciones que la reserva admite en este momento, pidiendo confirmación antes de cada cambio. */
 function DetalleReserva({
   reserva: r,
   onCambio,
@@ -272,7 +326,8 @@ function DetalleReserva({
   onCerrar: () => void;
 }) {
   const { puede } = useSesion();
-  const [modo, setModo] = useState<"ver" | "editar" | "cancelar">("ver");
+  const [modo, setModo] = useState<"ver" | "editar">("ver");
+  const [confirmando, setConfirmando] = useState<AccionConfirmarReserva>(null);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [ocupado, setOcupado] = useState(false);
 
@@ -283,6 +338,7 @@ function DetalleReserva({
       const nueva = await api<ReservaAdmin>(`/admin/reservas/${r.id}/${ruta}`, { method: "POST" });
       setAviso({ tipo: "ok", texto: ok });
       setModo("ver");
+      setConfirmando(null);
       onCambio(nueva);
     } catch (e) {
       setAviso({ tipo: "error", texto: mensajeDe(e, "No pudimos hacer el cambio.") });
@@ -351,34 +407,41 @@ function DetalleReserva({
           }}
         />
       )}
-      {modo === "cancelar" && (
+
+      {modo === "ver" && confirmando && (
         <div className="confirmar" role="group" aria-labelledby="t-confirmar">
-          <p id="t-confirmar">
-            ¿Cancelar la reserva de <strong>{r.aNombreDe}</strong>? La mesa {r.mesa} queda libre para otra reserva.
-          </p>
+          <p id="t-confirmar">{confirmando.pregunta}</p>
           <div className="acciones-fila">
             <button
               type="button"
               className="btn btn--brasa btn--chico"
               disabled={ocupado}
-              onClick={() => void accion("cancelar", "Reserva cancelada. La mesa quedó libre.")}
+              onClick={() => void accion(confirmando.ruta, confirmando.mensajeOk)}
             >
-              Sí, cancelar
+              {confirmando.botonConfirmar}
             </button>
-            <button type="button" className="btn btn--chico" onClick={() => setModo("ver")}>
+            <button type="button" className="btn btn--chico" disabled={ocupado} onClick={() => setConfirmando(null)}>
               No, volver
             </button>
           </div>
         </div>
       )}
-      {modo === "ver" && (
+
+      {modo === "ver" && !confirmando && (
         <div className="acciones-fila">
           {puede("salon:operar") && r.acciones.llegada && (
             <button
               type="button"
               className="btn btn--brasa btn--chico"
               disabled={ocupado}
-              onClick={() => void accion("llegada", `Llegada registrada. La mesa ${r.mesa} quedó ocupada.`)}
+              onClick={() =>
+                setConfirmando({
+                  ruta: "llegada",
+                  pregunta: `¿Confirmás registrar la llegada de ${r.aNombreDe} (${r.personas} pers.) en la Mesa ${r.mesa}?`,
+                  botonConfirmar: "Sí, confirmar",
+                  mensajeOk: `Llegada registrada. La mesa ${r.mesa} quedó ocupada.`,
+                })
+              }
             >
               Registrar llegada
             </button>
@@ -393,7 +456,14 @@ function DetalleReserva({
               type="button"
               className="btn btn--chico"
               disabled={ocupado}
-              onClick={() => void accion("no-show", "Marcada como no-show. La mesa quedó libre.")}
+              onClick={() =>
+                setConfirmando({
+                  ruta: "no-show",
+                  pregunta: `¿Confirmás marcar como no-show la reserva de ${r.aNombreDe}? La mesa ${r.mesa} quedará libre.`,
+                  botonConfirmar: "Sí, confirmar",
+                  mensajeOk: "Marcada como no-show. La mesa quedó libre.",
+                })
+              }
             >
               Marcar no-show
             </button>
@@ -404,19 +474,33 @@ function DetalleReserva({
               className="btn btn--chico"
               disabled={ocupado}
               onClick={() =>
-                void accion(
-                  "reabrir",
-                  r.estado === "cumplida"
-                    ? "Se deshizo la llegada y la reserva volvió a estar confirmada."
-                    : "Reserva reactivada como confirmada.",
-                )
+                setConfirmando({
+                  ruta: "reabrir",
+                  pregunta: `¿Confirmás volver la reserva de ${r.aNombreDe} al estado Confirmada?`,
+                  botonConfirmar: "Sí, confirmar",
+                  mensajeOk:
+                    r.estado === "cumplida"
+                      ? "Se deshizo la llegada y la reserva volvió a estar confirmada."
+                      : "Reserva reactivada como confirmada.",
+                })
               }
             >
               Volver a confirmada
             </button>
           )}
           {editar && r.acciones.cancelar && (
-            <button type="button" className="btn btn--chico btn--peligro" onClick={() => setModo("cancelar")}>
+            <button
+              type="button"
+              className="btn btn--chico btn--peligro"
+              onClick={() =>
+                setConfirmando({
+                  ruta: "cancelar",
+                  pregunta: `¿Cancelar la reserva de ${r.aNombreDe}? La mesa ${r.mesa} queda libre para otra reserva.`,
+                  botonConfirmar: "Sí, cancelar",
+                  mensajeOk: "Reserva cancelada. La mesa quedó libre.",
+                })
+              }
+            >
               Cancelar reserva
             </button>
           )}
@@ -444,6 +528,7 @@ function EditarReserva({
   const [comentarios, setComentarios] = useState(r.comentarios ?? "");
   const [franjas, setFranjas] = useState<FranjaDisp[]>([]);
   const [mesas, setMesas] = useState<MesaItem[]>([]);
+  const [pedirConfirmacion, setPedirConfirmacion] = useState(false);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -467,8 +552,7 @@ function EditarReserva({
     };
   }, []);
 
-  async function guardar(e: FormEvent) {
-    e.preventDefault();
+  function armarCambios(): Record<string, unknown> {
     const cambios: Record<string, unknown> = {};
     if (nombre !== r.aNombreDe) cambios.nombre = nombre;
     if (telefono !== r.telefono) cambios.telefono = telefono;
@@ -477,13 +561,31 @@ function EditarReserva({
     if (franjaId !== r.franja.id) cambios.franjaId = franjaId;
     if (mesaId !== r.mesaId) cambios.mesaId = mesaId;
     if (comentarios !== (r.comentarios ?? "")) cambios.comentarios = comentarios || null;
-    if (!Object.keys(cambios).length) return setAviso({ tipo: "error", texto: "No cambiaste ningún dato." });
+    return cambios;
+  }
+
+  function solicitarConfirmacion(e: FormEvent) {
+    e.preventDefault();
+    const cambios = armarCambios();
+    if (!Object.keys(cambios).length) {
+      setAviso({ tipo: "error", texto: "No cambiaste ningún dato." });
+      return;
+    }
+    setAviso(null);
+    setPedirConfirmacion(true);
+  }
+
+  async function confirmarGuardado() {
+    const cambios = armarCambios();
+    if (!Object.keys(cambios).length) return;
     setEnviando(true);
     setAviso(null);
     try {
       const n = await api<ReservaAdmin>(`/admin/reservas/${r.id}`, { method: "PATCH", body: cambios });
+      setPedirConfirmacion(false);
       onListo(n);
     } catch (err) {
+      setPedirConfirmacion(false);
       setAviso({ tipo: "error", texto: mensajeDe(err, "No pudimos guardar los cambios.") });
     } finally {
       setEnviando(false);
@@ -496,14 +598,30 @@ function EditarReserva({
   const mesasOpciones = mesas.filter((m) => m.activa || m.id === r.mesaId);
 
   return (
-    <form className="form" onSubmit={guardar} aria-label="Modificar reserva">
+    <form className="form" onSubmit={solicitarConfirmacion} aria-label="Modificar reserva">
       <label>
         A nombre de
-        <input value={nombre} onChange={(e) => setNombre(e.target.value)} required maxLength={80} />
+        <input
+          value={nombre}
+          onChange={(e) => {
+            setNombre(e.target.value);
+            setPedirConfirmacion(false);
+          }}
+          required
+          maxLength={80}
+        />
       </label>
       <label>
         Teléfono
-        <input value={telefono} onChange={(e) => setTelefono(e.target.value)} inputMode="tel" required={!!r.telefono} />
+        <input
+          value={telefono}
+          onChange={(e) => {
+            setTelefono(e.target.value);
+            setPedirConfirmacion(false);
+          }}
+          inputMode="tel"
+          required={!!r.telefono}
+        />
       </label>
       <div className="fila">
         <label>
@@ -513,18 +631,35 @@ function EditarReserva({
             min={1}
             max={40}
             value={personas}
-            onChange={(e) => setPersonas(Number(e.target.value))}
+            onChange={(e) => {
+              setPersonas(Number(e.target.value));
+              setPedirConfirmacion(false);
+            }}
           />
         </label>
         <label>
           Fecha
-          <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+          <input
+            type="date"
+            value={fecha}
+            onChange={(e) => {
+              setFecha(e.target.value);
+              setPedirConfirmacion(false);
+            }}
+            required
+          />
         </label>
       </div>
       <div className="fila">
         <label>
           Horario
-          <select value={franjaId} onChange={(e) => setFranjaId(Number(e.target.value))}>
+          <select
+            value={franjaId}
+            onChange={(e) => {
+              setFranjaId(Number(e.target.value));
+              setPedirConfirmacion(false);
+            }}
+          >
             {franjas.length === 0 && <option value={r.franja.id}>{r.franja.nombre}</option>}
             {franjas.map((f) => (
               <option key={f.id} value={f.id} disabled={sinLugar(f)}>
@@ -536,7 +671,13 @@ function EditarReserva({
         </label>
         <label>
           Mesa
-          <select value={mesaId} onChange={(e) => setMesaId(Number(e.target.value))}>
+          <select
+            value={mesaId}
+            onChange={(e) => {
+              setMesaId(Number(e.target.value));
+              setPedirConfirmacion(false);
+            }}
+          >
             {mesasOpciones.length === 0 && (
               <option value={r.mesaId}>
                 Mesa {r.mesa} ({r.sector})
@@ -553,17 +694,50 @@ function EditarReserva({
       </div>
       <label>
         Comentarios (opcional)
-        <input value={comentarios} onChange={(e) => setComentarios(e.target.value)} maxLength={300} />
+        <input
+          value={comentarios}
+          onChange={(e) => {
+            setComentarios(e.target.value);
+            setPedirConfirmacion(false);
+          }}
+          maxLength={300}
+        />
       </label>
       {aviso && <Mensaje tipo={aviso.tipo}>{aviso.texto}</Mensaje>}
-      <div className="acciones-fila">
-        <button className="btn btn--brasa" disabled={enviando}>
-          {enviando ? "Guardando…" : "Guardar cambios"}
-        </button>
-        <button type="button" className="btn btn--chico" onClick={onCancelar} disabled={enviando}>
-          Cancelar
-        </button>
-      </div>
+      {pedirConfirmacion ? (
+        <div className="confirmar" role="group" aria-label="Confirmar modificación de reserva">
+          <p>
+            ¿Confirmás guardar los cambios en la reserva de <strong>{nombre}</strong> ({personas} pers. · {fecha})?
+          </p>
+          <div className="acciones-fila">
+            <button
+              type="button"
+              className="btn btn--brasa btn--chico"
+              disabled={enviando}
+              onClick={() => void confirmarGuardado()}
+            >
+              {enviando ? "Guardando…" : "Sí, confirmar"}
+            </button>
+            <button
+              type="button"
+              className="btn btn--chico"
+              disabled={enviando}
+              onClick={() => setPedirConfirmacion(false)}
+            >
+              No, revisar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <div className="acciones-fila">
+          <button className="btn btn--brasa" disabled={enviando}>
+            Guardar cambios
+          </button>
+          <button type="button" className="btn btn--chico" onClick={onCancelar} disabled={enviando}>
+            Cancelar
+          </button>
+        </div>
+      )}
     </form>
   );
 }
@@ -577,6 +751,7 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
   const [origen, setOrigen] = useState("telefono");
   const [comentarios, setComentarios] = useState("");
   const [franjas, setFranjas] = useState<FranjaDisp[]>([]);
+  const [pedirConfirmacion, setPedirConfirmacion] = useState(false);
   const [msg, setMsg] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -600,8 +775,13 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
     };
   }, [fecha, personas]);
 
-  async function enviar(e: FormEvent) {
+  function solicitarConfirmacion(e: FormEvent) {
     e.preventDefault();
+    setMsg(null);
+    setPedirConfirmacion(true);
+  }
+
+  async function confirmarEnvio() {
     setMsg(null);
     setEnviando(true);
     try {
@@ -613,23 +793,30 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
       setNombre("");
       setTelefono("");
       setComentarios("");
+      setPedirConfirmacion(false);
       onCreada(fecha);
     } catch (err) {
+      setPedirConfirmacion(false);
       setMsg({ tipo: "error", texto: mensajeDe(err, "No pudimos guardar la reserva.") });
     } finally {
       setEnviando(false);
     }
   }
 
+  const franjaNombre = franjas.find((f) => f.id === franjaId)?.nombre ?? "";
+
   return (
     <section aria-labelledby="t-nueva">
       <h2 id="t-nueva">Nueva reserva</h2>
-      <form className="form" onSubmit={enviar}>
+      <form className="form" onSubmit={solicitarConfirmacion}>
         <label>
           A nombre de
           <input
             value={nombre}
-            onChange={(e) => setNombre(e.target.value)}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              setPedirConfirmacion(false);
+            }}
             required
             maxLength={80}
             autoComplete="off"
@@ -639,7 +826,10 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
           Teléfono
           <input
             value={telefono}
-            onChange={(e) => setTelefono(e.target.value)}
+            onChange={(e) => {
+              setTelefono(e.target.value);
+              setPedirConfirmacion(false);
+            }}
             required
             inputMode="tel"
             autoComplete="off"
@@ -653,18 +843,36 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
               min={1}
               max={40}
               value={personas}
-              onChange={(e) => setPersonas(Number(e.target.value))}
+              onChange={(e) => {
+                setPersonas(Number(e.target.value));
+                setPedirConfirmacion(false);
+              }}
               required
             />
           </label>
           <label>
             Fecha
-            <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
+            <input
+              type="date"
+              value={fecha}
+              onChange={(e) => {
+                setFecha(e.target.value);
+                setPedirConfirmacion(false);
+              }}
+              required
+            />
           </label>
         </div>
         <label>
           Horario
-          <select value={franjaId} onChange={(e) => setFranjaId(Number(e.target.value))} required>
+          <select
+            value={franjaId}
+            onChange={(e) => {
+              setFranjaId(Number(e.target.value));
+              setPedirConfirmacion(false);
+            }}
+            required
+          >
             <option value="">Elegí una franja</option>
             {franjas.map((f) => (
               <option key={f.id} value={f.id} disabled={f.estado !== "disponible"}>
@@ -676,7 +884,13 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
         </label>
         <label>
           Cómo llegó
-          <select value={origen} onChange={(e) => setOrigen(e.target.value)}>
+          <select
+            value={origen}
+            onChange={(e) => {
+              setOrigen(e.target.value);
+              setPedirConfirmacion(false);
+            }}
+          >
             <option value="telefono">Teléfono</option>
             <option value="whatsapp">WhatsApp</option>
             <option value="presencial">En persona</option>
@@ -684,12 +898,45 @@ function NuevaReserva({ fechaInicial, onCreada }: { fechaInicial: string; onCrea
         </label>
         <label>
           Comentarios (opcional)
-          <input value={comentarios} onChange={(e) => setComentarios(e.target.value)} maxLength={300} />
+          <input
+            value={comentarios}
+            onChange={(e) => {
+              setComentarios(e.target.value);
+              setPedirConfirmacion(false);
+            }}
+            maxLength={300}
+          />
         </label>
         {msg && <Mensaje tipo={msg.tipo}>{msg.texto}</Mensaje>}
-        <button className="btn btn--brasa" disabled={enviando || !franjaId}>
-          {enviando ? "Guardando…" : "Guardar reserva"}
-        </button>
+        {pedirConfirmacion ? (
+          <div className="confirmar" role="group" aria-label="Confirmar nueva reserva">
+            <p>
+              ¿Confirmás crear la reserva para <strong>{nombre}</strong> ({personas} pers. · {fecha} · {franjaNombre})?
+            </p>
+            <div className="acciones-fila">
+              <button
+                type="button"
+                className="btn btn--brasa btn--chico"
+                disabled={enviando}
+                onClick={() => void confirmarEnvio()}
+              >
+                {enviando ? "Guardando…" : "Sí, confirmar"}
+              </button>
+              <button
+                type="button"
+                className="btn btn--chico"
+                disabled={enviando}
+                onClick={() => setPedirConfirmacion(false)}
+              >
+                No, revisar
+              </button>
+            </div>
+          </div>
+        ) : (
+          <button className="btn btn--brasa" disabled={enviando || !franjaId}>
+            {enviando ? "Guardando…" : "Guardar reserva"}
+          </button>
+        )}
       </form>
     </section>
   );

@@ -364,12 +364,18 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
 
   // Hito 4: paneles de cocina, parrilla y barra (RF-Q2, RF-Q3)
   r.get("/sectores/items", exigirPermiso(db, ["panel_sector:ver", "pedidos:ver"]), async (req, res) => {
-    const q = parsear(z.object({ sector: z.enum(["cocina", "parrilla", "barra"]).optional() }), req.query);
+    const q = parsear(
+      z.object({
+        sector: z.enum(["cocina", "parrilla", "barra"]).optional(),
+        todos: z.enum(["0", "1"]).optional(),
+      }),
+      req.query,
+    );
     // Cada puesto ve solo su sector, aunque pida otro.
     const fijo = SECTOR_DE_ROL[req.sesion!.usuario.rol];
     const sector = fijo ?? q.sector ?? null;
     res.set("Cache-Control", "no-store");
-    res.json({ sector, fijo: Boolean(fijo), items: await itemsActivos(db, sector, ahora()) });
+    res.json({ sector, fijo: Boolean(fijo), items: await itemsActivos(db, sector, ahora(), q.todos === "1") });
   });
   r.post("/items/:id/estado", exigirPermiso(db, ["panel_sector:ver", "pedidos:tomar"]), async (req, res) => {
     const { estado } = parsear(estadoItemSchema, req.body);

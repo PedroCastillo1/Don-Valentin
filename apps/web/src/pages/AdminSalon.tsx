@@ -31,13 +31,18 @@ interface Salon {
 const TEXTO: Record<EstadoMesa, string> = { libre: "Libre", reservada: "Reservada", ocupada: "Ocupada" };
 type Aviso = { tipo: "ok" | "error"; texto: string } | null;
 
-/** RF-R3: las mesas de una franja, libres, reservadas u ocupadas; llegada, no-show y walk-in desde la misma pantalla. */
+/** RF-R3: las mesas de una franja, libres, reservadas u ocupadas; llegada, no-show, deshacer y walk-in con confirmación. */
 export function AdminSalon() {
   const { puede } = useSesion();
   const [salon, setSalon] = useState<Salon | null>(null);
   const [fecha, setFecha] = useState<string | undefined>(undefined);
   const [franjaId, setFranjaId] = useState<number | undefined>(undefined);
   const [elegida, setElegida] = useState<number | null>(null);
+  const [confirmando, setConfirmando] = useState<{
+    pregunta: string;
+    ejecutar: () => Promise<unknown>;
+    ok: string;
+  } | null>(null);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [error, setError] = useState("");
 
@@ -64,9 +69,11 @@ export function AdminSalon() {
     setAviso(null);
     try {
       await f();
+      setConfirmando(null);
       setAviso({ tipo: "ok", texto: ok });
       await cargar();
     } catch (e) {
+      setConfirmando(null);
       setAviso({ tipo: "error", texto: e instanceof ApiError ? e.message : "No pudimos hacer el cambio." });
     }
   }
@@ -120,6 +127,7 @@ export function AdminSalon() {
             aria-pressed={f.id === salon.franja.id}
             onClick={() => {
               setElegida(null);
+              setConfirmando(null);
               setFranjaId(f.id);
             }}
           >
@@ -161,7 +169,10 @@ export function AdminSalon() {
                     m.estado === "libre" ? "mesa" : `mesa mesa--${m.estado === "ocupada" ? "abierta" : "reservada"}`
                   }
                   aria-pressed={m.id === elegida}
-                  onClick={() => setElegida(m.id)}
+                  onClick={() => {
+                    setElegida(m.id);
+                    setConfirmando(null);
+                  }}
                 >
                   <b>{m.numero}</b>
                   <small>{m.reserva ? `${m.reserva.personas}/${m.capacidad} p.` : `${m.capacidad} p.`}</small>
@@ -218,64 +229,92 @@ export function AdminSalon() {
                 </dl>
               )}
               {mesa.sesionSinReserva && <p className="nota">El mozo abrió la mesa sin una reserva vinculada.</p>}
-              <div className="acciones-fila">
-                {mesa.reserva?.acciones.llegada && puede("salon:operar") && (
-                  <button
-                    type="button"
-                    className="btn btn--brasa btn--chico"
-                    onClick={() =>
-                      void hacer(
-                        () => api(`/admin/reservas/${mesa.reserva!.id}/llegada`, { method: "POST" }),
-                        `Llegada registrada: la mesa ${mesa.numero} quedó ocupada.`,
-                      )
-                    }
-                  >
-                    Registrar llegada
-                  </button>
-                )}
-                {mesa.reserva?.acciones.noShow && puede("reservas:editar") && (
-                  <button
-                    type="button"
-                    className="btn btn--chico"
-                    onClick={() =>
-                      void hacer(
-                        () => api(`/admin/reservas/${mesa.reserva!.id}/no-show`, { method: "POST" }),
-                        `No-show registrado: la mesa ${mesa.numero} quedó libre.`,
-                      )
-                    }
-                  >
-                    Marcar no-show
-                  </button>
-                )}
-                {mesa.reserva?.estado === "cumplida" && (puede("reservas:editar") || puede("salon:operar")) && (
-                  <button
-                    type="button"
-                    className="btn btn--chico"
-                    onClick={() =>
-                      void hacer(
-                        () => api(`/admin/reservas/${mesa.reserva!.id}/reabrir`, { method: "POST" }),
-                        `Se deshizo la llegada y la reserva de ${mesa.reserva!.aNombreDe} volvió a estar confirmada.`,
-                      )
-                    }
-                  >
-                    Volver a confirmada
-                  </button>
-                )}
-                {mesa.reserva && puede("reservas:ver") && (
-                  <Link className="btn btn--chico" to={`/admin/reservas?id=${mesa.reserva.id}`}>
-                    Modificar reserva
-                  </Link>
-                )}
-                {mesa.estado === "ocupada" && puede("sesion_mesa:cerrar") && (
-                  <Link className="btn btn--chico" to="/admin/mesas">
-                    Liberar en Mesas y QR
-                  </Link>
-                )}
-              </div>
+              {confirmando ? (
+                <div className="confirmar" role="group" aria-label="Confirmar cambio en el salón">
+                  <p>{confirmando.pregunta}</p>
+                  <div className="acciones-fila">
+                    <button
+                      type="button"
+                      className="btn btn--brasa btn--chico"
+                      onClick={() => void hacer(confirmando.ejecutar, confirmando.ok)}
+                    >
+                      Sí, confirmar
+                    </button>
+                    <button type="button" className="btn btn--chico" onClick={() => setConfirmando(null)}>
+                      No, volver
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="acciones-fila">
+                  {mesa.reserva?.acciones.llegada && puede("salon:operar") && (
+                    <button
+                      type="button"
+                      className="btn btn--brasa btn--chico"
+                      onClick={() =>
+                        setConfirmando({
+                          pregunta: `¿Confirmás registrar la llegada de ${mesa.reserva!.aNombreDe} en la Mesa ${mesa.numero}?`,
+                          ejecutar: () => api(`/admin/reservas/${mesa.reserva!.id}/llegada`, { method: "POST" }),
+                          ok: `Llegada registrada: la mesa ${mesa.numero} quedó ocupada.`,
+                        })
+                      }
+                    >
+                      Registrar llegada
+                    </button>
+                  )}
+                  {mesa.reserva?.acciones.noShow && puede("reservas:editar") && (
+                    <button
+                      type="button"
+                      className="btn btn--chico"
+                      onClick={() =>
+                        setConfirmando({
+                          pregunta: `¿Confirmás marcar no-show para ${mesa.reserva!.aNombreDe} en la Mesa ${mesa.numero}?`,
+                          ejecutar: () => api(`/admin/reservas/${mesa.reserva!.id}/no-show`, { method: "POST" }),
+                          ok: `No-show registrado: la mesa ${mesa.numero} quedó libre.`,
+                        })
+                      }
+                    >
+                      Marcar no-show
+                    </button>
+                  )}
+                  {mesa.reserva?.estado === "cumplida" && (puede("reservas:editar") || puede("salon:operar")) && (
+                    <button
+                      type="button"
+                      className="btn btn--chico"
+                      onClick={() =>
+                        setConfirmando({
+                          pregunta: `¿Confirmás deshacer la llegada de ${mesa.reserva!.aNombreDe} y volver la reserva a Confirmada?`,
+                          ejecutar: () => api(`/admin/reservas/${mesa.reserva!.id}/reabrir`, { method: "POST" }),
+                          ok: `Se deshizo la llegada y la reserva de ${mesa.reserva!.aNombreDe} volvió a estar confirmada.`,
+                        })
+                      }
+                    >
+                      Volver a confirmada
+                    </button>
+                  )}
+                  {mesa.reserva && puede("reservas:ver") && (
+                    <Link className="btn btn--chico" to={`/admin/reservas?id=${mesa.reserva.id}`}>
+                      Modificar reserva
+                    </Link>
+                  )}
+                  {mesa.estado === "ocupada" && puede("sesion_mesa:cerrar") && (
+                    <Link className="btn btn--chico" to="/admin/mesas">
+                      Liberar en Mesas y QR
+                    </Link>
+                  )}
+                </div>
+              )}
               {mesa.estado === "libre" && salon.enCurso && puede("salon:operar") && (
                 <WalkIn mesa={mesa} onListo={(m) => void hacer(async () => undefined, m)} onRecargar={cargar} />
               )}
-              <button type="button" className="btn btn--chico detalle__volver" onClick={() => setElegida(null)}>
+              <button
+                type="button"
+                className="btn btn--chico detalle__volver"
+                onClick={() => {
+                  setElegida(null);
+                  setConfirmando(null);
+                }}
+              >
                 Ver todas
               </button>
             </>
@@ -286,7 +325,7 @@ export function AdminSalon() {
   );
 }
 
-/** RF-R3: grupo sin reserva en la franja en curso. Solo se pide cuántos son (RNF-4: datos mínimos). */
+/** RF-R3: grupo sin reserva en la franja en curso. Solo se pide cuántos son (RNF-4: datos mínimos) y pide confirmación. */
 function WalkIn({
   mesa,
   onListo,
@@ -298,11 +337,17 @@ function WalkIn({
 }) {
   const [personas, setPersonas] = useState(2);
   const [nombre, setNombre] = useState("");
+  const [confirmar, setConfirmar] = useState(false);
   const [error, setError] = useState("");
   const [enviando, setEnviando] = useState(false);
 
-  async function enviar(e: FormEvent) {
+  function pedirConfirmacion(e: FormEvent) {
     e.preventDefault();
+    setError("");
+    setConfirmar(true);
+  }
+
+  async function enviar() {
     setError("");
     setEnviando(true);
     try {
@@ -310,9 +355,11 @@ function WalkIn({
         method: "POST",
         body: { personas, nombre: nombre || undefined, mesaId: mesa?.id },
       });
+      setConfirmar(false);
       onListo(`Grupo de ${r.personas} sentado en la mesa ${r.mesa}.`);
       setNombre("");
     } catch (err) {
+      setConfirmar(false);
       setError(err instanceof ApiError ? err.message : "No pudimos sentar al grupo.");
       await onRecargar();
     } finally {
@@ -321,7 +368,7 @@ function WalkIn({
   }
 
   return (
-    <form className="form" onSubmit={enviar} aria-label="Sentar sin reserva">
+    <form className="form" onSubmit={pedirConfirmacion} aria-label="Sentar sin reserva">
       <h3>{mesa ? `Sentar en la mesa ${mesa.numero}` : "Sentar sin reserva"}</h3>
       <div className="fila">
         <label>
@@ -331,20 +378,53 @@ function WalkIn({
             min={1}
             max={mesa?.capacidad ?? 40}
             value={personas}
-            onChange={(e) => setPersonas(Number(e.target.value))}
+            onChange={(e) => {
+              setPersonas(Number(e.target.value));
+              setConfirmar(false);
+            }}
             required
           />
         </label>
         <label>
           Nombre (opcional)
-          <input value={nombre} onChange={(e) => setNombre(e.target.value)} maxLength={80} autoComplete="off" />
+          <input
+            value={nombre}
+            onChange={(e) => {
+              setNombre(e.target.value);
+              setConfirmar(false);
+            }}
+            maxLength={80}
+            autoComplete="off"
+          />
         </label>
       </div>
       {!mesa && <p className="nota">Se asigna la mesa libre más ajustada al grupo.</p>}
       {error && <Mensaje tipo="error">{error}</Mensaje>}
-      <button className="btn btn--brasa" disabled={enviando}>
-        {enviando ? "Sentando…" : "Sentar grupo"}
-      </button>
+      {confirmar ? (
+        <div className="confirmar" role="group" aria-label="Confirmar sentar grupo">
+          <p>
+            ¿Confirmás sentar al grupo de <strong>{personas} personas</strong>
+            {mesa ? ` en la Mesa ${mesa.numero}` : ""}?
+          </p>
+          <div className="acciones-fila">
+            <button
+              type="button"
+              className="btn btn--brasa btn--chico"
+              disabled={enviando}
+              onClick={() => void enviar()}
+            >
+              {enviando ? "Sentando…" : "Sí, confirmar"}
+            </button>
+            <button type="button" className="btn btn--chico" disabled={enviando} onClick={() => setConfirmar(false)}>
+              No, revisar
+            </button>
+          </div>
+        </div>
+      ) : (
+        <button className="btn btn--brasa" disabled={enviando}>
+          Sentar grupo
+        </button>
+      )}
     </form>
   );
 }

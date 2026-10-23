@@ -2209,8 +2209,35 @@ button.mesa[aria-pressed="true"] {
   font-weight: 600;
   font-size: 0.82rem;
 }
+.ticket-s__reserva {
+  font-size: 0.8rem;
+  color: var(--tinta-2);
+}
+.ticket-s__reserva code,
+.mesa-reserva-tag code {
+  font-family: var(--f-mono);
+  font-size: 0.72rem;
+  background: var(--ceniza-2);
+  padding: 0.12rem 0.4rem;
+  border-radius: 5px;
+  margin-left: 0.3rem;
+}
+.ticket-s__acciones {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  width: 100%;
+  margin-top: 0.15rem;
+}
 .ticket-s .btn {
   flex: none;
+}
+.confirmar--compacto {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  gap: 0.45rem;
+  font-size: 0.88rem;
 }
 .opciones {
   list-style: none;
@@ -2384,6 +2411,23 @@ button.mesa[aria-pressed="true"] {
   list-style: none;
   margin: 0;
   padding: 0;
+}
+.lista-items--scroll {
+  max-height: 26rem;
+  overflow-y: auto;
+  padding-right: 0.25rem;
+}
+.mesa-reserva-tag {
+  margin: 0.15rem 0 0;
+  font-size: 0.84rem;
+  color: var(--tinta-2);
+}
+.mesa-pedidos-tag {
+  display: block;
+  margin-top: 0.15rem;
+  font-family: var(--f-mono);
+  font-size: 0.74rem;
+  color: var(--tinta-3);
 }
 .lista-items li {
   display: grid;

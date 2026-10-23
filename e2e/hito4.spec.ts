@@ -3,8 +3,8 @@ import { axe, ingresar } from "./helpers.ts";
 
 /**
  * Hito 4 en el navegador: el comensal pide desde el QR con su celular (RF-Q1/Q2), el pedido llega al panel de
- * parrilla en menos de 5 segundos, pasa a «en preparación» y «listo» (RF-Q3) y se entrega (RF-Q4).
- * Un solo ingreso al panel (el Encargado opera todos los puestos) para no chocar con el límite de intentos.
+ * parrilla en menos de 5 segundos, pasa a «en preparación» y «listo» con confirmación, puede volver atrás a un
+ * estado anterior, y luego se entrega (RF-Q3/Q4).
  */
 test("Hito 4: pedido desde el QR, panel de parrilla y entrega", async ({ page, browser }, info) => {
   test.skip(info.project.name !== "desktop", "un solo ingreso al panel por corrida");
@@ -44,26 +44,37 @@ test("Hito 4: pedido desde el QR, panel de parrilla y entrega", async ({ page, b
   const enviado = Date.now();
   expect(await cel.evaluate(() => document.documentElement.scrollWidth - innerWidth)).toBe(0);
 
-  // Llega a la parrilla en menos de 5 segundos
+  // Llega a la parrilla en menos de 5 segundos; cada cambio pide confirmación
   await page.goto("/admin/sectores");
   await page.getByRole("button", { name: "Parrilla" }).click();
   const ticket = page.locator(".ticket-s", { hasText: "Mesa 27" }).filter({ hasText: "bien cocida" });
   await expect(ticket).toBeVisible({ timeout: 5_000 });
   expect(Date.now() - enviado).toBeLessThan(5_000);
   await ticket.getByRole("button", { name: /^Empezar/ }).click();
-  await expect(
-    page.locator(".cocina__col", { hasText: "En preparación" }).locator(".ticket-s", { hasText: "bien cocida" }),
-  ).toBeVisible();
-  await page
-    .locator(".ticket-s", { hasText: "bien cocida" })
-    .getByRole("button", { name: /^Listo/ })
-    .click();
+  await ticket.getByRole("button", { name: "Sí, confirmar" }).click();
+  const enPrepTicket = page
+    .locator(".cocina__col", { hasText: "En preparación" })
+    .locator(".ticket-s", { hasText: "bien cocida" });
+  await expect(enPrepTicket).toBeVisible();
+  await enPrepTicket.getByRole("button", { name: /^Listo/ }).click();
+  await enPrepTicket.getByRole("button", { name: "Sí, confirmar" }).click();
+
+  // Un plato listo puede volver atrás a preparación y volver a listo con confirmación
+  const listoTicket = page
+    .locator(".cocina__col", { hasText: "Listos para entregar" })
+    .locator(".ticket-s", { hasText: "bien cocida" });
+  await expect(listoTicket).toBeVisible();
+  await listoTicket.getByRole("button", { name: /A preparación/ }).click();
+  await listoTicket.getByRole("button", { name: "Sí, confirmar" }).click();
+  await expect(enPrepTicket).toBeVisible();
+  await enPrepTicket.getByRole("button", { name: /^Listo/ }).click();
+  await enPrepTicket.getByRole("button", { name: "Sí, confirmar" }).click();
 
   // En Pedidos se puede filtrar por mesa y gestionar; en Pedido del mozo buscar por palabra intermedia y sumar/restar de a 1
   await page.goto("/admin/pedidos");
   await expect(page.getByRole("region", { name: "Filtrar y buscar mesas" })).toBeVisible();
 
-  // El comensal ve el estado y el mozo lo entrega
+  // El comensal ve el estado y el mozo lo entrega con confirmación
   await expect(cel.locator(".seguimiento")).toContainText("Listo, ya viene", { timeout: 12_000 });
   await page.goto("/admin/mozo?mesa=27");
   await page.getByLabel("Buscar en la carta").fill("chorizo");
@@ -75,9 +86,8 @@ test("Hito 4: pedido desde el QR, panel de parrilla y entrega", async ({ page, b
   await expect(page.getByRole("list", { name: "Pedido" })).toContainText("2 ×");
   await page.getByRole("button", { name: /Restar uno de Bife de chorizo/ }).click();
   await expect(page.getByRole("list", { name: "Pedido" })).toContainText("1 ×");
-  await page
-    .locator(".ticket-s", { hasText: "bien cocida" })
-    .getByRole("button", { name: /^Entregado/ })
-    .click();
+  const entregarTicket = page.locator(".ticket-s", { hasText: "bien cocida" });
+  await entregarTicket.getByRole("button", { name: /^Entregado/ }).click();
+  await entregarTicket.getByRole("button", { name: "Sí, confirmar" }).click();
   await expect(cel.locator(".seguimiento")).toContainText("Entregado", { timeout: 12_000 });
 });

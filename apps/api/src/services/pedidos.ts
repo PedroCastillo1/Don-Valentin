@@ -148,7 +148,8 @@ export async function crearPedido(
 
 const SELECT_ITEMS = `SELECT i.id, i.pedido_id, i.cantidad, i.nota, i.estado, i.precio_unitario, i.creado_en, i.en_preparacion_en,
        i.listo_en, sp.codigo AS sector, pr.nombre AS producto, v.etiqueta AS variante, ts.tiempo_maximo_min,
-       p.origen, p.estado AS estado_pedido, p.creado_en AS pedido_creado_en, p.sesion_mesa_id, m.numero AS mesa
+       p.origen, p.estado AS estado_pedido, p.creado_en AS pedido_creado_en, p.sesion_mesa_id, m.numero AS mesa,
+       rv.codigo AS reserva_codigo, rv.a_nombre_de AS reserva_nombre
   FROM pedido_items i
   JOIN pedidos p ON p.id = i.pedido_id
   JOIN sesiones_mesa s ON s.id = p.sesion_mesa_id
@@ -156,7 +157,15 @@ const SELECT_ITEMS = `SELECT i.id, i.pedido_id, i.cantidad, i.nota, i.estado, i.
   JOIN sectores_preparacion sp ON sp.id = i.sector_preparacion_id
   JOIN variantes_producto v ON v.id = i.variante_id
   JOIN productos pr ON pr.id = v.producto_id
-  JOIN tipos_solicitud ts ON ts.id = pr.tipo_solicitud_id`;
+  JOIN tipos_solicitud ts ON ts.id = pr.tipo_solicitud_id
+  LEFT JOIN LATERAL (
+    SELECT r.codigo, r.a_nombre_de
+      FROM reservas r
+      JOIN franjas f ON f.id = r.franja_id
+     WHERE (r.id = s.reserva_id OR (s.reserva_id IS NULL AND r.mesa_id = m.id AND r.estado IN ('confirmada', 'cumplida')))
+     ORDER BY (r.id = s.reserva_id) DESC, r.fecha_servicio DESC, f.orden ASC
+     LIMIT 1
+  ) rv ON true`;
 
 function itemDto(x: Row): ItemPedidoDto {
   return {
@@ -193,6 +202,8 @@ export function pedidosDeSesion(db: Db, sesionId: number): Promise<PedidoDto[]> 
 export interface ItemSectorDto extends ItemPedidoDto {
   pedidoId: number;
   mesa: number;
+  reservaCodigo: string | null;
+  reservaNombre: string | null;
   origen: "qr" | "mozo";
   creadoEn: string;
   minutos: number;
@@ -200,11 +211,17 @@ export interface ItemSectorDto extends ItemPedidoDto {
   demorado: boolean;
 }
 
-/** Ítems pendientes de entregar, con la demora contra el tiempo máximo de su tipo de solicitud (planilla). */
-export async function itemsActivos(db: Db, sector: Sector | null, ahora = new Date()): Promise<ItemSectorDto[]> {
+/** Ítems pendientes de entregar (o todos los de sesiones abiertas si `incluirCerrados = true`), con la demora contra el tiempo máximo. */
+export async function itemsActivos(
+  db: Db,
+  sector: Sector | null,
+  ahora = new Date(),
+  incluirCerrados = false,
+): Promise<ItemSectorDto[]> {
+  const filtroEstado = incluirCerrados ? "s.estado = 'abierta'" : "i.estado IN ('recibido','en_preparacion','listo')";
   const r = await rows(
     db,
-    `${SELECT_ITEMS} WHERE i.estado IN ('recibido','en_preparacion','listo')${sector ? " AND sp.codigo = ?" : ""}
+    `${SELECT_ITEMS} WHERE ${filtroEstado}${sector ? " AND sp.codigo = ?" : ""}
       ORDER BY i.creado_en, i.id`,
     sector ? [sector] : [],
   );
@@ -212,25 +229,36 @@ export async function itemsActivos(db: Db, sector: Sector | null, ahora = new Da
     // La demora corre hasta que el plato está listo: después le toca al mozo.
     const fin = x.listo_en ? new Date(iso(x.listo_en)!) : ahora;
     const minutos = minutosDesde(x.creado_en, fin);
+    const activo = x.estado === "recibido" || x.estado === "en_preparacion" || x.estado === "listo";
     return {
       ...itemDto(x),
       pedidoId: Number(x.pedido_id),
       mesa: x.mesa,
+      reservaCodigo: (x.reserva_codigo as string | null) ?? null,
+      reservaNombre: (x.reserva_nombre as string | null) ?? null,
       origen: x.origen,
       creadoEn: iso(x.creado_en)!,
       minutos,
       tiempoMaximo: x.tiempo_maximo_min,
-      demorado: minutos > x.tiempo_maximo_min,
+      demorado: activo && minutos > x.tiempo_maximo_min,
     };
   });
 }
 
+/**
+ * Transiciones permitidas:
+ * - recibido → en_preparacion o cancelado
+ * - en_preparacion → recibido (volver atrás), listo o cancelado
+ * - listo → cualquier estado (recibido, en_preparacion, entregado o cancelado)
+ * - entregado → volver atrás a cualquier estado (listo, en_preparacion, recibido o cancelado)
+ * - cancelado → reactivar a recibido, en_preparacion o listo
+ */
 const SIGUIENTE: Record<EstadoItem, EstadoItem[]> = {
   recibido: ["en_preparacion", "cancelado"],
-  en_preparacion: ["listo", "cancelado"],
-  listo: ["entregado"],
-  entregado: [],
-  cancelado: [],
+  en_preparacion: ["recibido", "listo", "cancelado"],
+  listo: ["recibido", "en_preparacion", "entregado", "cancelado"],
+  entregado: ["recibido", "en_preparacion", "listo", "cancelado"],
+  cancelado: ["recibido", "en_preparacion", "listo"],
 };
 
 /** El estado del pedido sigue al más atrasado de sus ítems (sin contar los cancelados). */
@@ -243,7 +271,7 @@ async function recalcularPedido(tx: Tx, pedidoId: number): Promise<void> {
 }
 
 /**
- * RF-Q3: recibido → en preparación → listo (el sector) → entregado (el mozo).
+ * RF-Q3: permite avanzar y también retroceder el estado de un ítem (y que un ítem listo o entregado vuelva a cualquier estado).
  * Un puesto solo mueve los ítems de su sector; cancelar queda para el Encargado y Administración.
  */
 export async function cambiarEstadoItem(db: Db, itemId: number, nuevo: EstadoItem, rol: Rol): Promise<ItemPedidoDto> {
@@ -261,26 +289,58 @@ export async function cambiarEstadoItem(db: Db, itemId: number, nuevo: EstadoIte
     if (nuevo === "entregado" && propio) throw new ErrorDeDominio(403, "SOLO_SALON", "La entrega la registra el mozo.");
     if (nuevo === "cancelado" && rol !== "admin" && rol !== "encargado")
       throw new ErrorDeDominio(403, "SOLO_ENCARGADO", "Solo el Encargado puede cancelar un ítem.");
-    if (!SIGUIENTE[it.estado as EstadoItem].includes(nuevo))
+    const estadoActual = it.estado as EstadoItem;
+    if (estadoActual === nuevo || !SIGUIENTE[estadoActual].includes(nuevo))
       throw new ErrorDeDominio(409, "ESTADO_INVALIDO", "Ese ítem ya cambió de estado. Actualizá la pantalla.");
-    const marca: Partial<Record<EstadoItem, string>> = {
-      en_preparacion: ", en_preparacion_en = CURRENT_TIMESTAMP(3)",
-      listo: ", listo_en = CURRENT_TIMESTAMP(3)",
-      entregado: ", entregado_en = CURRENT_TIMESTAMP(3)",
+
+    const marca: Record<EstadoItem, string> = {
+      recibido: ", en_preparacion_en = NULL, listo_en = NULL, entregado_en = NULL",
+      en_preparacion: ", en_preparacion_en = CURRENT_TIMESTAMP(3), listo_en = NULL, entregado_en = NULL",
+      listo:
+        ", en_preparacion_en = COALESCE(en_preparacion_en, CURRENT_TIMESTAMP(3)), listo_en = CURRENT_TIMESTAMP(3), entregado_en = NULL",
+      entregado:
+        ", en_preparacion_en = COALESCE(en_preparacion_en, CURRENT_TIMESTAMP(3)), listo_en = COALESCE(listo_en, CURRENT_TIMESTAMP(3)), entregado_en = CURRENT_TIMESTAMP(3)",
+      cancelado: "",
     };
-    await exec(tx, `UPDATE pedido_items SET estado = ?${marca[nuevo] ?? ""} WHERE id = ?`, [nuevo, itemId]);
+    await exec(tx, `UPDATE pedido_items SET estado = ?${marca[nuevo]} WHERE id = ?`, [nuevo, itemId]);
     await recalcularPedido(tx, Number(it.pedido_id));
     return itemDto((await one(tx, `${SELECT_ITEMS} WHERE i.id = ?`, [itemId]))!);
   });
 }
 
-/** Mesas con sesión abierta, para que el mozo elija dónde cargar un pedido. */
-export async function mesasAbiertas(db: Db): Promise<{ sesionId: number; mesaId: number; numero: number }[]> {
+export interface MesaAbiertaDto {
+  sesionId: number;
+  mesaId: number;
+  numero: number;
+  reservaCodigo: string | null;
+  reservaNombre: string | null;
+}
+
+/** Mesas con sesión abierta, para que el mozo elija dónde cargar un pedido (con su reserva vinculada si la hay). */
+export async function mesasAbiertas(db: Db): Promise<MesaAbiertaDto[]> {
   const r = await rows(
     db,
-    "SELECT s.id, m.id AS mesa_id, m.numero FROM sesiones_mesa s JOIN mesas m ON m.id = s.mesa_id WHERE s.estado = 'abierta' ORDER BY m.numero",
+    `SELECT s.id, m.id AS mesa_id, m.numero, rv.codigo AS reserva_codigo, rv.a_nombre_de AS reserva_nombre
+       FROM sesiones_mesa s
+       JOIN mesas m ON m.id = s.mesa_id
+       LEFT JOIN LATERAL (
+         SELECT r.codigo, r.a_nombre_de
+           FROM reservas r
+           JOIN franjas f ON f.id = r.franja_id
+          WHERE (r.id = s.reserva_id OR (s.reserva_id IS NULL AND r.mesa_id = m.id AND r.estado IN ('confirmada', 'cumplida')))
+          ORDER BY (r.id = s.reserva_id) DESC, r.fecha_servicio DESC, f.orden ASC
+          LIMIT 1
+       ) rv ON true
+      WHERE s.estado = 'abierta'
+      ORDER BY m.numero`,
   );
-  return r.map((x) => ({ sesionId: Number(x.id), mesaId: x.mesa_id, numero: x.numero }));
+  return r.map((x) => ({
+    sesionId: Number(x.id),
+    mesaId: x.mesa_id,
+    numero: x.numero,
+    reservaCodigo: (x.reserva_codigo as string | null) ?? null,
+    reservaNombre: (x.reserva_nombre as string | null) ?? null,
+  }));
 }
 
 export async function sesionAbiertaDeMesa(db: Db, mesaId: number): Promise<number> {
@@ -340,7 +400,7 @@ export async function editarPrecio(
       "SELECT v.precio, v.etiqueta, p.nombre FROM variantes_producto v JOIN productos p ON p.id = v.producto_id WHERE v.id = ? FOR UPDATE OF v",
       [varianteId],
     );
-    if (!v) throw new ErrorDeDominio(404, "VARIANTE_NO_ENCONTRADA", "Ese precio no existe.");
+    if (!v) throw new ErrorDeDominio(404, "VARIANTE_NO_ENCONTRADO", "Ese precio no existe.");
     await exec(tx, "UPDATE variantes_producto SET precio = ?, actualizado_en = CURRENT_TIMESTAMP(3) WHERE id = ?", [
       precio,
       varianteId,
