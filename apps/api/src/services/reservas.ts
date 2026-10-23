@@ -291,6 +291,7 @@ export interface AccionesReserva {
   cancelar: boolean;
   llegada: boolean;
   noShow: boolean;
+  reabrir: boolean;
 }
 
 export interface ReservaDto {
@@ -322,11 +323,13 @@ function acciones(x: Row, cfg: ConfigLocal, ahora: Date): AccionesReserva {
   const fin = new Date(inicio.getTime() + Number(x.duracion_min) * 60_000);
   const hoy = fechaServicioActual(ahora, cfg.apertura, cfg.cierre);
   const confirmada = x.estado === "confirmada";
+  const activa = confirmada || x.estado === "cumplida";
   return {
-    modificar: confirmada && ahora < inicio,
+    modificar: activa,
     cancelar: confirmada && ahora < fin,
     llegada: confirmada && x.fecha_servicio === hoy && ahora < fin,
     noShow: confirmada && ahora >= new Date(inicio.getTime() + cfg.toleranciaNoShowMin * 60_000),
+    reabrir: !confirmada,
   };
 }
 
@@ -450,18 +453,28 @@ function exigirConfirmada(r: Row): void {
     throw new ErrorDeDominio(409, "RESERVA_NO_EDITABLE", estados[r.estado] ?? "Esa reserva no se puede cambiar.");
 }
 
+function exigirEditable(r: Row): void {
+  const estados: Record<string, string> = {
+    cancelada: "Esa reserva ya está cancelada. Reactivala si querés cambiarla.",
+    no_show: "Esa reserva quedó como no-show. Reactivala si querés cambiarla.",
+  };
+  if (r.estado !== "confirmada" && r.estado !== "cumplida")
+    throw new ErrorDeDominio(409, "RESERVA_NO_EDITABLE", estados[r.estado] ?? "Esa reserva no se puede cambiar.");
+}
+
 export interface CambiosReserva {
   nombre?: string | undefined;
   telefono?: string | undefined;
   personas?: number | undefined;
   fecha?: string | undefined;
   franjaId?: number | undefined;
+  mesaId?: number | undefined;
   comentarios?: string | null | undefined;
 }
 
 /**
- * RF-R4: cambia día, horario o personas liberando el cupo anterior y tomando el nuevo en una sola transacción.
- * Si la mesa original sigue sirviendo, se conserva.
+ * RF-R4: cambia día, horario, personas o mesa liberando el cupo anterior y tomando el nuevo en una sola transacción.
+ * Si la mesa original sigue sirviendo y no se pidió otra, se conserva.
  */
 export async function modificarReserva(db: Db, id: number, c: CambiosReserva, ahora = new Date()): Promise<ReservaDto> {
   const cfg = await leerConfigLocal(db);
@@ -469,13 +482,12 @@ export async function modificarReserva(db: Db, id: number, c: CambiosReserva, ah
   if (!actual) throw new ErrorDeDominio(404, "RESERVA_NO_ENCONTRADA", "Esa reserva no existe.");
   const fecha = c.fecha ?? (actual.fecha_servicio as string);
   const franjaId = c.franjaId ?? (actual.franja_id as number);
-  const cambiaLugar = c.fecha !== undefined || c.franjaId !== undefined || c.personas !== undefined;
+  const cambiaLugar =
+    c.fecha !== undefined || c.franjaId !== undefined || c.personas !== undefined || c.mesaId !== undefined;
   if (cambiaLugar) {
     validarFecha(fecha, cfg, ahora);
     const franja = await one(db, "SELECT hora_inicio FROM franjas WHERE id = ? AND activa = 1", [franjaId]);
     if (!franja) throw new ErrorDeDominio(400, "FRANJA_INVALIDA", "Ese horario no existe. Elegí uno de la lista.");
-    if (ahora >= inicioFranjaUtc(fecha, franja.hora_inicio, cfg.apertura))
-      throw new ErrorDeDominio(409, "FRANJA_PASADA", "Ese horario ya empezó. Elegí uno posterior.");
   }
   const sectores = await asegurarContadores(db, fecha, franjaId);
   await withTx(db, async (tx) => {
@@ -487,13 +499,7 @@ export async function modificarReserva(db: Db, id: number, c: CambiosReserva, ah
     await rows(tx, "SELECT id FROM reservas WHERE id = ? FOR UPDATE", [id]);
     const r = await reservaBloqueada(tx, id);
     exigirSinCambios(r, actual);
-    exigirConfirmada(r);
-    if (ahora >= inicioFranjaUtc(r.fecha_servicio, r.hora_inicio, cfg.apertura))
-      throw new ErrorDeDominio(
-        409,
-        "RESERVA_EN_CURSO",
-        "La franja de esa reserva ya empezó: se puede registrar la llegada, cancelar o marcar no-show, pero no cambiarla.",
-      );
+    exigirEditable(r);
     const personas = c.personas ?? (r.personas as number);
     let sectorId = r.sector_salon_id as number;
     let mesaId = r.mesa_id as number;
@@ -505,15 +511,32 @@ export async function modificarReserva(db: Db, id: number, c: CambiosReserva, ah
         franjaId,
         personas,
         excluirReservaId: id,
-        preferida: { mesaId: r.mesa_id, sectorId: r.sector_salon_id },
+        ...(c.mesaId !== undefined
+          ? { soloMesaId: c.mesaId }
+          : { preferida: { mesaId: r.mesa_id, sectorId: r.sector_salon_id } }),
       });
       sectorId = lugar.sectorId;
       mesaId = lugar.mesa.id;
       await moverAforo(tx, fecha, franjaId, sectorId, personas);
+      if (r.estado === "cumplida" && mesaId !== (r.mesa_id as number)) {
+        const otraAbierta = await one(
+          tx,
+          "SELECT m.numero FROM sesiones_mesa s JOIN mesas m ON m.id = s.mesa_id WHERE s.mesa_id = ? AND s.estado = 'abierta' AND COALESCE(s.reserva_id, 0) <> ?",
+          [mesaId, id],
+        );
+        if (otraAbierta)
+          throw new ErrorDeDominio(409, "MESA_OCUPADA", `La mesa ${otraAbierta.numero} ya tiene una sesión abierta.`);
+        await exec(tx, "UPDATE sesiones_mesa SET mesa_id = ? WHERE reserva_id = ? AND estado = 'abierta'", [
+          mesaId,
+          id,
+        ]);
+      }
     }
     const nombre = c.nombre ?? (r.a_nombre_de as string);
     let cliente = r.cliente_id as number | null;
-    if (c.telefono !== undefined) cliente = await clienteId(tx, nombre, c.telefono);
+    if (c.telefono !== undefined) {
+      cliente = c.telefono ? await clienteId(tx, nombre, c.telefono) : null;
+    }
     await exec(
       tx,
       `UPDATE reservas SET fecha_servicio = ?, franja_id = ?, sector_salon_id = ?, mesa_id = ?, personas = ?,
@@ -529,6 +552,66 @@ export async function modificarReserva(db: Db, id: number, c: CambiosReserva, ah
         c.comentarios === undefined ? r.comentarios : c.comentarios || null,
         id,
       ],
+    );
+  });
+  return leerReserva(db, id, ahora);
+}
+
+/**
+ * Permite deshacer un cambio de estado (no-show, llegada o cancelación) y volver la reserva a «confirmada».
+ * Si estaba en no-show o cancelada, vuelve a tomar cupo y mesa en su franja; si estaba cumplida, libera la sesión de mesa si no tenía pedidos.
+ */
+export async function reabrirReserva(db: Db, id: number, ahora = new Date()): Promise<ReservaDto> {
+  const actual = await one(db, "SELECT fecha_servicio, franja_id, estado FROM reservas WHERE id = ?", [id]);
+  if (!actual) throw new ErrorDeDominio(404, "RESERVA_NO_ENCONTRADA", "Esa reserva no existe.");
+  if (actual.estado === "confirmada")
+    throw new ErrorDeDominio(409, "RESERVA_YA_CONFIRMADA", "Esa reserva ya está confirmada.");
+  const fecha = actual.fecha_servicio as string;
+  const franjaId = actual.franja_id as number;
+  const sectores = await asegurarContadores(db, fecha, franjaId);
+  await withTx(db, async (tx) => {
+    await bloquearContadores(tx, [{ fecha, franjaId }]);
+    await rows(tx, "SELECT id FROM reservas WHERE id = ? FOR UPDATE", [id]);
+    const r = await reservaBloqueada(tx, id);
+    exigirSinCambios(r, actual);
+    if (r.estado === "confirmada")
+      throw new ErrorDeDominio(409, "RESERVA_YA_CONFIRMADA", "Esa reserva ya está confirmada.");
+    if (r.estado === "cumplida") {
+      // Ya ocupaba aforo; cerramos la sesión de mesa si no tiene pedidos, o la desvinculamos si ya tenía pedidos.
+      const ses = await one(tx, "SELECT id FROM sesiones_mesa WHERE reserva_id = ? AND estado = 'abierta'", [id]);
+      if (ses) {
+        const tienePedidos = await one(tx, "SELECT 1 FROM pedidos WHERE sesion_mesa_id = ? LIMIT 1", [ses.id]);
+        if (tienePedidos) {
+          await exec(tx, "UPDATE sesiones_mesa SET reserva_id = NULL WHERE id = ?", [ses.id]);
+        } else {
+          await exec(
+            tx,
+            "UPDATE sesiones_mesa SET estado = 'cerrada', cerrada_en = CURRENT_TIMESTAMP(3), reserva_id = NULL WHERE id = ?",
+            [ses.id],
+          );
+        }
+      }
+      await exec(
+        tx,
+        "UPDATE reservas SET estado = 'confirmada', llegada_en = NULL, origen = CASE WHEN origen = 'walk_in' THEN 'presencial' ELSE origen END WHERE id = ?",
+        [id],
+      );
+      return;
+    }
+    // Estaba cancelada o no_show: vuelve a ocupar aforo y mesa
+    const lugar = await buscarLugar(tx, {
+      sectores,
+      fecha,
+      franjaId,
+      personas: r.personas as number,
+      excluirReservaId: id,
+      preferida: { mesaId: r.mesa_id as number, sectorId: r.sector_salon_id as number },
+    });
+    await moverAforo(tx, fecha, franjaId, lugar.sectorId, r.personas as number);
+    await exec(
+      tx,
+      "UPDATE reservas SET estado = 'confirmada', sector_salon_id = ?, mesa_id = ?, cancelada_en = NULL, llegada_en = NULL WHERE id = ?",
+      [lugar.sectorId, lugar.mesa.id, id],
     );
   });
   return leerReserva(db, id, ahora);

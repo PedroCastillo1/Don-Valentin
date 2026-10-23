@@ -247,6 +247,25 @@ export function AdminSalon() {
                     Marcar no-show
                   </button>
                 )}
+                {mesa.reserva?.estado === "cumplida" && (puede("reservas:editar") || puede("salon:operar")) && (
+                  <button
+                    type="button"
+                    className="btn btn--chico"
+                    onClick={() =>
+                      void hacer(
+                        () => api(`/admin/reservas/${mesa.reserva!.id}/reabrir`, { method: "POST" }),
+                        `Se deshizo la llegada y la reserva de ${mesa.reserva!.aNombreDe} volvió a estar confirmada.`,
+                      )
+                    }
+                  >
+                    Volver a confirmada
+                  </button>
+                )}
+                {mesa.reserva && puede("reservas:ver") && (
+                  <Link className="btn btn--chico" to={`/admin/reservas?id=${mesa.reserva.id}`}>
+                    Modificar reserva
+                  </Link>
+                )}
                 {mesa.estado === "ocupada" && puede("sesion_mesa:cerrar") && (
                   <Link className="btn btn--chico" to="/admin/mesas">
                     Liberar en Mesas y QR

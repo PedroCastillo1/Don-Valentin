@@ -41,14 +41,15 @@ export const reservaInternaSchema = reservaPublicaSchema
   .extend({ origen: z.enum(["telefono", "whatsapp", "presencial"]) });
 export type ReservaInternaInput = z.infer<typeof reservaInternaSchema>;
 
-/** RF-R4: cambiar día, horario, personas o datos de contacto de una reserva confirmada. */
+/** RF-R4: cambiar día, horario, personas, mesa o datos de contacto de una reserva. */
 export const reservaEdicionSchema = z
   .object({
     nombre: reservaPublicaSchema.shape.nombre.optional(),
-    telefono: telefonoSchema.optional(),
+    telefono: z.union([telefonoSchema, z.literal("")]).optional(),
     personas: reservaPublicaSchema.shape.personas.optional(),
     fecha: fechaIso.optional(),
     franjaId: reservaPublicaSchema.shape.franjaId.optional(),
+    mesaId: z.number().int().positive().optional(),
     comentarios: z.string().trim().max(300, "Los comentarios admiten hasta 300 caracteres").nullable().optional(),
   })
   .refine((d) => Object.values(d).some((v) => v !== undefined), "No hay nada para cambiar");

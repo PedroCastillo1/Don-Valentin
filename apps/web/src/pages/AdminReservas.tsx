@@ -11,6 +11,14 @@ import { Cabecera, Mensaje } from "../components/ui.tsx";
 type Aviso = { tipo: "ok" | "error"; texto: string } | null;
 const mensajeDe = (e: unknown, defecto: string) => (e instanceof ApiError ? e.message : defecto);
 
+interface MesaItem {
+  id: number;
+  numero: number;
+  capacidad: number;
+  sectorNombre: string;
+  activa: boolean;
+}
+
 export function AdminReservas() {
   const { puede } = useSesion();
   const [searchParams] = useSearchParams();
@@ -160,8 +168,8 @@ export function AdminReservas() {
           </h2>
           {lista.length > 0 && (
             <p className="nota nota--arriba">
-              Tocá una reserva o su botón <strong>Gestionar / Modificar</strong> para registrar la llegada, cambiar
-              datos, marcar no-show o cancelar.
+              Tocá una reserva o su botón <strong>Modificar / Gestionar</strong> para registrar la llegada, cambiar
+              mesa, fecha, horario o datos, deshacer estados o cancelar.
             </p>
           )}
           {lista.length === 0 ? (
@@ -223,7 +231,11 @@ export function AdminReservas() {
                             seleccionar(r);
                           }}
                         >
-                          {elegida?.id === r.id ? "Abierta" : r.estado === "confirmada" ? "Modificar" : "Ver"}
+                          {elegida?.id === r.id
+                            ? "Abierta"
+                            : r.estado === "confirmada" || r.estado === "cumplida"
+                              ? "Modificar"
+                              : "Gestionar"}
                           <span className="sr-only"> reserva de {r.aNombreDe}</span>
                         </button>
                       </td>
@@ -331,6 +343,7 @@ function DetalleReserva({
       {modo === "editar" && (
         <EditarReserva
           reserva={r}
+          onCancelar={() => setModo("ver")}
           onListo={(n) => {
             setModo("ver");
             setAviso({ tipo: "ok", texto: "Cambios guardados." });
@@ -385,6 +398,23 @@ function DetalleReserva({
               Marcar no-show
             </button>
           )}
+          {(editar || puede("salon:operar")) && (r.acciones.reabrir ?? r.estado !== "confirmada") && (
+            <button
+              type="button"
+              className="btn btn--chico"
+              disabled={ocupado}
+              onClick={() =>
+                void accion(
+                  "reabrir",
+                  r.estado === "cumplida"
+                    ? "Se deshizo la llegada y la reserva volvió a estar confirmada."
+                    : "Reserva reactivada como confirmada.",
+                )
+              }
+            >
+              Volver a confirmada
+            </button>
+          )}
           {editar && r.acciones.cancelar && (
             <button type="button" className="btn btn--chico btn--peligro" onClick={() => setModo("cancelar")}>
               Cancelar reserva
@@ -396,14 +426,24 @@ function DetalleReserva({
   );
 }
 
-function EditarReserva({ reserva: r, onListo }: { reserva: ReservaAdmin; onListo: (r: ReservaAdmin) => void }) {
+function EditarReserva({
+  reserva: r,
+  onCancelar,
+  onListo,
+}: {
+  reserva: ReservaAdmin;
+  onCancelar: () => void;
+  onListo: (r: ReservaAdmin) => void;
+}) {
   const [nombre, setNombre] = useState(r.aNombreDe);
   const [telefono, setTelefono] = useState(r.telefono);
   const [personas, setPersonas] = useState(r.personas);
   const [fecha, setFecha] = useState(r.fecha);
   const [franjaId, setFranjaId] = useState<number>(r.franja.id);
+  const [mesaId, setMesaId] = useState<number>(r.mesaId);
   const [comentarios, setComentarios] = useState(r.comentarios ?? "");
   const [franjas, setFranjas] = useState<FranjaDisp[]>([]);
+  const [mesas, setMesas] = useState<MesaItem[]>([]);
   const [aviso, setAviso] = useState<Aviso>(null);
   const [enviando, setEnviando] = useState(false);
 
@@ -417,6 +457,16 @@ function EditarReserva({ reserva: r, onListo }: { reserva: ReservaAdmin; onListo
     };
   }, [fecha, personas]);
 
+  useEffect(() => {
+    let vivo = true;
+    api<{ mesas: MesaItem[] }>("/admin/mesas")
+      .then((x) => vivo && setMesas(x.mesas))
+      .catch(() => vivo && setMesas([]));
+    return () => {
+      vivo = false;
+    };
+  }, []);
+
   async function guardar(e: FormEvent) {
     e.preventDefault();
     const cambios: Record<string, unknown> = {};
@@ -425,6 +475,7 @@ function EditarReserva({ reserva: r, onListo }: { reserva: ReservaAdmin; onListo
     if (personas !== r.personas) cambios.personas = personas;
     if (fecha !== r.fecha) cambios.fecha = fecha;
     if (franjaId !== r.franja.id) cambios.franjaId = franjaId;
+    if (mesaId !== r.mesaId) cambios.mesaId = mesaId;
     if (comentarios !== (r.comentarios ?? "")) cambios.comentarios = comentarios || null;
     if (!Object.keys(cambios).length) return setAviso({ tipo: "error", texto: "No cambiaste ningún dato." });
     setEnviando(true);
@@ -439,8 +490,11 @@ function EditarReserva({ reserva: r, onListo }: { reserva: ReservaAdmin; onListo
     }
   }
 
-  // La franja actual de la reserva siempre se puede conservar, aunque la disponibilidad la cuente ocupada.
+  // La franja actual de la reserva siempre se puede conservar; en el panel también permitimos elegir franjas iniciadas hoy.
   const propia = (id: number) => fecha === r.fecha && id === r.franja.id;
+  const sinLugar = (f: FranjaDisp) => (f.estado === "completa" || f.estado === "sin_mesa") && !propia(f.id);
+  const mesasOpciones = mesas.filter((m) => m.activa || m.id === r.mesaId);
+
   return (
     <form className="form" onSubmit={guardar} aria-label="Modificar reserva">
       <label>
@@ -467,25 +521,49 @@ function EditarReserva({ reserva: r, onListo }: { reserva: ReservaAdmin; onListo
           <input type="date" value={fecha} onChange={(e) => setFecha(e.target.value)} required />
         </label>
       </div>
-      <label>
-        Horario
-        <select value={franjaId} onChange={(e) => setFranjaId(Number(e.target.value))}>
-          {franjas.map((f) => (
-            <option key={f.id} value={f.id} disabled={f.estado !== "disponible" && !propia(f.id)}>
-              {f.nombre}
-              {f.estado !== "disponible" && !propia(f.id) ? ` — ${MOTIVO_FRANJA[f.estado]}` : ""}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="fila">
+        <label>
+          Horario
+          <select value={franjaId} onChange={(e) => setFranjaId(Number(e.target.value))}>
+            {franjas.length === 0 && <option value={r.franja.id}>{r.franja.nombre}</option>}
+            {franjas.map((f) => (
+              <option key={f.id} value={f.id} disabled={sinLugar(f)}>
+                {f.nombre}
+                {f.estado !== "disponible" && !propia(f.id) ? ` — ${MOTIVO_FRANJA[f.estado]}` : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+        <label>
+          Mesa
+          <select value={mesaId} onChange={(e) => setMesaId(Number(e.target.value))}>
+            {mesasOpciones.length === 0 && (
+              <option value={r.mesaId}>
+                Mesa {r.mesa} ({r.sector})
+              </option>
+            )}
+            {mesasOpciones.map((m) => (
+              <option key={m.id} value={m.id} disabled={m.capacidad < personas && m.id !== r.mesaId}>
+                Mesa {m.numero} ({m.capacidad} pers. · {m.sectorNombre})
+                {m.capacidad < personas ? " — capacidad menor" : ""}
+              </option>
+            ))}
+          </select>
+        </label>
+      </div>
       <label>
         Comentarios (opcional)
         <input value={comentarios} onChange={(e) => setComentarios(e.target.value)} maxLength={300} />
       </label>
       {aviso && <Mensaje tipo={aviso.tipo}>{aviso.texto}</Mensaje>}
-      <button className="btn btn--brasa" disabled={enviando}>
-        {enviando ? "Guardando…" : "Guardar cambios"}
-      </button>
+      <div className="acciones-fila">
+        <button className="btn btn--brasa" disabled={enviando}>
+          {enviando ? "Guardando…" : "Guardar cambios"}
+        </button>
+        <button type="button" className="btn btn--chico" onClick={onCancelar} disabled={enviando}>
+          Cancelar
+        </button>
+      </div>
     </form>
   );
 }

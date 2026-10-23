@@ -49,6 +49,7 @@ import {
   leerReserva,
   marcarNoShow,
   modificarReserva,
+  reabrirReserva,
   registrarLlegada,
   registrarWalkIn,
   reservasDelDia,
@@ -105,7 +106,7 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
     const fecha = q.fecha ?? (await diaActual());
     res.json({ fecha, reservas: await reservasDelDia(db, fecha, ahora()) });
   });
-  // RF-R4: buscar en todas las fechas, ver, modificar, cancelar y no-show
+  // RF-R4: buscar en todas las fechas, ver, modificar, cancelar, no-show y reabrir
   r.get("/reservas/buscar", exigirPermiso(db, "reservas:ver"), async (req, res) => {
     const { q } = parsear(busquedaReservasSchema, req.query);
     res.json({ q, reservas: await buscarReservas(db, q, ahora()) });
@@ -128,7 +129,7 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   });
   const transicion = (
     ruta: string,
-    permiso: "reservas:editar" | "salon:operar",
+    permiso: "reservas:editar" | "salon:operar" | ("reservas:editar" | "salon:operar")[],
     accion: string,
     f: (id: number, req: Request) => ReturnType<typeof leerReserva>,
   ) =>
@@ -146,6 +147,9 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   transicion("cancelar", "reservas:editar", "reserva:cancelar", (id) => cancelarReserva(db, id, ahora()));
   transicion("no-show", "reservas:editar", "reserva:no_show", (id) => marcarNoShow(db, id, ahora()));
   transicion("llegada", "salon:operar", "reserva:llegada", (id, req) => registrarLlegada(db, id, actor(req), ahora()));
+  transicion("reabrir", ["reservas:editar", "salon:operar"], "reserva:reabrir", (id) =>
+    reabrirReserva(db, id, ahora()),
+  );
 
   // RF-R3: estado del salón por franja y walk-in
   r.get("/salon", exigirPermiso(db, "salon:operar"), async (req, res) => {
@@ -179,7 +183,7 @@ export function rutasAdmin(db: Db, cfg: Config, ahora: () => Date): Router {
   });
 
   // Mesas, QR y sesión de mesa
-  r.get("/mesas", exigirPermiso(db, "mesas:ver"), async (_req, res) => {
+  r.get("/mesas", exigirPermiso(db, ["mesas:ver", "reservas:editar"]), async (_req, res) => {
     res.json({ mesas: await listarMesas(db) });
   });
   r.post("/mesas", exigirPermiso(db, "mesas:administrar"), async (req, res) => {

@@ -14,7 +14,7 @@ export interface ReservaAdmin {
   origen: string;
   comentarios: string | null;
   llegadaEn: string | null;
-  acciones: { modificar: boolean; cancelar: boolean; llegada: boolean; noShow: boolean };
+  acciones: { modificar: boolean; cancelar: boolean; llegada: boolean; noShow: boolean; reabrir?: boolean };
 }
 
 export const ESTADO_RESERVA: Record<ReservaAdmin["estado"], { texto: string; clase: string }> = {
@@ -32,7 +32,7 @@ export interface FranjaDisp {
 export const MOTIVO_FRANJA: Record<string, string> = {
   completa: "sin aforo",
   sin_mesa: "sin mesa para ese grupo",
-  cerrada: "cerrada",
+  cerrada: "en curso / iniciada",
 };
 
 /** "2026-10-24" → "sáb 24/10" */

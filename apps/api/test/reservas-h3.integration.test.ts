@@ -185,10 +185,38 @@ describe("RF-R4: buscar, modificar y cancelar", () => {
     expect((await patch("encargado", `/reservas/${r.id}`, { personas: 2 })).status).toBe(409);
     await contadoresCuadran();
   });
+
+  it("permite cambiar la mesa asignada y reactivar reservas marcadas como no-show, cancelada o cumplida", async () => {
+    poner(a("12:00", "2026-10-21"));
+    const r = await reservar(2, "16:00");
+    const otraMesa = await one(db, "SELECT id, numero FROM mesas WHERE capacidad >= 4 AND id <> ? LIMIT 1", [r.mesaId]);
+    const cambioMesa = await patch("encargado", `/reservas/${r.id}`, { mesaId: otraMesa!.id as number });
+    expect(cambioMesa.status).toBe(200);
+    expect(cambioMesa.body.mesaId).toBe(otraMesa!.id);
+
+    // El día de la reserva, aún con la franja iniciada, se puede modificar o deshacer no-show
+    poner(a("16:25"));
+    const ns = await post("encargado", `/reservas/${r.id}/no-show`);
+    expect(ns.status).toBe(200);
+    expect(ns.body.estado).toBe("no_show");
+    expect(ns.body.acciones.reabrir).toBe(true);
+
+    const reabierta = await post("encargado", `/reservas/${r.id}/reabrir`);
+    expect(reabierta.status).toBe(200);
+    expect(reabierta.body.estado).toBe("confirmada");
+    expect(reabierta.body.acciones.modificar).toBe(true);
+
+    const editadaEnCurso = await patch("encargado", `/reservas/${r.id}`, { nombre: "Familia Editada En Curso" });
+    expect(editadaEnCurso.status).toBe(200);
+    expect(editadaEnCurso.body.aNombreDe).toBe("Familia Editada En Curso");
+
+    await contadoresCuadran();
+  });
 });
 
 describe("RF-R3: llegada, no-show, walk-in y estado del salón", () => {
   it("la llegada solo se registra el día de la reserva y deja la mesa ocupada con su sesión", async () => {
+    poner(a("12:00", "2026-10-21"));
     const r = await reservar(4, "20:00");
     expect((await post("mozo", `/reservas/${r.id}/llegada`)).status).toBe(409); // todavía es el 21/10
     poner(a("19:50"));

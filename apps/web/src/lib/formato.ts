@@ -19,9 +19,28 @@ export function normalizarBusqueda(texto: string): string {
     .trim();
 }
 
+const TERMINOS_CATEGORIA: Record<string, string> = {
+  pizzas: "pizza pizzas",
+  "pastas caseras": "pasta pastas",
+  sandwiches: "sandwich sandwiches",
+  "vinos blancos": "vino blanco vinos blancos",
+  "vinos tintos": "vino tinto vinos tintos",
+  cervezas: "cerveza cervezas",
+  "bebidas sin alcohol": "gaseosa bebida agua",
+  aperitivos: "aperitivo aperitivos",
+  espumantes: "espumante espumantes",
+  postres: "postre postres",
+  "papas fritas": "papa papas fritas",
+  guarniciones: "guarnicion guarniciones",
+};
+
+export function terminosDeCategoria(categoria: string): string {
+  return TERMINOS_CATEGORIA[normalizarBusqueda(categoria)] ?? "";
+}
+
 /**
  * Devuelve true si todas las palabras buscadas aparecen en cualquier orden dentro del texto (sin importar tildes,
- * mayúsculas ni si la palabra está al principio o en el medio del nombre, categoría, nota o variante).
+ * mayúsculas ni si la palabra está al principio o en el medio del nombre o categoría específica).
  */
 export function coincideBusqueda(texto: string, consulta: string): boolean {
   const q = normalizarBusqueda(consulta);
@@ -31,15 +50,23 @@ export function coincideBusqueda(texto: string, consulta: string): boolean {
   return palabras.every((p) => base.includes(p));
 }
 
-/** Puntúa coincidencias priorizando el nombre del producto antes que la categoría o nota. */
-export function puntajeBusqueda(nombre: string, contexto: string, consulta: string): number {
+/**
+ * Puntúa coincidencias de un producto de la carta usando únicamente su nombre y su categoría específica
+ * (sin mezclar el grupo general como «Pizzas y pastas» ni notas accesorias).
+ */
+export function puntajeBusqueda(nombre: string, categoria: string, consulta: string): number {
   const q = normalizarBusqueda(consulta);
   if (!q) return 1;
   const nom = normalizarBusqueda(nombre);
+  const catNorm = normalizarBusqueda(categoria);
+  const terminosCat = TERMINOS_CATEGORIA[catNorm] ?? "";
   const palabras = q.split(/\s+/).filter(Boolean);
-  if (nom.startsWith(q)) return 4;
+
+  if (nom.startsWith(q)) return 5;
+  // Si busca "pizza" o "pizza calabresa", las pizzas de la categoría Pizzas van primero que "Matambre a la pizza"
+  if (catNorm === "pizzas" && `pizza ${nom}`.startsWith(q)) return 4;
   if (palabras.every((p) => nom.includes(p))) return 3;
-  const ctx = normalizarBusqueda(`${nombre} ${contexto}`);
-  if (palabras.every((p) => ctx.includes(p))) return 2;
+  const combinado = `${nom} ${terminosCat}`;
+  if (palabras.every((p) => combinado.includes(p))) return catNorm === "pizzas" && palabras.includes("pizza") ? 4 : 2;
   return 0;
 }

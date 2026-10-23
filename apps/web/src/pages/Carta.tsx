@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
-import { coincideBusqueda, precio, UNICA } from "../lib/formato.ts";
+import { precio, puntajeBusqueda, UNICA } from "../lib/formato.ts";
 import { medir } from "../lib/medicion.ts";
 import { scrollA } from "../lib/scroll.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
@@ -43,11 +43,7 @@ function desplazamientoSuperior(): number {
 
 type ProductoCarta = CartaPublica["grupos"][number]["categorias"][number]["productos"][number];
 
-const coincideProducto = (p: ProductoCarta, cat: string, grupo: string, q: string): boolean =>
-  coincideBusqueda(
-    `${p.nombre} ${cat} ${grupo} ${p.nota ?? ""} ${p.sinTacc ? "sin tacc celiaco" : ""} ${p.variantes.map((v) => v.etiqueta).join(" ")}`,
-    q,
-  );
+const coincideProducto = (p: ProductoCarta, cat: string, q: string): boolean => puntajeBusqueda(p.nombre, cat, q) > 0;
 
 /** `agregar`: en la mesa (QR) cada precio lleva su botón para sumarlo al pedido. */
 export function CartaVista({
@@ -66,7 +62,7 @@ export function CartaVista({
       categorias: g.categorias
         .map((c) => ({
           ...c,
-          productos: q ? c.productos.filter((p) => coincideProducto(p, c.nombre, g.grupo, q)) : c.productos,
+          productos: q ? c.productos.filter((p) => coincideProducto(p, c.nombre, q)) : c.productos,
         }))
         .filter((c) => c.productos.length),
     }))
@@ -163,11 +159,7 @@ export function Carta() {
     if (!carta || !q) return null;
     return carta.grupos.reduce(
       (n, g) =>
-        n +
-        g.categorias.reduce(
-          (m, c) => m + c.productos.filter((p) => coincideProducto(p, c.nombre, g.grupo, q)).length,
-          0,
-        ),
+        n + g.categorias.reduce((m, c) => m + c.productos.filter((p) => coincideProducto(p, c.nombre, q)).length, 0),
       0,
     );
   }, [carta, filtro]);

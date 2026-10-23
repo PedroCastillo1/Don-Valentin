@@ -74,21 +74,23 @@ function Ticket({
   const [ocupado, setOcupado] = useState(false);
   return (
     <li className={i.demorado ? "ticket-s ticket-s--demorado" : "ticket-s"}>
-      <div className="ticket-s__cab">
-        <b>Mesa {i.mesa}</b>
-        <span className="ticket-s__min" title={`Tiempo máximo: ${i.tiempoMaximo} min`}>
-          {i.minutos} min{i.demorado && <strong> · demorado</strong>}
-        </span>
+      <div className="ticket-s__cuerpo">
+        <div className="ticket-s__cab">
+          <b>Mesa {i.mesa}</b>
+          <span className="ticket-s__min" title={`Tiempo máximo: ${i.tiempoMaximo} min`}>
+            {i.minutos} min{i.demorado && <strong> · demorado</strong>}
+          </span>
+          <span className="ticket-s__pie">
+            {SECTOR[i.sector]} · {i.origen === "mozo" ? "mozo" : "QR"}
+          </span>
+        </div>
+        <p className="ticket-s__plato">
+          <span className="ticket-s__cant">{i.cantidad} ×</span> {i.producto}
+          {i.variante && <small> ({i.variante})</small>}
+        </p>
+        {i.nota && <p className="ticket-s__nota">{i.nota}</p>}
+        {error && <p className="ticket-s__error">{error}</p>}
       </div>
-      <p className="ticket-s__plato">
-        <span className="ticket-s__cant">{i.cantidad} ×</span> {i.producto}
-        {i.variante && <small> ({i.variante})</small>}
-      </p>
-      {i.nota && <p className="ticket-s__nota">{i.nota}</p>}
-      <p className="ticket-s__pie">
-        {SECTOR[i.sector]} · {i.origen === "mozo" ? "lo cargó el mozo" : "pedido desde el QR"}
-      </p>
-      {error && <p className="ticket-s__error">{error}</p>}
       {accion && (
         <button
           type="button"
@@ -120,9 +122,23 @@ function Ticket({
 /** RF-Q2/Q3: panel de un sector, en tres columnas: nuevos, en preparación y listos para entregar. */
 export function AdminSectores() {
   const [elegido, setElegido] = useState<Sector>("parrilla");
+  const [mesaFiltro, setMesaFiltro] = useState<number | "todas">("todas");
+  const [busqueda, setBusqueda] = useState("");
   const { items, sectorFijo, error, cargar } = useItems(elegido);
   const sector = sectorFijo ?? elegido;
-  const delSector = items.filter((i) => i.sector === sector);
+  const delSectorBase = useMemo(() => items.filter((i) => i.sector === sector), [items, sector]);
+  const mesasDelSector = useMemo(
+    () => [...new Set(delSectorBase.map((i) => i.mesa))].sort((a, b) => a - b),
+    [delSectorBase],
+  );
+  const delSector = useMemo(() => {
+    const q = busqueda.trim();
+    return delSectorBase.filter((i) => {
+      if (mesaFiltro !== "todas" && i.mesa !== mesaFiltro) return false;
+      if (!q) return true;
+      return coincideBusqueda(`mesa ${i.mesa} ${i.mesa} ${i.producto} ${i.variante} ${i.nota ?? ""}`, q);
+    });
+  }, [delSectorBase, mesaFiltro, busqueda]);
   const col = (e: EstadoItem) => delSector.filter((i) => i.estado === e);
   const demorados = delSector.filter((i) => i.demorado && i.estado !== "listo").length;
 
@@ -148,6 +164,34 @@ export function AdminSectores() {
           {demorados} {demorados === 1 ? "plato superó" : "platos superaron"} el tiempo máximo
         </p>
       )}
+      {delSectorBase.length > 0 && (
+        <div className="filtros-pedidos filtros-pedidos--compacto" role="region" aria-label="Filtrar sector">
+          <label>
+            Mesa
+            <select
+              value={mesaFiltro}
+              onChange={(e) => setMesaFiltro(e.target.value === "todas" ? "todas" : Number(e.target.value))}
+            >
+              <option value="todas">Todas las mesas ({mesasDelSector.length})</option>
+              {mesasDelSector.map((num) => (
+                <option key={num} value={num}>
+                  Mesa {num} ({delSectorBase.filter((i) => i.mesa === num).length})
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Buscar plato o mesa
+            <input
+              type="search"
+              value={busqueda}
+              onChange={(e) => setBusqueda(e.target.value)}
+              placeholder="Ej. mesa 1, asado, jugoso…"
+              autoComplete="off"
+            />
+          </label>
+        </div>
+      )}
       <div className="cocina">
         {(
           [
@@ -163,7 +207,7 @@ export function AdminSectores() {
             {col(estado).length === 0 ? (
               <p className="vacio">Nada por ahora.</p>
             ) : (
-              <ul className="tickets">
+              <ul className="tickets tickets--scroll">
                 {col(estado).map((i) => (
                   <Ticket key={i.id} i={i} accion={accion} onHecho={() => void cargar()} />
                 ))}
@@ -239,11 +283,7 @@ export function AdminMozo() {
             .map((p) => ({
               p,
               categoria: c.nombre,
-              puntaje: puntajeBusqueda(
-                p.nombre,
-                `${c.nombre} ${g.grupo} ${p.nota ?? ""} ${p.variantes.map((v) => v.etiqueta).join(" ")}`,
-                q,
-              ),
+              puntaje: puntajeBusqueda(p.nombre, c.nombre, q),
             }))
             .filter((x) => x.puntaje > 0),
         ),
@@ -514,49 +554,53 @@ function ItemMesaFila({
 
   return (
     <li className={i.demorado ? "lista-items--demorado" : undefined}>
-      <div>
-        <span>
-          <b>{i.cantidad} ×</b> {i.producto}
-          {i.variante && ` (${i.variante})`}
-        </span>
-        {i.nota && <small className="lista-items__nota">Nota: {i.nota}</small>}
-        <small>
-          {SECTOR[i.sector]} · {i.origen === "mozo" ? "mozo" : "QR"} · {i.minutos} min
-          {i.demorado ? " · demorado" : ""}
-        </small>
-        {err && <small className="ticket-s__error">{err}</small>}
-      </div>
-      <div className="lista-items__acciones">
+      <div className="lista-items__tope">
+        <div className="lista-items__info">
+          <span className="lista-items__plato">
+            <b>{i.cantidad} ×</b> {i.producto}
+            {i.variante && ` (${i.variante})`}
+          </span>
+          {i.nota && <small className="lista-items__nota">Nota: {i.nota}</small>}
+          <small>
+            {SECTOR[i.sector]} · {i.origen === "mozo" ? "mozo" : "QR"} · {i.minutos} min
+            {i.demorado ? " · demorado" : ""}
+          </small>
+          {err && <small className="ticket-s__error">{err}</small>}
+        </div>
         <span className={`seg-estado seg-estado--${i.estado}`}>{ETQ_ESTADO[i.estado]}</span>
-        {accion && (
-          <button
-            type="button"
-            className={accion.principal ? "btn btn--brasa btn--chico" : "btn btn--chico"}
-            disabled={ocupado}
-            onClick={() => void cambiarEstado(accion.siguiente)}
-          >
-            {accion.texto}
-            <span className="sr-only">
-              {" "}
-              {i.cantidad} {i.producto} de mesa {i.mesa}
-            </span>
-          </button>
-        )}
-        {puedeCancelar && (i.estado === "recibido" || i.estado === "en_preparacion") && (
-          <button
-            type="button"
-            className="btn btn--chico btn--peligro"
-            disabled={ocupado}
-            onClick={() => void cambiarEstado("cancelado")}
-          >
-            Cancelar
-            <span className="sr-only">
-              {" "}
-              {i.cantidad} {i.producto} de mesa {i.mesa}
-            </span>
-          </button>
-        )}
       </div>
+      {(accion || (puedeCancelar && (i.estado === "recibido" || i.estado === "en_preparacion"))) && (
+        <div className="lista-items__acciones">
+          {accion && (
+            <button
+              type="button"
+              className={accion.principal ? "btn btn--brasa btn--chico" : "btn btn--chico"}
+              disabled={ocupado}
+              onClick={() => void cambiarEstado(accion.siguiente)}
+            >
+              {accion.texto}
+              <span className="sr-only">
+                {" "}
+                {i.cantidad} {i.producto} de mesa {i.mesa}
+              </span>
+            </button>
+          )}
+          {puedeCancelar && (i.estado === "recibido" || i.estado === "en_preparacion") && (
+            <button
+              type="button"
+              className="btn btn--chico btn--peligro"
+              disabled={ocupado}
+              onClick={() => void cambiarEstado("cancelado")}
+            >
+              Cancelar
+              <span className="sr-only">
+                {" "}
+                {i.cantidad} {i.producto} de mesa {i.mesa}
+              </span>
+            </button>
+          )}
+        </div>
+      )}
     </li>
   );
 }

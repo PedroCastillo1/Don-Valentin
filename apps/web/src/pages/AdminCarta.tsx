@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
-import { coincideBusqueda, precio, UNICA } from "../lib/formato.ts";
+import { precio, puntajeBusqueda, UNICA } from "../lib/formato.ts";
 import { Cabecera, Mensaje } from "../components/ui.tsx";
 
 interface Producto {
@@ -32,14 +32,7 @@ export function AdminCarta() {
 
   const grupos = useMemo(() => {
     const q = filtro.trim();
-    const lista = (productos ?? []).filter(
-      (p) =>
-        !q ||
-        coincideBusqueda(
-          `${p.nombre} ${p.categoria} ${p.grupo} ${SECTOR[p.sector]} ${p.variantes.map((v) => v.etiqueta).join(" ")}`,
-          q,
-        ),
-    );
+    const lista = (productos ?? []).filter((p) => !q || puntajeBusqueda(p.nombre, p.categoria, q) > 0);
     const m = new Map<string, Producto[]>();
     for (const p of lista) {
       const k = `${p.grupo} · ${p.categoria}`;

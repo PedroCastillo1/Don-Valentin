@@ -33,12 +33,14 @@ describe("búsqueda de productos en carta, mozo y QR", () => {
     expect(coincideBusqueda("Gaseosa 1 ½", "1/2")).toBe(true);
   });
 
-  it("prioriza coincidencias en el nombre del plato por sobre la categoría", () => {
+  it("prioriza coincidencias en el nombre del plato y no mezcla pastas al buscar pizza", () => {
     const enNombre = puntajeBusqueda("Milanesa napolitana", "Porciones con guarnición", "milanesa");
     const enMedio = puntajeBusqueda("Sándwich de milanesa", "Sándwiches", "milanesa");
-    const enCat = puntajeBusqueda("Calabresa", "Pizzas", "pizza");
+    const pizzaReal = puntajeBusqueda("Calabresa", "Pizzas", "pizza");
+    const matambrePizza = puntajeBusqueda("Matambre a la pizza", "Porciones con guarnición", "pizza");
+    const pastaNoEsPizza = puntajeBusqueda("Agñolotis de ricota y jamón", "Pastas caseras", "pizza");
     expect(enNombre).toBeGreaterThan(enMedio);
-    expect(enMedio).toBeGreaterThan(enCat);
-    expect(enCat).toBeGreaterThan(0);
+    expect(pizzaReal).toBeGreaterThan(matambrePizza);
+    expect(pastaNoEsPizza).toBe(0);
   });
 });

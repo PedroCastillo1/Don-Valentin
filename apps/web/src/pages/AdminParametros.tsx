@@ -1,4 +1,4 @@
-import { DIAS_SEMANA, DIA_NOMBRE, parsearDias } from "@dv/shared";
+import { DIAS_SEMANA, DIA_NOMBRE, parsearDias, parsearFechas } from "@dv/shared";
 import { useCallback, useEffect, useState } from "react";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
@@ -156,12 +156,21 @@ export function AdminParametros() {
                         )
                       }
                     />
+                  ) : editar && x.clave === "dias_cerrados" ? (
+                    <FechasCerradasEditor
+                      valor={x.valor}
+                      onGuardar={(v) =>
+                        hacer(
+                          () => api(`/admin/parametros/${x.clave}`, { method: "PUT", body: { valor: v } }),
+                          "Fechas de cierre actualizadas.",
+                        )
+                      }
+                    />
                   ) : editar ? (
                     <Celda
                       valor={x.valor}
                       unidad={x.unidad}
                       etiqueta={x.descripcion}
-                      vacioPermitido={x.clave === "dias_cerrados"}
                       onGuardar={(v) =>
                         hacer(
                           () => api(`/admin/parametros/${x.clave}`, { method: "PUT", body: { valor: v } }),
@@ -307,53 +316,127 @@ function Celda({
   unidad,
   etiqueta,
   onGuardar,
-  vacioPermitido = false,
 }: {
   valor: string;
   unidad: string | null;
   etiqueta: string;
   onGuardar: (v: string) => void;
-  vacioPermitido?: boolean;
 }) {
   const [v, setV] = useState(valor);
   useEffect(() => setV(valor), [valor]);
+  const esHora = unidad === "hh:mm";
   return (
     <span className="celda">
       <input
+        type={esHora ? "time" : "text"}
         value={v}
         aria-label={etiqueta}
         onChange={(e) => setV(e.target.value)}
-        onBlur={() => v !== valor && (v.trim() !== "" || vacioPermitido) && onGuardar(v.trim())}
-        placeholder={vacioPermitido ? "Sin cierres (AAAA-MM-DD, AAAA-MM-DD)" : undefined}
+        onBlur={() => v !== valor && v.trim() !== "" && onGuardar(v.trim())}
         onKeyDown={(e) => e.key === "Enter" && (e.target as HTMLInputElement).blur()}
       />
-      {unidad && <small>{unidad}</small>}
+      {unidad && !esHora && <small>{unidad}</small>}
     </span>
   );
 }
 
-/** Días de atención: un botón por día (encendido = el local abre). Nunca deja la semana vacía. */
+const DIA_ETIQUETA: Record<(typeof DIAS_SEMANA)[number], string> = {
+  lun: "Lun",
+  mar: "Mar",
+  mie: "Mié",
+  jue: "Jue",
+  vie: "Vie",
+  sab: "Sáb",
+  dom: "Dom",
+};
+
+/** Días de atención: cada botón indica claramente si ese día está Abierto o Cerrado. Nunca deja la semana vacía. */
 function DiasEditor({ valor, onGuardar }: { valor: string; onGuardar: (v: string) => void }) {
   const activos = parsearDias(valor);
   return (
-    <span className="dias" role="group" aria-label="Días de atención">
-      {DIAS_SEMANA.map((d) => {
-        const on = activos.includes(d);
-        return (
-          <button
-            key={d}
-            type="button"
-            className={on ? "dias__d dias__d--on" : "dias__d"}
-            aria-pressed={on}
-            title={DIA_NOMBRE[d]}
-            disabled={on && activos.length === 1}
-            onClick={() => onGuardar(DIAS_SEMANA.filter((x) => (x === d ? !on : activos.includes(x))).join(","))}
-          >
-            {d}
-            <span className="sr-only"> ({DIA_NOMBRE[d]})</span>
-          </button>
-        );
-      })}
-    </span>
+    <div className="dias-bloque">
+      <span className="dias" role="group" aria-label="Días de atención">
+        {DIAS_SEMANA.map((d) => {
+          const on = activos.includes(d);
+          return (
+            <button
+              key={d}
+              type="button"
+              className={on ? "dias__d dias__d--on" : "dias__d dias__d--off"}
+              aria-pressed={on}
+              title={`${DIA_NOMBRE[d]}: ${on ? "Abierto (tocá para cerrar)" : "Cerrado (tocá para abrir)"}`}
+              disabled={on && activos.length === 1}
+              onClick={() => onGuardar(DIAS_SEMANA.filter((x) => (x === d ? !on : activos.includes(x))).join(","))}
+            >
+              <strong>{DIA_ETIQUETA[d]}</strong>
+              <small>{on ? "Abierto" : "Cerrado"}</small>
+              <span className="sr-only"> ({DIA_NOMBRE[d]})</span>
+            </button>
+          );
+        })}
+      </span>
+      <small className="dias-ayuda">Tocá un día para cambiarlo entre Abierto y Cerrado.</small>
+    </div>
+  );
+}
+
+const formatearIso = (iso: string): string => {
+  const [a, m, d] = iso.split("-");
+  return d && m && a ? `${d}/${m}/${a}` : iso;
+};
+
+/** Fechas puntuales sin atención: selector de calendario con etiquetas para agregar o quitar sin escribir a mano. */
+function FechasCerradasEditor({ valor, onGuardar }: { valor: string; onGuardar: (v: string) => void }) {
+  const fechas = parsearFechas(valor);
+  const [nueva, setNueva] = useState("");
+
+  function agregarFecha() {
+    if (!nueva) return;
+    const siguiente = [...new Set([...fechas, nueva])].sort();
+    setNueva("");
+    onGuardar(siguiente.join(","));
+  }
+
+  function quitarFecha(iso: string) {
+    const siguiente = fechas.filter((f) => f !== iso);
+    onGuardar(siguiente.join(","));
+  }
+
+  return (
+    <div className="fechas-editor">
+      {fechas.length === 0 ? (
+        <small className="fechas-editor__vacio">Sin cierres programados</small>
+      ) : (
+        <ul className="fechas-editor__lista" aria-label="Fechas cerradas">
+          {fechas.map((iso) => (
+            <li key={iso} className="fechas-editor__chip">
+              <span>{formatearIso(iso)}</span>
+              <button
+                type="button"
+                onClick={() => quitarFecha(iso)}
+                aria-label={`Quitar cierre del ${formatearIso(iso)}`}
+                title="Quitar fecha"
+              >
+                ×
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
+      <div className="fechas-editor__agregar">
+        <input
+          type="date"
+          value={nueva}
+          aria-label="Elegir fecha de cierre"
+          onChange={(e) => {
+            const val = e.target.value;
+            setNueva(val);
+          }}
+        />
+        <button type="button" className="btn btn--chico" disabled={!nueva} onClick={agregarFecha}>
+          + Agregar cierre
+        </button>
+      </div>
+    </div>
   );
 }
