@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { useSearchParams } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
-import { diaLargo, ORIGEN, sumarDias } from "../lib/fechas.ts";
+import { diaLargo, etiquetaDia, ORIGEN, sumarDias } from "../lib/fechas.ts";
 import { ESTADO_RESERVA, fechaCorta, MOTIVO_FRANJA } from "../lib/reservas.ts";
 import type { FranjaDisp, ReservaAdmin } from "../lib/reservas.ts";
 import { Cabecera, Mensaje } from "../components/ui.tsx";
@@ -24,6 +24,7 @@ export function AdminReservas() {
   const [searchParams] = useSearchParams();
   const idUrl = Number(searchParams.get("id") ?? 0);
   const [fecha, setFecha] = useState<string>("");
+  const [hoyBase, setHoyBase] = useState<string>("");
   const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
   const [busqueda, setBusqueda] = useState<{ q: string; reservas: ReservaAdmin[] } | null>(null);
   const [q, setQ] = useState("");
@@ -41,8 +42,10 @@ export function AdminReservas() {
 
   const cargar = useCallback(
     async (f: string) => {
+      if (f) setFecha(f);
       try {
         const r = await api<{ fecha: string; reservas: ReservaAdmin[] }>(`/admin/reservas${f ? `?fecha=${f}` : ""}`);
+        if (!f) setHoyBase((prev) => prev || r.fecha);
         setFecha(r.fecha);
         setReservas(r.reservas);
         if (idUrl) {
@@ -92,6 +95,9 @@ export function AdminReservas() {
     [listaBase, filtroEstado, filtroMesa],
   );
 
+  const baseHoy = hoyBase || fecha;
+  const rotuloDia = etiquetaDia(fecha, baseHoy);
+
   return (
     <>
       <Cabecera titulo="Reservas" bajada={busqueda ? `Resultados de «${busqueda.q}»` : fecha ? diaLargo(fecha) : ""}>
@@ -109,12 +115,14 @@ export function AdminReservas() {
           </button>
           <button
             type="button"
+            aria-pressed={true}
+            title={fecha && baseHoy && fecha !== baseHoy ? "Volver a hoy" : "Día seleccionado"}
             onClick={() => {
               setBusqueda(null);
               void cargar("");
             }}
           >
-            Hoy
+            {rotuloDia}
           </button>
           <button
             type="button"

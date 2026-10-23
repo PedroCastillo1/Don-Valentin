@@ -16,7 +16,7 @@ const envSchema = z.object({
     .default("false")
     .transform((v) => v === "true"),
   /** Conexiones por instancia: en funciones de Vercel conviene 1–3. */
-  DB_POOL_MAX: z.coerce.number().int().min(1).max(50).default(10),
+  DB_POOL_MAX: z.coerce.number().int().min(1).max(50).optional(),
   SESSION_TTL_HOURS: z.coerce.number().int().min(1).max(72).default(10),
   COOKIE_SECURE: z.enum(["true", "false"]).optional(),
   /** Orígenes permitidos para peticiones con cookie (CSRF por Origin). Vacío = mismo host. */
@@ -35,6 +35,7 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env) {
   const e = envSchema.parse(env);
   return {
     ...e,
+    DB_POOL_MAX: e.DB_POOL_MAX ?? (e.DATABASE_URL ? 3 : 10),
     isProd: e.NODE_ENV === "production",
     cookieSecure: e.COOKIE_SECURE ? e.COOKIE_SECURE === "true" : e.NODE_ENV === "production",
     allowedOrigins: e.ALLOWED_ORIGINS.split(",")

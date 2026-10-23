@@ -3,7 +3,7 @@ import type { FormEvent } from "react";
 import { Link } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
-import { diaLargo, ORIGEN, sumarDias } from "../lib/fechas.ts";
+import { diaLargo, etiquetaDia, ORIGEN, sumarDias } from "../lib/fechas.ts";
 import type { ReservaAdmin } from "../lib/reservas.ts";
 import { Cabecera, Mensaje } from "../components/ui.tsx";
 
@@ -36,6 +36,7 @@ export function AdminSalon() {
   const { puede } = useSesion();
   const [salon, setSalon] = useState<Salon | null>(null);
   const [fecha, setFecha] = useState<string | undefined>(undefined);
+  const [hoyBase, setHoyBase] = useState<string>("");
   const [franjaId, setFranjaId] = useState<number | undefined>(undefined);
   const [elegida, setElegida] = useState<number | null>(null);
   const [confirmando, setConfirmando] = useState<{
@@ -51,7 +52,9 @@ export function AdminSalon() {
     if (fecha) p.set("fecha", fecha);
     if (franjaId) p.set("franjaId", String(franjaId));
     try {
-      setSalon(await api<Salon>(`/admin/salon${p.size ? `?${p}` : ""}`));
+      const r = await api<Salon>(`/admin/salon${p.size ? `?${p}` : ""}`);
+      if (!fecha) setHoyBase((prev) => prev || r.fecha);
+      setSalon(r);
       setError("");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "No pudimos cargar el salón.");
@@ -81,37 +84,41 @@ export function AdminSalon() {
   if (error) return <Mensaje tipo="error">{error}</Mensaje>;
   if (!salon) return <p className="cargando">Cargando el salón…</p>;
   const mesa = salon.mesas.find((m) => m.id === elegida) ?? null;
+  const fechaVista = fecha ?? salon.fecha;
+  const baseHoy = hoyBase || salon.fecha;
+  const rotuloDia = etiquetaDia(fechaVista, baseHoy);
 
   return (
     <>
-      <Cabecera titulo="Estado del salón" bajada={`${diaLargo(salon.fecha)} · ${salon.franja.nombre}`}>
+      <Cabecera titulo="Estado del salón" bajada={`${diaLargo(fechaVista)} · ${salon.franja.nombre}`}>
         <div className="dia" role="group" aria-label="Día">
           <button
             type="button"
             aria-label="Día anterior"
             onClick={() => {
               setFranjaId(undefined);
-              setFecha(sumarDias(salon.fecha, -1));
+              setFecha(sumarDias(fechaVista, -1));
             }}
           >
             ‹
           </button>
           <button
             type="button"
-            aria-pressed={!fecha}
+            aria-pressed={true}
+            title={fechaVista !== baseHoy ? "Volver a hoy" : "Día seleccionado"}
             onClick={() => {
               setFranjaId(undefined);
               setFecha(undefined);
             }}
           >
-            Hoy
+            {rotuloDia}
           </button>
           <button
             type="button"
             aria-label="Día siguiente"
             onClick={() => {
               setFranjaId(undefined);
-              setFecha(sumarDias(salon.fecha, 1));
+              setFecha(sumarDias(fechaVista, 1));
             }}
           >
             ›

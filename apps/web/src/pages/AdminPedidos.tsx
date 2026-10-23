@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Link, useSearchParams } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
 import { coincideBusqueda, precio, puntajeBusqueda, UNICA } from "../lib/formato.ts";
@@ -100,7 +100,10 @@ function useItems(sector: Sector | null, incluirCerrados = false) {
   const [items, setItems] = useState<ItemSector[]>([]);
   const [sectorFijo, setSectorFijo] = useState<Sector | null>(null);
   const [error, setError] = useState("");
+  const enCurso = useRef(false);
   const cargar = useCallback(async () => {
+    if (enCurso.current) return;
+    enCurso.current = true;
     try {
       const params = new URLSearchParams();
       if (sector) params.set("sector", sector);
@@ -114,11 +117,15 @@ function useItems(sector: Sector | null, incluirCerrados = false) {
       setError("");
     } catch (e) {
       setError(e instanceof ApiError ? e.message : "Sin conexión: reintentando…");
+    } finally {
+      enCurso.current = false;
     }
   }, [sector, incluirCerrados]);
   useEffect(() => {
     void cargar();
-    const t = setInterval(() => void cargar(), REFRESCO_MS);
+    const t = setInterval(() => {
+      if (!document.hidden) void cargar();
+    }, REFRESCO_MS);
     return () => clearInterval(t);
   }, [cargar]);
   return { items, sectorFijo, error, cargar };

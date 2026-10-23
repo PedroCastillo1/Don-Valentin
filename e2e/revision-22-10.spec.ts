@@ -22,8 +22,10 @@ test("panel: una reserva con nombre largo no desborda Reservas del día ni el Sa
     await page.setViewportSize({ width: ancho, height: 900 });
     for (const ruta of ["/admin", "/admin/reservas"]) {
       await page.goto(ruta);
+      await expect(page.getByRole("group", { name: "Día" }).getByRole("button", { name: "Hoy" })).toBeVisible();
       if (ruta === "/admin") await page.getByRole("button", { name: "Día siguiente" }).click();
       else await page.getByLabel("Ir a la fecha").fill(manana());
+      await expect(page.getByRole("group", { name: "Día" }).getByRole("button", { name: "Mañana" })).toBeVisible();
       await expect(page.getByText("MaximilianoSebastián", { exact: false }).first()).toBeVisible();
       const r = await page.evaluate(() => {
         const fuera = [...document.querySelectorAll(".reservas li > *, .dos > section td")].filter((e) => {

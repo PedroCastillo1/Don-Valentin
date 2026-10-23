@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
-import { ORIGEN } from "../lib/fechas.ts";
+import { diaLargo, etiquetaDia, ORIGEN, sumarDias } from "../lib/fechas.ts";
 import { useSesion } from "../lib/sesion.tsx";
 import { Link, Navigate } from "react-router";
 import { MODULOS, textoProgramado } from "@dv/shared";
@@ -46,18 +46,6 @@ interface Mesa {
   activa: boolean;
 }
 
-const diaLargo = (iso: string): string => {
-  const [a, m, d] = iso.split("-").map(Number);
-  const f = new Date(Date.UTC(a ?? 2026, (m ?? 1) - 1, d ?? 1));
-  return new Intl.DateTimeFormat("es-AR", { weekday: "long", day: "numeric", month: "long", timeZone: "UTC" }).format(
-    f,
-  );
-};
-const sumar = (iso: string, n: number): string => {
-  const [a, m, d] = iso.split("-").map(Number);
-  return new Date(Date.UTC(a ?? 2026, (m ?? 1) - 1, (d ?? 1) + n)).toISOString().slice(0, 10);
-};
-
 /** Los puestos de cocina, parrilla y barra no ven reservas: entran directo a su panel. */
 export function AdminInicio() {
   const { puede } = useSesion();
@@ -72,25 +60,51 @@ function InicioTablero() {
   const [mesas, setMesas] = useState<Mesa[]>([]);
   const [error, setError] = useState("");
   const [fecha, setFecha] = useState<string | undefined>(undefined);
+  const [hoyBase, setHoyBase] = useState<string>("");
 
   useEffect(() => {
     const ctl = new AbortController();
     void (async () => {
       try {
-        const r = await api<Resumen>(`/admin/resumen${fecha ? `?fecha=${fecha}` : ""}`);
-        setResumen(r);
-        // Las canceladas y los no-show no ocupan lugar: no se listan en el día.
-        const dia = (await api<{ reservas: Reserva[] }>(`/admin/reservas?fecha=${r.fecha}`)).reservas;
-        setReservas(dia.filter((x) => x.estado === "confirmada" || x.estado === "cumplida"));
         if (puede("mesas:ver")) setMesas((await api<{ mesas: Mesa[] }>("/admin/mesas")).mesas);
         else if (puede("sesion_mesa:abrir"))
           setMesas((await api<{ mesas: Mesa[] }>("/admin/sesiones/mesas")).mesas as unknown as Mesa[]);
-      } catch (e) {
-        if (!ctl.signal.aborted) setError(e instanceof Error ? e.message : "No pudimos cargar el día.");
+      } catch {
+        // Las mesas se muestran en el panel secundario; no bloquean el resumen del día.
       }
     })();
     return () => ctl.abort();
-  }, [puede, fecha]);
+  }, [puede]);
+
+  useEffect(() => {
+    let cancelado = false;
+    void (async () => {
+      try {
+        if (fecha) {
+          const [r, diaResp] = await Promise.all([
+            api<Resumen>(`/admin/resumen?fecha=${fecha}`),
+            api<{ reservas: Reserva[] }>(`/admin/reservas?fecha=${fecha}`),
+          ]);
+          if (cancelado) return;
+          setResumen(r);
+          setReservas(diaResp.reservas.filter((x) => x.estado === "confirmada" || x.estado === "cumplida"));
+        } else {
+          const r = await api<Resumen>("/admin/resumen");
+          if (cancelado) return;
+          setHoyBase(r.fecha);
+          setResumen(r);
+          const dia = (await api<{ reservas: Reserva[] }>(`/admin/reservas?fecha=${r.fecha}`)).reservas;
+          if (cancelado) return;
+          setReservas(dia.filter((x) => x.estado === "confirmada" || x.estado === "cumplida"));
+        }
+      } catch (e) {
+        if (!cancelado) setError(e instanceof Error ? e.message : "No pudimos cargar el día.");
+      }
+    })();
+    return () => {
+      cancelado = true;
+    };
+  }, [fecha]);
 
   if (error)
     return (
@@ -100,6 +114,9 @@ function InicioTablero() {
     );
   if (!resumen) return <p className="cargando">Cargando el día…</p>;
 
+  const fechaVista = fecha ?? resumen.fecha;
+  const baseHoy = hoyBase || resumen.fecha;
+  const rotuloDia = etiquetaDia(fechaVista, baseHoy);
   const aforoTotal = resumen.franjas.reduce((a, f) => a + f.aforo, 0);
   const ocupacion = aforoTotal ? Math.round((resumen.personas / aforoTotal) * 100) : 0;
   const activas = mesas.filter((m) => m.activa);
@@ -112,18 +129,23 @@ function InicioTablero() {
     <div className="tablero">
       <header className="tablero__cab">
         <div>
-          <p className="tablero__fecha">{diaLargo(resumen.fecha)}</p>
+          <p className="tablero__fecha">{diaLargo(fechaVista)}</p>
           <h1>Hola, {primerNombre}.</h1>
         </div>
         <div className="tablero__acciones">
           <div className="dia" role="group" aria-label="Día">
-            <button type="button" aria-label="Día anterior" onClick={() => setFecha(sumar(resumen.fecha, -1))}>
+            <button type="button" aria-label="Día anterior" onClick={() => setFecha(sumarDias(fechaVista, -1))}>
               ‹
             </button>
-            <button type="button" aria-pressed={!fecha} onClick={() => setFecha(undefined)}>
-              Hoy
+            <button
+              type="button"
+              aria-pressed={true}
+              title={fechaVista !== baseHoy ? "Volver a hoy" : "Día seleccionado"}
+              onClick={() => setFecha(undefined)}
+            >
+              {rotuloDia}
             </button>
-            <button type="button" aria-label="Día siguiente" onClick={() => setFecha(sumar(resumen.fecha, 1))}>
+            <button type="button" aria-label="Día siguiente" onClick={() => setFecha(sumarDias(fechaVista, 1))}>
               ›
             </button>
           </div>

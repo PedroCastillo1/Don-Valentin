@@ -40,12 +40,13 @@ export async function resumenMedicion(db: Db, dias: number, ahora = new Date()):
   for (const x of r) {
     const n = Number(x.cantidad);
     eventos[x.evento as EventoSitio] = (eventos[x.evento as EventoSitio] ?? 0) + n;
-    const d = porDia.get(x.dia)!;
+    const diaClave = typeof x.dia === "string" ? x.dia.slice(0, 10) : new Date(x.dia).toISOString().slice(0, 10);
+    const d = porDia.get(diaClave);
     if (x.evento === "pagina_vista") {
-      d.visitas += n;
+      if (d) d.visitas += n;
       paginas.set(x.ruta, (paginas.get(x.ruta) ?? 0) + n);
     }
-    if (x.evento === "reserva_confirmada") d.reservas += n;
+    if (x.evento === "reserva_confirmada" && d) d.reservas += n;
   }
   return {
     desde,

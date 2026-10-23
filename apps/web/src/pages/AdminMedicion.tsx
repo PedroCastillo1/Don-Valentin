@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { api } from "../lib/api.ts";
 import { GA4_ID } from "../lib/medicion.ts";
 import { SITIO_URL } from "../components/Metadatos.tsx";
@@ -27,12 +27,25 @@ const diaCorto = (iso: string) => `${iso.slice(8, 10)}/${iso.slice(5, 7)}`;
 export function AdminMedicion() {
   const [dias, setDias] = useState(30);
   const [r, setR] = useState<Resumen | null>(null);
+  const [cargando, setCargando] = useState(true);
   const [error, setError] = useState("");
+
+  const cargar = useCallback(async (periodo: number) => {
+    setCargando(true);
+    setError("");
+    try {
+      const datos = await api<Resumen>(`/admin/medicion?dias=${periodo}`);
+      setR(datos);
+    } catch {
+      setError("No pudimos cargar la medición. Revisá tu conexión e intentá de nuevo.");
+    } finally {
+      setCargando(false);
+    }
+  }, []);
+
   useEffect(() => {
-    api<Resumen>(`/admin/medicion?dias=${dias}`)
-      .then(setR)
-      .catch(() => setError("No pudimos cargar la medición."));
-  }, [dias]);
+    void cargar(dias);
+  }, [dias, cargar]);
 
   const e = r?.eventos ?? {};
   const visitas = e.pagina_vista ?? 0;
@@ -59,8 +72,15 @@ export function AdminMedicion() {
           ))}
         </div>
       </Cabecera>
-      {error && <Mensaje tipo="error">{error}</Mensaje>}
-      {!r && !error && <p className="cargando">Cargando…</p>}
+      {error && (
+        <div className="acciones" style={{ alignItems: "center", marginBottom: "1rem" }}>
+          <Mensaje tipo="error">{error}</Mensaje>
+          <button type="button" className="mini mini--brasa" onClick={() => void cargar(dias)}>
+            Reintentar
+          </button>
+        </div>
+      )}
+      {cargando && !r && !error && <p className="cargando">Cargando…</p>}
       {r && (
         <>
           <ul className="kpis" aria-label="Resumen del período">

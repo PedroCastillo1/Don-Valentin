@@ -42,8 +42,12 @@ export function createPool(cfg: ConfigDb, _opts: { multipleStatements?: boolean 
     ssl,
     // En conexiones directas fijamos UTC; en Supabase la base ya trabaja en UTC.
     options: cfg.DATABASE_URL ? undefined : "-c TimeZone=UTC",
-    idleTimeoutMillis: 10_000,
-    connectionTimeoutMillis: 10_000,
+    idleTimeoutMillis: 5_000,
+    connectionTimeoutMillis: 8_000,
+    query_timeout: 8_000,
+    statement_timeout: 8_000,
+    keepAlive: true,
+    allowExitOnIdle: true,
   };
   const pool = cfg.DATABASE_URL
     ? new pg.Pool({ ...base, connectionString: cfg.DATABASE_URL })
@@ -81,12 +85,23 @@ export function aPostgres(sql: string): string {
 const ERRNO: Record<string, number> = { "23505": 1062, "40P01": 1213, "40001": 1213, "55P03": 1205 };
 
 async function consulta(db: Db | Tx, sql: string, params: unknown[]): Promise<pg.QueryResult> {
-  try {
-    return await db.query(aPostgres(sql), params as unknown[]);
-  } catch (e) {
-    const code = (e as { code?: string }).code;
-    if (code && ERRNO[code]) (e as { errno?: number }).errno = ERRNO[code];
-    throw e;
+  const q = aPostgres(sql);
+  for (let intento = 1; ; intento++) {
+    try {
+      return await db.query(q, params as unknown[]);
+    } catch (e) {
+      const code = (e as { code?: string }).code;
+      const msg = (e as { message?: string }).message ?? "";
+      const esPool = "totalCount" in db;
+      const caida =
+        code === "57P01" ||
+        code === "ECONNRESET" ||
+        code === "ETIMEDOUT" ||
+        /Connection terminated|timeout|closed|ECONNRESET/i.test(msg);
+      if (esPool && intento === 1 && caida) continue;
+      if (code && ERRNO[code]) (e as { errno?: number }).errno = ERRNO[code];
+      throw e;
+    }
   }
 }
 
