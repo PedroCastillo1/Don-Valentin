@@ -49,17 +49,44 @@ const hora = (iso: string) =>
 /** RF-Q1/Q2: la mesa del QR. Con la mesa habilitada por el mozo, el comensal arma y envía su pedido desde acá. */
 export function MesaQr() {
   const { token = "" } = useParams();
+  const claveBorrador = `dv-borrador-qr-${token}`;
   const [mesa, setMesa] = useState<{ numero: number; sesionAbierta: boolean } | null>(null);
   const [habilitada, setHabilitada] = useState(false);
   const [carta, setCarta] = useState<CartaPublica | null>(null);
   const [error, setError] = useState("");
-  const [filtro, setFiltro] = useState("");
-  const [lineas, setLineas] = useState<Linea[]>([]);
+  const [filtro, setFiltro] = useState(() => {
+    try {
+      const raw = sessionStorage.getItem(claveBorrador);
+      if (!raw) return "";
+      const d = JSON.parse(raw) as { filtro?: unknown };
+      return typeof d.filtro === "string" ? d.filtro : "";
+    } catch {
+      return "";
+    }
+  });
+  const [lineas, setLineas] = useState<Linea[]>(() => {
+    try {
+      const raw = sessionStorage.getItem(claveBorrador);
+      if (!raw) return [];
+      const d = JSON.parse(raw) as { lineas?: unknown };
+      return Array.isArray(d.lineas) ? (d.lineas as Linea[]) : [];
+    } catch {
+      return [];
+    }
+  });
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [aviso, setAviso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [enviando, setEnviando] = useState(false);
   const [carritoAbierto, setCarritoAbierto] = useState(true);
   const base = `/public/mesa/${encodeURIComponent(token)}`;
+
+  useEffect(() => {
+    try {
+      sessionStorage.setItem(claveBorrador, JSON.stringify({ filtro, lineas }));
+    } catch {
+      // Ignorado si el navegador bloquea sessionStorage.
+    }
+  }, [claveBorrador, filtro, lineas]);
 
   const verPedidos = useCallback(async () => {
     try {
@@ -139,6 +166,12 @@ export function MesaQr() {
         },
       });
       setLineas([]);
+      setFiltro("");
+      try {
+        sessionStorage.removeItem(claveBorrador);
+      } catch {
+        // Ignorado
+      }
       medir("pedido_qr_enviado", "/m");
       setAviso({ tipo: "ok", texto: "¡Pedido enviado! Ya lo están preparando. Abajo ves cómo va." });
       await verPedidos();

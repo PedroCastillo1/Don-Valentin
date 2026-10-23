@@ -386,23 +386,53 @@ export function AdminSectores() {
   );
 }
 
+const CLAVE_BORRADOR_MOZO = "dv-borrador-mozo";
+
+interface BorradorMozo {
+  mesaId: number | "";
+  filtro: string;
+  lineas: LineaMozo[];
+  listaAbierta: boolean;
+  modoCompacto: boolean;
+  notasAbiertas: number[];
+}
+
+function leerBorradorMozo(): BorradorMozo | null {
+  try {
+    const raw = sessionStorage.getItem(CLAVE_BORRADOR_MOZO);
+    if (!raw) return null;
+    const d = JSON.parse(raw) as Partial<BorradorMozo>;
+    return {
+      mesaId: typeof d.mesaId === "number" ? d.mesaId : "",
+      filtro: typeof d.filtro === "string" ? d.filtro : "",
+      lineas: Array.isArray(d.lineas) ? d.lineas : [],
+      listaAbierta: typeof d.listaAbierta === "boolean" ? d.listaAbierta : true,
+      modoCompacto: typeof d.modoCompacto === "boolean" ? d.modoCompacto : true,
+      notasAbiertas: Array.isArray(d.notasAbiertas) ? d.notasAbiertas : [],
+    };
+  } catch {
+    return null;
+  }
+}
+
 /** RF-Q4: el mozo carga el pedido de una mesa (mismo circuito que el QR) y gestiona/entrega los platos de las mesas. */
 export function AdminMozo() {
   const { usuario } = useSesion();
   const puedeCancelar = usuario?.rol === "admin" || usuario?.rol === "encargado";
   const [searchParams] = useSearchParams();
   const mesaUrl = Number(searchParams.get("mesa") ?? 0);
+  const borradorInicial = useMemo(() => leerBorradorMozo(), []);
   const [mesas, setMesas] = useState<MesaAbierta[]>([]);
-  const [mesaId, setMesaId] = useState<number | "">("");
+  const [mesaId, setMesaId] = useState<number | "">(() => borradorInicial?.mesaId ?? "");
   const [filtroMesaListos, setFiltroMesaListos] = useState<number | "todas">("todas");
   const [busquedaListos, setBusquedaListos] = useState("");
   const [estadoVistaDerecha, setEstadoVistaDerecha] = useState<"listo" | "activos" | "todos">("listo");
   const [carta, setCarta] = useState<CartaPublica | null>(null);
-  const [filtro, setFiltro] = useState("");
-  const [lineas, setLineas] = useState<LineaMozo[]>([]);
-  const [listaAbierta, setListaAbierta] = useState(true);
-  const [modoCompacto, setModoCompacto] = useState(true);
-  const [notasAbiertas, setNotasAbiertas] = useState<number[]>([]);
+  const [filtro, setFiltro] = useState(() => borradorInicial?.filtro ?? "");
+  const [lineas, setLineas] = useState<LineaMozo[]>(() => borradorInicial?.lineas ?? []);
+  const [listaAbierta, setListaAbierta] = useState(() => borradorInicial?.listaAbierta ?? true);
+  const [modoCompacto, setModoCompacto] = useState(() => borradorInicial?.modoCompacto ?? true);
+  const [notasAbiertas, setNotasAbiertas] = useState<number[]>(() => borradorInicial?.notasAbiertas ?? []);
   const [confirmarVaciar, setConfirmarVaciar] = useState(false);
   const [confirmarEnvio, setConfirmarEnvio] = useState(false);
   const [quitarConfirmId, setQuitarConfirmId] = useState<number | null>(null);
@@ -410,12 +440,28 @@ export function AdminMozo() {
   const { items, cargar } = useItems(null, true);
 
   useEffect(() => {
+    try {
+      const b: BorradorMozo = { mesaId, filtro, lineas, listaAbierta, modoCompacto, notasAbiertas };
+      sessionStorage.setItem(CLAVE_BORRADOR_MOZO, JSON.stringify(b));
+    } catch {
+      // Si el almacenamiento está restringido, el estado sigue en memoria.
+    }
+  }, [mesaId, filtro, lineas, listaAbierta, modoCompacto, notasAbiertas]);
+
+  useEffect(() => {
     void api<{ mesas: MesaAbierta[] }>("/admin/pedidos/mesas").then((r) => {
       setMesas(r.mesas);
       if (mesaUrl) {
         const encontrada = r.mesas.find((m) => m.numero === mesaUrl || m.mesaId === mesaUrl);
-        if (encontrada) setMesaId(encontrada.mesaId);
+        if (encontrada) {
+          setMesaId(encontrada.mesaId);
+          return;
+        }
       }
+      setMesaId((actual) => {
+        if (actual !== "" && r.mesas.some((m) => m.mesaId === actual)) return actual;
+        return r.mesas.length === 1 ? r.mesas[0]!.mesaId : "";
+      });
     });
     void api<CartaPublica>("/public/carta").then(setCarta);
   }, [mesaUrl]);
@@ -470,9 +516,15 @@ export function AdminMozo() {
       const n = mesas.find((m) => m.mesaId === mesaId)?.numero;
       setAviso({ tipo: "ok", texto: `Pedido de la mesa ${n} enviado a los sectores.` });
       setLineas([]);
+      setFiltro("");
       setNotasAbiertas([]);
       setConfirmarVaciar(false);
       setConfirmarEnvio(false);
+      try {
+        sessionStorage.removeItem(CLAVE_BORRADOR_MOZO);
+      } catch {
+        // Ignorado
+      }
       void cargar();
     } catch (e) {
       setAviso({ tipo: "error", texto: e instanceof ApiError ? e.message : "No pudimos enviar el pedido." });
