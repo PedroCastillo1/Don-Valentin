@@ -23,14 +23,20 @@ test("Hito 4: pedido desde el QR, panel de parrilla y entrega", async ({ page, b
   const { codigos } = await (await page.request.get("/api/admin/qr")).json();
   const url = new URL(codigos.find((c: { numero: number }) => c.numero === 27).url).pathname;
 
-  // El comensal, en su celular
+  // El comensal, en su celular: busca por palabra intermedia/sin tilde y puede ocultar/mostrar la lista del pedido
   const cel = await (
     await browser.newContext({ viewport: { width: 390, height: 844 }, isMobile: true, hasTouch: true })
   ).newPage();
   await cel.goto(url);
   await expect(cel.getByRole("heading", { level: 1, name: "Mesa 27" })).toBeVisible();
+  await cel.getByPlaceholder("Buscar un plato o una bebida").fill("chorizo");
+  await expect(cel.locator(".carta__nombre", { hasText: "Bife de chorizo" }).first()).toBeVisible();
   await cel.getByPlaceholder("Buscar un plato o una bebida").fill("molleja");
   await cel.locator(".carta__agregar button").first().click();
+  await cel.getByRole("button", { name: "Ocultar lista" }).click();
+  await expect(cel.locator("#carrito-detalle")).toBeHidden();
+  await cel.getByRole("button", { name: /Ver lista/ }).click();
+  await expect(cel.locator("#carrito-detalle")).toBeVisible();
   await cel.getByLabel(/Aclaración para Molleja/).fill("bien cocida");
   expect(await axe(cel), "accesibilidad del pedido en el celular").toEqual([]);
   await cel.getByRole("button", { name: "Enviar pedido" }).click();
@@ -53,9 +59,22 @@ test("Hito 4: pedido desde el QR, panel de parrilla y entrega", async ({ page, b
     .getByRole("button", { name: /^Listo/ })
     .click();
 
+  // En Pedidos se puede filtrar por mesa y gestionar; en Pedido del mozo buscar por palabra intermedia y sumar/restar de a 1
+  await page.goto("/admin/pedidos");
+  await expect(page.getByRole("region", { name: "Filtrar y buscar mesas" })).toBeVisible();
+
   // El comensal ve el estado y el mozo lo entrega
   await expect(cel.locator(".seguimiento")).toContainText("Listo, ya viene", { timeout: 12_000 });
-  await page.goto("/admin/mozo");
+  await page.goto("/admin/mozo?mesa=27");
+  await page.getByLabel("Buscar en la carta").fill("chorizo");
+  await page
+    .getByRole("button", { name: /Agregar Bife de chorizo/ })
+    .first()
+    .click();
+  await page.getByRole("button", { name: /Sumar uno de Bife de chorizo/ }).click();
+  await expect(page.getByRole("list", { name: "Pedido" })).toContainText("2 ×");
+  await page.getByRole("button", { name: /Restar uno de Bife de chorizo/ }).click();
+  await expect(page.getByRole("list", { name: "Pedido" })).toContainText("1 ×");
   await page
     .locator(".ticket-s", { hasText: "bien cocida" })
     .getByRole("button", { name: /^Entregado/ })

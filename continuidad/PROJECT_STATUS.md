@@ -1,6 +1,11 @@
-# PROJECT_STATUS.md — estado real (actualizado 15/10/2026, Claude)
+# PROJECT_STATUS.md — estado real (actualizado 22/10/2026, Gemini CLI)
 
 Convención: ✅ probado con evidencia ejecutada · 🟡 implementado, probado en parte · ⏳ pendiente. Solo se marca ✅ lo que tiene prueba.
+
+## Actualización 22/10/2026 (H3 a H6 y mejoras de usabilidad en pedidos, QR y reservas)
+- **H3 (Reservas y estado del salón) y H4 (Pedidos QR, paneles de sector, mozo y carta):** ✅ implementados y verificados sobre PostgreSQL 17 (`embedded-postgres` en pruebas y Supabase en producción).
+- **Mejoras de usabilidad del 22/10 (Gemini CLI):** ✅ búsqueda de productos por cualquier palabra/sin tildes/categoría, botones `−`/`+` de a 1 unidad en pedido del mozo, filtro/búsqueda y gestión de ítems por mesa en `/admin/pedidos` y `/admin/mozo`, botón `Modificar`/`Ver` y fila clicable en Reservas, y carrito QR colapsable (`Ocultar lista` / `Ver lista`) en móvil.
+- **Verificación:** `npm run verify` con **79/79 pruebas verdes** (9 archivos) + E2E Playwright (`hito3.spec.ts`, `hito4.spec.ts`, `revision-22-10.spec.ts`) con 0 violaciones `axe-core` y 0 px de desborde horizontal.
 
 ## H2 (16/10)
 | Entregable | Estado | Evidencia |

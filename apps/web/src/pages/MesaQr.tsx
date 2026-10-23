@@ -58,6 +58,7 @@ export function MesaQr() {
   const [pedidos, setPedidos] = useState<Pedido[]>([]);
   const [aviso, setAviso] = useState<{ tipo: "ok" | "error"; texto: string } | null>(null);
   const [enviando, setEnviando] = useState(false);
+  const [carritoAbierto, setCarritoAbierto] = useState(true);
   const base = `/public/mesa/${encodeURIComponent(token)}`;
 
   const verPedidos = useCallback(async () => {
@@ -222,55 +223,75 @@ export function MesaQr() {
           )}
         </div>
         {habilitada && lineas.length > 0 && (
-          <section className="carrito" aria-labelledby="t-carrito">
-            <h2 id="t-carrito">
-              Tu pedido · {unidades} {unidades === 1 ? "cosa" : "cosas"}
-            </h2>
-            <ul className="carrito__lista">
-              {lineas.map((l) => (
-                <li key={l.varianteId}>
-                  <div className="carrito__fila">
-                    <span className="carrito__nombre">
-                      {l.nombre}
-                      {l.etiqueta && <small> ({l.etiqueta})</small>}
-                    </span>
-                    <span className="carrito__cant" role="group" aria-label={`Cantidad de ${l.nombre}`}>
-                      <button
-                        type="button"
-                        onClick={() => cambiar(l.varianteId, -1)}
-                        aria-label={`Uno menos de ${l.nombre}`}
-                      >
-                        −
-                      </button>
-                      <b aria-live="polite">{l.cantidad}</b>
-                      <button
-                        type="button"
-                        onClick={() => cambiar(l.varianteId, 1)}
-                        aria-label={`Uno más de ${l.nombre}`}
-                      >
-                        +
-                      </button>
-                    </span>
-                  </div>
-                  <label className="carrito__nota">
-                    <span className="sr-only">Aclaración para {l.nombre}</span>
-                    <input
-                      value={l.nota}
-                      maxLength={140}
-                      placeholder="Aclaración (opcional): jugoso, sin sal…"
-                      onChange={(e) =>
-                        setLineas((ls) =>
-                          ls.map((x) => (x.varianteId === l.varianteId ? { ...x, nota: e.target.value } : x)),
-                        )
-                      }
-                    />
-                  </label>
-                </li>
-              ))}
-            </ul>
-            <p className="carrito__total">
-              Total de este pedido <b>{precio(total)}</b>
-            </p>
+          <section className={carritoAbierto ? "carrito" : "carrito carrito--cerrado"} aria-labelledby="t-carrito">
+            <div className="carrito__cab">
+              <div>
+                <h2 id="t-carrito">
+                  Tu pedido · {unidades} {unidades === 1 ? "cosa" : "cosas"}
+                </h2>
+                {!carritoAbierto && (
+                  <p className="carrito__resumen">
+                    Total <b>{precio(total)}</b>
+                  </p>
+                )}
+              </div>
+              <button
+                type="button"
+                className="btn btn--chico carrito__toggle"
+                aria-expanded={carritoAbierto}
+                aria-controls="carrito-detalle"
+                onClick={() => setCarritoAbierto((v) => !v)}
+              >
+                {carritoAbierto ? "Ocultar lista" : `Ver lista (${unidades})`}
+              </button>
+            </div>
+            <div id="carrito-detalle" hidden={!carritoAbierto}>
+              <ul className="carrito__lista">
+                {lineas.map((l) => (
+                  <li key={l.varianteId}>
+                    <div className="carrito__fila">
+                      <span className="carrito__nombre">
+                        {l.nombre}
+                        {l.etiqueta && <small> ({l.etiqueta})</small>}
+                      </span>
+                      <span className="carrito__cant" role="group" aria-label={`Cantidad de ${l.nombre}`}>
+                        <button
+                          type="button"
+                          onClick={() => cambiar(l.varianteId, -1)}
+                          aria-label={`Uno menos de ${l.nombre}`}
+                        >
+                          −
+                        </button>
+                        <b aria-live="polite">{l.cantidad}</b>
+                        <button
+                          type="button"
+                          onClick={() => cambiar(l.varianteId, 1)}
+                          aria-label={`Uno más de ${l.nombre}`}
+                        >
+                          +
+                        </button>
+                      </span>
+                    </div>
+                    <label className="carrito__nota">
+                      <span className="sr-only">Aclaración para {l.nombre}</span>
+                      <input
+                        value={l.nota}
+                        maxLength={140}
+                        placeholder="Aclaración (opcional): jugoso, sin sal…"
+                        onChange={(e) =>
+                          setLineas((ls) =>
+                            ls.map((x) => (x.varianteId === l.varianteId ? { ...x, nota: e.target.value } : x)),
+                          )
+                        }
+                      />
+                    </label>
+                  </li>
+                ))}
+              </ul>
+              <p className="carrito__total">
+                Total de este pedido <b>{precio(total)}</b>
+              </p>
+            </div>
             <button
               type="button"
               className="btn btn--brasa btn--grande carrito__enviar"

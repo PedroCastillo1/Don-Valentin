@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
+import { useSearchParams } from "react-router";
 import { api, ApiError } from "../lib/api.ts";
 import { useSesion } from "../lib/sesion.tsx";
 import { diaLargo, ORIGEN, sumarDias } from "../lib/fechas.ts";
@@ -12,6 +13,8 @@ const mensajeDe = (e: unknown, defecto: string) => (e instanceof ApiError ? e.me
 
 export function AdminReservas() {
   const { puede } = useSesion();
+  const [searchParams] = useSearchParams();
+  const idUrl = Number(searchParams.get("id") ?? 0);
   const [fecha, setFecha] = useState<string>("");
   const [reservas, setReservas] = useState<ReservaAdmin[]>([]);
   const [busqueda, setBusqueda] = useState<{ q: string; reservas: ReservaAdmin[] } | null>(null);
@@ -19,16 +22,30 @@ export function AdminReservas() {
   const [elegida, setElegida] = useState<ReservaAdmin | null>(null);
   const [error, setError] = useState("");
 
-  const cargar = useCallback(async (f: string) => {
-    try {
-      const r = await api<{ fecha: string; reservas: ReservaAdmin[] }>(`/admin/reservas${f ? `?fecha=${f}` : ""}`);
-      setFecha(r.fecha);
-      setReservas(r.reservas);
-      setError("");
-    } catch (e) {
-      setError(mensajeDe(e, "No pudimos cargar las reservas."));
-    }
+  const seleccionar = useCallback((r: ReservaAdmin) => {
+    setElegida(r);
+    setTimeout(() => {
+      document.getElementById("t-detalle")?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }, 40);
   }, []);
+
+  const cargar = useCallback(
+    async (f: string) => {
+      try {
+        const r = await api<{ fecha: string; reservas: ReservaAdmin[] }>(`/admin/reservas${f ? `?fecha=${f}` : ""}`);
+        setFecha(r.fecha);
+        setReservas(r.reservas);
+        if (idUrl) {
+          const encontrada = r.reservas.find((x) => x.id === idUrl);
+          if (encontrada) setElegida((actual) => actual ?? encontrada);
+        }
+        setError("");
+      } catch (e) {
+        setError(mensajeDe(e, "No pudimos cargar las reservas."));
+      }
+    },
+    [idUrl],
+  );
   useEffect(() => {
     void cargar("");
   }, [cargar]);
@@ -141,6 +158,12 @@ export function AdminReservas() {
           <h2 id="t-lista">
             {lista.length} {lista.length === 1 ? "reserva" : "reservas"}
           </h2>
+          {lista.length > 0 && (
+            <p className="nota nota--arriba">
+              Tocá una reserva o su botón <strong>Gestionar / Modificar</strong> para registrar la llegada, cambiar
+              datos, marcar no-show o cancelar.
+            </p>
+          )}
           {lista.length === 0 ? (
             <p className="vacio">
               {busqueda ? "No encontramos reservas con esos datos." : "No hay reservas para este día."}
@@ -155,22 +178,33 @@ export function AdminReservas() {
                     <th>Pers.</th>
                     <th>Mesa</th>
                     <th>Estado</th>
-                    <th>Código</th>
+                    <th>Acción</th>
                   </tr>
                 </thead>
                 <tbody>
                   {lista.map((r) => (
-                    <tr key={r.id} className={elegida?.id === r.id ? "fila--elegida" : undefined}>
+                    <tr
+                      key={r.id}
+                      className={elegida?.id === r.id ? "fila--elegida fila--clicable" : "fila--clicable"}
+                      onClick={() => seleccionar(r)}
+                    >
                       <td className="hora" data-etiqueta={busqueda ? "Día y hora" : "Hora"}>
                         {busqueda && <small>{fechaCorta(r.fecha)}</small>}
                         {r.franja.desde}
                       </td>
                       <td data-etiqueta="A nombre de">
-                        <button type="button" className="enlace-fila" onClick={() => setElegida(r)}>
+                        <button
+                          type="button"
+                          className="enlace-fila"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            seleccionar(r);
+                          }}
+                        >
                           <strong>{r.aNombreDe}</strong>
                         </button>
                         <small>
-                          {r.telefono || "—"} · {ORIGEN[r.origen] ?? r.origen}
+                          {r.telefono || "—"} · {ORIGEN[r.origen] ?? r.origen} · <code>{r.codigo}</code>
                         </small>
                       </td>
                       <td data-etiqueta="Personas">{r.personas}</td>
@@ -180,8 +214,18 @@ export function AdminReservas() {
                           {ESTADO_RESERVA[r.estado].texto}
                         </span>
                       </td>
-                      <td data-etiqueta="Código">
-                        <code>{r.codigo}</code>
+                      <td className="acciones" data-etiqueta="Acción">
+                        <button
+                          type="button"
+                          className={elegida?.id === r.id ? "btn btn--chico" : "btn btn--brasa btn--chico"}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            seleccionar(r);
+                          }}
+                        >
+                          {elegida?.id === r.id ? "Abierta" : r.estado === "confirmada" ? "Modificar" : "Ver"}
+                          <span className="sr-only"> reserva de {r.aNombreDe}</span>
+                        </button>
                       </td>
                     </tr>
                   ))}

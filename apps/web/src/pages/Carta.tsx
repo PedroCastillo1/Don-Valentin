@@ -4,7 +4,7 @@ import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { PARRILLA_LIBRE } from "@dv/shared";
 import { api } from "../lib/api.ts";
-import { precio, UNICA } from "../lib/formato.ts";
+import { coincideBusqueda, precio, UNICA } from "../lib/formato.ts";
 import { medir } from "../lib/medicion.ts";
 import { scrollA } from "../lib/scroll.ts";
 import { PaginaPublica } from "../components/PaginaPublica.tsx";
@@ -43,6 +43,12 @@ function desplazamientoSuperior(): number {
 
 type ProductoCarta = CartaPublica["grupos"][number]["categorias"][number]["productos"][number];
 
+const coincideProducto = (p: ProductoCarta, cat: string, grupo: string, q: string): boolean =>
+  coincideBusqueda(
+    `${p.nombre} ${cat} ${grupo} ${p.nota ?? ""} ${p.sinTacc ? "sin tacc celiaco" : ""} ${p.variantes.map((v) => v.etiqueta).join(" ")}`,
+    q,
+  );
+
 /** `agregar`: en la mesa (QR) cada precio lleva su botón para sumarlo al pedido. */
 export function CartaVista({
   carta,
@@ -53,17 +59,26 @@ export function CartaVista({
   filtro: string;
   agregar?: (p: ProductoCarta, v: ProductoCarta["variantes"][number]) => void;
 }) {
-  const q = filtro.trim().toLowerCase();
+  const q = filtro.trim();
+  const gruposFiltrados = carta.grupos
+    .map((g) => ({
+      ...g,
+      categorias: g.categorias
+        .map((c) => ({
+          ...c,
+          productos: q ? c.productos.filter((p) => coincideProducto(p, c.nombre, g.grupo, q)) : c.productos,
+        }))
+        .filter((c) => c.productos.length),
+    }))
+    .filter((g) => g.categorias.length);
+
   return (
     <div className="carta">
-      {carta.grupos.map((g) => {
-        const cats = g.categorias
-          .map((c) => ({
-            ...c,
-            productos: q ? c.productos.filter((p) => p.nombre.toLowerCase().includes(q)) : c.productos,
-          }))
-          .filter((c) => c.productos.length);
-        if (!cats.length) return null;
+      {q && gruposFiltrados.length === 0 && (
+        <p className="vacio">No encontramos platos ni bebidas para «{filtro.trim()}».</p>
+      )}
+      {gruposFiltrados.map((g) => {
+        const cats = g.categorias;
         return (
           <section key={g.grupo} className="carta__grupo" aria-labelledby={`g-${g.grupo}`}>
             <h2 id={`g-${g.grupo}`}>{g.grupo}</h2>
@@ -144,11 +159,15 @@ export function Carta() {
     [carta],
   );
   const coincidencias = useMemo(() => {
-    const q = filtro.trim().toLowerCase();
+    const q = filtro.trim();
     if (!carta || !q) return null;
     return carta.grupos.reduce(
       (n, g) =>
-        n + g.categorias.reduce((m, c) => m + c.productos.filter((p) => p.nombre.toLowerCase().includes(q)).length, 0),
+        n +
+        g.categorias.reduce(
+          (m, c) => m + c.productos.filter((p) => coincideProducto(p, c.nombre, g.grupo, q)).length,
+          0,
+        ),
       0,
     );
   }, [carta, filtro]);

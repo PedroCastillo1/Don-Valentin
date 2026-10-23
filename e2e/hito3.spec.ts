@@ -16,10 +16,10 @@ test("Hito 3: buscar, modificar y cancelar una reserva; el salón muestra cada m
   await page.getByRole("button", { name: "Guardar reserva" }).click();
   await expect(page.getByText(/Reserva guardada/)).toBeVisible();
 
-  // Buscar en todas las fechas, sin acentos ni mayúsculas
+  // Buscar en todas las fechas, sin acentos ni mayúsculas, y abrir con el botón Modificar de la fila
   await page.getByLabel("Buscar en todas las fechas").fill("quiroga");
   await page.getByRole("button", { name: "Buscar" }).click();
-  await page.getByRole("button", { name: "Familia Quiroga Hito Tres" }).click();
+  await page.getByRole("button", { name: /Modificar reserva de Familia Quiroga Hito Tres/ }).click();
   const detalle = page.locator(".detalle");
   await expect(detalle).toContainText("Confirmada");
 

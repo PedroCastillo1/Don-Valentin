@@ -208,7 +208,9 @@ function InicioTablero() {
                       {r.aNombreDe.slice(0, 1)}
                     </span>
                     <div>
-                      <strong>{r.aNombreDe}</strong>
+                      <Link to={`/admin/reservas?id=${r.id}`} className="enlace-fila">
+                        <strong>{r.aNombreDe}</strong>
+                      </Link>
                       <small>
                         {r.personas} personas · mesa {r.mesa} · {ORIGEN[r.origen] ?? r.origen}
                       </small>
